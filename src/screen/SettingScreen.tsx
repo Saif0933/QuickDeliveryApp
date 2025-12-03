@@ -12,6 +12,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { COLORS } from "../theme/color";
 
 type RootStackParamList = {
   YourProfile: undefined;
@@ -39,7 +40,7 @@ const SettingsScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={COLORS.black} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Settings</Text>
       </View>
@@ -81,7 +82,7 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.white,
   },
   header: {
     flexDirection: "row",
@@ -89,27 +90,27 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#f2f2f2",
+    borderBottomColor: COLORS.background,
   },
   headerText: {
     fontSize: 18,
     fontWeight: "600",
     marginLeft: 15,
-    color: "#000",
+    color: COLORS.black,
   },
   row: {
     paddingVertical: 18,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#f2f2f2",
+    borderBottomColor: COLORS.background,
   },
   title: {
     fontSize: 16,
-    color: "#000",
+    color: COLORS.black,
   },
   subtitle: {
     fontSize: 14,
-    color: "#666",
+    color: COLORS.muted,
     marginTop: 4,
   },
 });

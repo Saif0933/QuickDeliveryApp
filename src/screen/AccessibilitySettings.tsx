@@ -5,14 +5,20 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Alert,
+  StatusBar,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { COLORS } from "../theme/color";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const AccessibilitySettings = () => {
+type Props = {
+  navigation?: any; // For back navigation
+};
+
+const AccessibilitySettings: React.FC<Props> = ({ navigation }) => {
   // State for selections
   const [hearing, setHearing] = useState("not-deaf");
   const [vision, setVision] = useState("not-blind");
@@ -20,9 +26,14 @@ const AccessibilitySettings = () => {
 
   const handleSave = () => {
     Alert.alert(
-      "Saved Preferences",
-      `Hearing: ${hearing}\nVision: ${vision}\nMobility: ${mobility}`
+      "Preferences Saved! 🌟",
+      `Hearing: ${hearing}\nVision: ${vision}\nMobility: ${mobility}\n\nWe'll adjust the app to better suit your needs. Thank you!`,
+      [{ text: "Done", style: "default" }]
     );
+  };
+
+  const handleBack = () => {
+    navigation?.goBack();
   };
 
   const renderRadio = (
@@ -32,43 +43,66 @@ const AccessibilitySettings = () => {
     isLast: boolean = false
   ) => (
     <TouchableOpacity
-      style={[styles.option, isLast && { borderBottomWidth: 0 }]}
+      style={[
+        styles.option,
+        selected && styles.optionSelected,
+        isLast && { borderBottomWidth: 0 },
+      ]}
       onPress={onPress}
+      activeOpacity={0.7}
     >
-      <Text style={styles.optionText}>{label}</Text>
-      <Ionicons
-        name={selected ? "radio-button-on" : "radio-button-off"}
-        size={22}
-        color={selected ? "#E53935" : "#888"}
-      />
+      <View style={styles.optionLeft}>
+        <Text style={[styles.optionText, selected && styles.optionTextSelected]}>
+          {label}
+        </Text>
+      </View>
+      <View style={styles.radioContainer}>
+        <MaterialCommunityIcons
+          name={selected ? "radiobox-marked" : "radiobox-blank"}
+          size={24}
+          color={selected ? COLORS.primary : COLORS.muted}
+        />
+      </View>
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <Ionicons name="arrow-back" size={22} />
-          <Text style={styles.headerTitle}>Accessibility Settings</Text>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Accessibility</Text>
+          <View style={styles.headerSpacer} />
         </View>
 
         {/* Info Box */}
         <View style={styles.infoBox}>
-          <MaterialCommunityIcons name="information" size={18} color="#E53935" />
-          <Text style={styles.infoText}>
-            We'll make the app more friendly to use based on your disability.
-          </Text>
+          <MaterialCommunityIcons
+            name="accessibility-outline"
+            size={24}
+            color={COLORS.primary}
+          />
+          <View style={styles.infoContent}>
+            <Text style={styles.infoTitle}>Make It Yours</Text>
+            <Text style={styles.infoText}>
+              Share your needs so we can tailor the app for a smoother experience.
+              Your info is private and helps us improve.
+            </Text>
+          </View>
         </View>
 
-        {/* Hearing */}
+        {/* Hearing Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="ear-outline" size={18} />
-            <Text style={styles.sectionTitle}> Hearing</Text>
+            <Ionicons name="ear-hearing-outline" size={20} color={COLORS.primary} />
+            <Text style={styles.sectionTitle}>Hearing</Text>
           </View>
           <Text style={styles.subText}>
-            Select level of hearing impairment if any
+            Select your hearing needs (if any)
           </Text>
           {renderRadio("I'm deaf", hearing === "deaf", () => setHearing("deaf"))}
           {renderRadio(
@@ -77,21 +111,21 @@ const AccessibilitySettings = () => {
             () => setHearing("hard")
           )}
           {renderRadio(
-            "I'm not deaf or hard of hearing",
+            "No hearing impairment",
             hearing === "not-deaf",
             () => setHearing("not-deaf"),
             true
           )}
         </View>
 
-        {/* Vision */}
+        {/* Vision Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="eye-outline" size={18} />
-            <Text style={styles.sectionTitle}> Vision</Text>
+            <Ionicons name="eye-outline" size={20} color={COLORS.primary} />
+            <Text style={styles.sectionTitle}>Vision</Text>
           </View>
           <Text style={styles.subText}>
-            Select level of vision impairment if any
+            Select your vision needs (if any)
           </Text>
           {renderRadio("I'm blind", vision === "blind", () => setVision("blind"))}
           {renderRadio(
@@ -100,21 +134,21 @@ const AccessibilitySettings = () => {
             () => setVision("impaired")
           )}
           {renderRadio(
-            "I'm not blind or visually impaired",
+            "No vision impairment",
             vision === "not-blind",
             () => setVision("not-blind"),
             true
           )}
         </View>
 
-        {/* Mobility */}
+        {/* Mobility Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="accessibility-outline" size={18} />
-            <Text style={styles.sectionTitle}> Mobility</Text>
+            <Ionicons name="accessibility-outline" size={20} color={COLORS.primary} />
+            <Text style={styles.sectionTitle}>Mobility</Text>
           </View>
           <Text style={styles.subText}>
-            Select level of mobility impairment if any
+            Select your mobility needs (if any)
           </Text>
           {renderRadio(
             "I use a wheelchair or mobility aid",
@@ -122,12 +156,12 @@ const AccessibilitySettings = () => {
             () => setMobility("wheelchair")
           )}
           {renderRadio(
-            "I have a physical disability that affects my mobility",
+            "I have a physical disability affecting mobility",
             mobility === "disability",
             () => setMobility("disability")
           )}
           {renderRadio(
-            "I do not have a physical or mobility impairment",
+            "No mobility impairment",
             mobility === "no-impairment",
             () => setMobility("no-impairment"),
             true
@@ -135,9 +169,10 @@ const AccessibilitySettings = () => {
         </View>
 
         {/* Save Button */}
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-          <Text style={styles.saveText}>Save</Text>
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSave} activeOpacity={0.8}>
+          <Text style={styles.saveText}>Save Preferences</Text>
         </TouchableOpacity>
+        <View style={{height: 20}} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -148,78 +183,137 @@ export default AccessibilitySettings;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ebebefff",
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    backgroundColor: COLORS.white,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  backButton: {
+    padding: 4,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginLeft: 10,
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.textPrimary,
+    flex: 1,
+    marginLeft: 12,
+  },
+  headerSpacer: {
+    width: 24,
   },
   infoBox: {
     flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 15,
-    padding: 12,
-    borderRadius: 10,
-    backgroundColor: "#fff",
+    alignItems: "flex-start",
+    backgroundColor: COLORS.white,
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 24,
+    borderRadius: 12,
     elevation: 2,
-    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  infoContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  infoTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: COLORS.textPrimary,
+    marginBottom: 4,
   },
   infoText: {
-    marginLeft: 8,
     fontSize: 14,
-    flex: 1,
-    color: "#333",
+    color: COLORS.textSecondary,
+    lineHeight: 20,
   },
   section: {
-    backgroundColor: "#fff",
-    padding: 15,
-    marginHorizontal: 15,
+    backgroundColor: COLORS.white,
+    marginHorizontal: 16,
+    marginBottom: 16,
     borderRadius: 12,
-    marginBottom: 20,
     elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    overflow: "hidden",
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 6,
+    padding: 16,
+    paddingBottom: 8,
+    backgroundColor: COLORS.white,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
+    color: COLORS.textPrimary,
+    marginLeft: 8,
   },
   subText: {
-    fontSize: 13,
-    color: "#777",
-    marginBottom: 10,
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    lineHeight: 18,
   },
   option: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#eee",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.background,
+  },
+  optionSelected: {
+    backgroundColor: COLORS.secondary,
+  },
+  optionLeft: {
+    flex: 1,
   },
   optionText: {
     fontSize: 15,
-    color: "#333",
-    flex: 1,
+    color: COLORS.textPrimary,
+  },
+  optionTextSelected: {
+    color: COLORS.primary,
+    fontWeight: "600",
+  },
+  radioContainer: {
+    paddingLeft: 8,
   },
   saveBtn: {
-    margin: 20,
-    padding: 14,
-    borderRadius: 10,
-    backgroundColor: "#E53935",
+    backgroundColor: COLORS.primary,
+    marginHorizontal: 16,
+    marginBottom: 32,
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: "center",
+    elevation: 3,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   saveText: {
-    color: "#fff",
-    fontSize: 16,
+    color: COLORS.white,
+    fontSize: 18,
     fontWeight: "600",
   },
 });

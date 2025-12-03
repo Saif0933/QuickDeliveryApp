@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
+import {COLORS} from '../../theme/color';
 
 const CancellationPolicy: React.FC = () => {
   return (
@@ -18,18 +19,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: COLORS.background,
+    backgroundColor: COLORS.white,
   },
   policyTitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: COLORS.textSecondary,
     letterSpacing: 0.5,
     marginBottom: 8,
   },
   policyText: {
     fontSize: 12,
-    color: '#666',
+    color: COLORS.muted,
     lineHeight: 18,
   },
 });

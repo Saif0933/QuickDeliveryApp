@@ -1,3 +1,4 @@
+
 // OrdersScreen.tsx
 import React, { useState } from "react";
 import {
@@ -10,9 +11,18 @@ import {
   TextInput,
   Alert,
   Share,
+  StatusBar,
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { COLORS } from '../theme/color';
+
+// --- THEME COLORS ---
+const BG_COLOR = '#F5F7FA'; // Slightly cooler grey for modern feel
+const CARD_BG = '#FFFFFF';
+const TEXT_DARK = '#1F2937';
+const TEXT_GREY = '#9CA3AF';
 
 interface Order {
   id: string;
@@ -27,7 +37,7 @@ interface Order {
   extra?: string;
 }
 
-const YourOrder = () => {
+const YourOrders = ({ navigation }: any) => {
   const [orders, setOrders] = useState<Order[]>([
     {
       id: "1",
@@ -35,10 +45,10 @@ const YourOrder = () => {
       location: "Bariatu, Ranchi",
       menu: "View menu",
       items: "1 x Create Your Flavour Fun Combo - Classic Onion Capsicum",
-      date: "Order placed on 17 Feb, 4:15PM",
+      date: "17 Feb, 4:15 PM",
       price: "₹191.92",
       status: "Delivered",
-      image: "https://upload.wikimedia.org/wikipedia/en/6/6f/Pizza_Hut_logo.svg",
+      image: "https://tse2.mm.bing.net/th/id/OIP.3Dh9FWm684Jc41gmv8eZHwHaEE?pid=Api&P=0&h=180",
     },
     {
       id: "2",
@@ -46,10 +56,10 @@ const YourOrder = () => {
       location: "Bariatu, Ranchi",
       menu: "View menu",
       items: "1 x Create Your Flavour Fun Combo - Classic Onion Capsicum",
-      date: "Order placed on 17 Feb, 4:15PM",
+      date: "17 Feb, 4:15 PM",
       price: "₹191.92",
       status: "Payment failed",
-      image: "https://upload.wikimedia.org/wikipedia/en/6/6f/Pizza_Hut_logo.svg",
+      image: "https://tse1.mm.bing.net/th/id/OIP.y9WHqmBEubDgxpHWqRN9sAHaEO?pid=Api&P=0&h=180",
     },
     {
       id: "3",
@@ -57,14 +67,28 @@ const YourOrder = () => {
       location: "Sector 5, Salt Lake, Kolkata",
       menu: "View menu",
       items: "1 x Gulab Jamun [8 Pieces]",
-      date: "Order placed on 31 Jan, 2:30AM",
+      date: "31 Jan, 2:30 AM",
       price: "₹203.80",
       status: "Refund completed",
-      extra: "Bank Ref ID: 503108693626",
+      extra: "Ref ID: 503108693626",
       image:
-        "https://upload.wikimedia.org/wikipedia/commons/6/6a/Gulab_jamun_%28homemade%29.jpg",
+        "https://tse2.mm.bing.net/th/id/OIP.zec59lWeYML7_-wwsSYBHAHaE8?pid=Api&P=0&h=180",
     },
   ]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter orders based on search
+  const filteredOrders = orders.filter(
+    (order) =>
+      order.restaurant.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.items.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Go back on arrow press
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
 
   // Delete Order
   const handleDelete = (id: string) => {
@@ -97,150 +121,431 @@ const YourOrder = () => {
     }
   };
 
+  // Status Badge Component
+  const StatusBadge = ({ status, extra }: { status: Order["status"]; extra?: string }) => {
+    let containerStyle = styles.badgeDefault;
+    let textStyle = styles.badgeTextDefault;
+    let iconName = "information-circle";
+    let iconColor = "#666";
+
+    switch (status) {
+      case "Delivered":
+        containerStyle = styles.badgeDelivered;
+        textStyle = styles.badgeTextDelivered;
+        iconName = "checkmark-circle";
+        iconColor = "#15803d"; // Green
+        break;
+      case "Payment failed":
+        containerStyle = styles.badgeFailed;
+        textStyle = styles.badgeTextFailed;
+        iconName = "alert-circle";
+        iconColor = "#b91c1c"; // Red
+        break;
+      case "Refund completed":
+        containerStyle = styles.badgeRefund;
+        textStyle = styles.badgeTextRefund;
+        iconName = "wallet";
+        iconColor = "#1d4ed8"; // Blue
+        break;
+    }
+
+    return (
+      <View>
+        <View style={containerStyle}>
+          <Ionicons name={iconName} size={14} color={iconColor} style={{ marginRight: 6 }} />
+          <Text style={textStyle}>{status}</Text>
+        </View>
+        {extra && <Text style={styles.extraText}>{extra}</Text>}
+      </View>
+    );
+  };
+
   const renderOrder = ({ item }: { item: Order }) => (
-    <View style={styles.card}>
-      {/* Top Row */}
-      <View style={styles.rowBetween}>
-        <View style={styles.row}>
+    <View style={styles.orderItem}>
+      
+      {/* Top Row: Restaurant Info */}
+      <View style={styles.headerRow}>
+        <View style={styles.restaurantContainer}>
           <Image source={{ uri: item.image }} style={styles.logo} />
-          <View>
-            <Text style={styles.restaurant}>{item.restaurant}</Text>
-            <Text style={styles.location}>{item.location}</Text>
-            <Text style={styles.menu}>{item.menu}</Text>
+          <View style={styles.textContainer}>
+            <Text style={styles.restaurantName}>{item.restaurant}</Text>
+            <Text style={styles.locationText}>{item.location}</Text>
           </View>
         </View>
 
-        {/* 3 dots menu */}
         <TouchableOpacity
+          style={styles.optionsButton}
           onPress={() =>
             Alert.alert("Options", "", [
               { text: "Delete Order", onPress: () => handleDelete(item.id) },
               { text: "View Details", onPress: () => handleDetails(item) },
-              {
-                text: "Share Restaurant",
-                onPress: () => handleShare(item.restaurant, item.location),
-              },
+              { text: "Share Restaurant", onPress: () => handleShare(item.restaurant, item.location) },
               { text: "Cancel", style: "cancel" },
             ])
           }
         >
-          <MaterialCommunityIcons
-            name="dots-vertical"
-            size={22}
-            color="#444"
-          />
+          <MaterialCommunityIcons name="dots-vertical" size={20} color={COLORS.muted} />
         </TouchableOpacity>
       </View>
 
-      {/* Items */}
-      <Text style={styles.items}>{item.items}</Text>
-      <Text style={styles.date}>{item.date}</Text>
-
-      {/* Status + Price */}
-      <View style={styles.rowBetween}>
-        <Text style={styles.price}>{item.price}</Text>
+      {/* Dashed Divider */}
+      <View style={styles.dashedDivider}>
+        {Array.from({ length: 20 }).map((_, i) => (
+            <View key={i} style={styles.dash} />
+        ))}
       </View>
 
-      {/* Status */}
-      {item.status === "Delivered" && (
-        <Text style={styles.delivered}>Delivered</Text>
-      )}
-      {item.status === "Payment failed" && (
-        <Text style={styles.failed}>⚠ Payment failed</Text>
-      )}
-      {item.status === "Refund completed" && (
-        <View>
-          <Text style={styles.refund}>✔ Refund completed</Text>
-          <Text style={styles.extra}>{item.extra}</Text>
-        </View>
-      )}
+      {/* Items & Date */}
+      <View style={styles.detailsContainer}>
+        <Text style={styles.itemsText} numberOfLines={2}>
+          {item.items}
+        </Text>
+        <Text style={styles.dateText}>{item.date}</Text>
+      </View>
 
-      {/* Reorder Button */}
-      <TouchableOpacity style={styles.reorderBtn}>
-        <Text style={styles.reorderText}>Reorder</Text>
-      </TouchableOpacity>
+      {/* Footer: Price, Status & Reorder */}
+      <View style={styles.footerRow}>
+        <View style={styles.statusWrapper}>
+            <Text style={styles.priceText}>{item.price}</Text>
+            <View style={{marginTop: 6}}>
+                <StatusBadge status={item.status} extra={item.extra} />
+            </View>
+        </View>
+
+        <TouchableOpacity style={styles.reorderBtn} activeOpacity={0.8}>
+          <Text style={styles.reorderText}>Reorder</Text>
+          <Ionicons name="refresh" size={16} color="#FFF" style={{marginLeft: 4}}/>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  // Empty State
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <View style={styles.emptyIconBg}>
+        <Ionicons name="fast-food-outline" size={50} color={COLORS.muted} />
+      </View>
+      <Text style={styles.emptyTitle}>No orders found</Text>
+      <Text style={styles.emptySubtitle}>
+        Looks like you haven't ordered anything yet.
+      </Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+      
       {/* Header */}
       <View style={styles.header}>
-        <Ionicons name="arrow-back" size={22} color="#000" />
-        <Text style={styles.headerTitle}>Your Orders</Text>
+        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+          <Ionicons name="arrow-back" size={24} color={TEXT_DARK} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Orders</Text>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchBar}>
-        <Ionicons name="search" size={20} color="#999" />
-        <TextInput
-          placeholder="Search by restaurant or dish"
-          style={styles.searchInput}
-        />
+      {/* Floating Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={20} color={TEXT_GREY} />
+          <TextInput
+            placeholder="Search orders..."
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor={TEXT_GREY}
+          />
+          {searchQuery ? (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <Ionicons name="close-circle" size={18} color={TEXT_GREY} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
 
       {/* Orders List */}
       <FlatList
-        data={orders}
+        data={filteredOrders}
         renderItem={renderOrder}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 50 }}
+        contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={renderEmptyState}
+        showsVerticalScrollIndicator={false}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
-export default YourOrder;
+export default YourOrders;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f9f9f9" },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  
+  /* Header */
   header: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 15,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    backgroundColor: COLORS.background,
   },
-  headerTitle: { fontSize: 18, fontWeight: "600", marginLeft: 10 },
+  backButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: COLORS.white,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    marginRight: 16,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: TEXT_DARK,
+    letterSpacing: 0.5,
+  },
+
+  /* Search */
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    margin: 10,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    elevation: 1,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 52,
+    // Soft Float Shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  searchInput: { marginLeft: 8, flex: 1 },
-  card: {
-    backgroundColor: "#fff",
-    margin: 10,
-    borderRadius: 12,
-    padding: 12,
+  searchInput: {
+    marginLeft: 12,
+    flex: 1,
+    fontSize: 15,
+    color: TEXT_DARK,
+    fontWeight: '500',
+  },
+
+  /* List */
+  listContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+
+  /* Order Card */
+  orderItem: {
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    marginBottom: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    // Modern Shadow
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
     elevation: 2,
   },
-  row: { flexDirection: "row", alignItems: "center" },
-  rowBetween: {
+  
+  /* Header Row */
+  headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
-  logo: { width: 40, height: 40, borderRadius: 5, marginRight: 10 },
-  restaurant: { fontSize: 16, fontWeight: "600" },
-  location: { fontSize: 13, color: "#555" },
-  menu: { fontSize: 13, color: "#d33", marginTop: 2 },
-  items: { fontSize: 14, color: "#333", marginTop: 10 },
-  date: { fontSize: 13, color: "#666", marginTop: 5 },
-  price: { fontSize: 15, fontWeight: "600", marginTop: 5 },
-  delivered: { color: "green", marginTop: 5, fontWeight: "500" },
-  failed: { color: "red", marginTop: 5, fontWeight: "500" },
-  refund: { color: "green", marginTop: 5, fontWeight: "500" },
-  extra: { fontSize: 12, color: "#555" },
+  restaurantContainer: {
+    flexDirection: "row",
+    flex: 1,
+  },
+  logo: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    marginRight: 12,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  textContainer: {
+    justifyContent: 'center',
+    flex: 1,
+  },
+  restaurantName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: TEXT_DARK,
+    marginBottom: 2,
+  },
+  locationText: {
+    fontSize: 12,
+    color: TEXT_GREY,
+    fontWeight: '500',
+  },
+  optionsButton: {
+    padding: 4,
+  },
+
+  /* Divider */
+  dashedDivider: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 16,
+    overflow: 'hidden',
+  },
+  dash: {
+      width: 8,
+      height: 1,
+      backgroundColor: '#E5E7EB',
+      marginHorizontal: 2,
+  },
+
+  /* Details */
+  detailsContainer: {
+    paddingHorizontal: 4,
+    marginBottom: 16,
+  },
+  itemsText: {
+    fontSize: 14,
+    color: "#4B5563",
+    lineHeight: 20,
+    fontWeight: '500',
+  },
+  dateText: {
+    fontSize: 12,
+    color: TEXT_GREY,
+    marginTop: 6,
+    fontWeight: '500',
+  },
+
+  /* Footer */
+  footerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end", 
+    marginTop: 4,
+  },
+  statusWrapper: {
+      flex: 1,
+  },
+  priceText: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: TEXT_DARK,
+  },
   reorderBtn: {
-    marginTop: 10,
-    backgroundColor: "#ff2e5d",
-    borderRadius: 8,
-    paddingVertical: 8,
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 12,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  reorderText: { color: "#fff", fontWeight: "600" },
+  reorderText: {
+    color: COLORS.white,
+    fontWeight: "700",
+    fontSize: 13,
+  },
+
+  /* Status Badges - Pill Style */
+  badgeDefault: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+  },
+  badgeDelivered: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.SOFT_GREEN, // Soft Green
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+  },
+  badgeFailed: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.SOFT_RED, // Soft Red
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+  },
+  badgeRefund: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.SOFT_BLUE, // Soft Blue
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+  },
+  
+  badgeTextDefault: { fontSize: 11, fontWeight: "700", color: "#6B7280" },
+  badgeTextDelivered: { fontSize: 11, fontWeight: "700", color: "#15803d" },
+  badgeTextFailed: { fontSize: 11, fontWeight: "700", color: "#b91c1c" },
+  badgeTextRefund: { fontSize: 11, fontWeight: "700", color: "#1d4ed8" },
+  
+  extraText: {
+    fontSize: 11,
+    color: TEXT_GREY,
+    marginTop: 6,
+    marginLeft: 4,
+    fontStyle: 'italic',
+  },
+
+  /* Empty State */
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 100,
+  },
+  emptyIconBg: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: TEXT_DARK,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: TEXT_GREY,
+    textAlign: "center",
+    lineHeight: 20,
+    paddingHorizontal: 40,
+  },
 });

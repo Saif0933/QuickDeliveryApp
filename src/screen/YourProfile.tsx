@@ -1,4 +1,4 @@
-// ProfileScreen.tsx
+
 import React, { useState } from "react";
 import {
   View,
@@ -7,105 +7,203 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  StatusBar,
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { COLORS } from "../theme/color";
 
-const YourProfile = () => {
+
+type Props = {
+  navigation?: any;
+};
+
+const YourProfile: React.FC<Props> = ({ navigation }) => {
   const [name, setName] = useState("Saif");
   const [mobile, setMobile] = useState("9334804356");
   const [email, setEmail] = useState("");
-  const [dob, setDob] = useState("");
-  const [anniversary, setAnniversary] = useState("");
+  const [dob, setDob] = useState(new Date());
+  const [anniversary, setAnniversary] = useState(new Date());
   const [gender, setGender] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [showDobPicker, setShowDobPicker] = useState(false);
+  const [showAnniversaryPicker, setShowAnniversaryPicker] = useState(false);
+
+  const handleUpdateProfile = () => {
+    if (!email || !gender) {
+      Alert.alert("Incomplete", "Please fill in email and gender.");
+      return;
+    }
+    Alert.alert("Success", "Profile updated successfully!");
+    setIsEditing(false);
+  };
+
+  const handleBack = () => {
+    if (isEditing) {
+      Alert.alert("Discard changes?", "", [
+        { text: "No", style: "cancel" },
+        { text: "Yes", onPress: () => navigation?.goBack() },
+      ]);
+    } else {
+      navigation?.goBack();
+    }
+  };
+
+  const formatDate = (d: Date) => d.toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+      
       {/* Header */}
       <View style={styles.header}>
-        <Ionicons name="arrow-back" size={22} color="black" />
-        <Text style={styles.headerText}>Your Profile</Text>
-      </View>
-
-      {/* Profile Circle */}
-      <View style={styles.profileContainer}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>S</Text>
-          <TouchableOpacity style={styles.editIcon}>
-            <MaterialCommunityIcons name="pencil" size={18} color="#666" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Input Fields */}
-      <View style={styles.inputContainer}>
-        {/* Name */}
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-        />
-
-        {/* Mobile */}
-        <Text style={styles.label}>Mobile</Text>
-        <View style={styles.rowInput}>
-          <TextInput
-            style={[styles.input, { flex: 1 }]}
-            value={mobile}
-            editable={false}
-          />
-          <TouchableOpacity>
-            <Text style={styles.changeText}>CHANGE</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Email */}
-        <Text style={styles.label}>Email</Text>
-        <View style={styles.rowInput}>
-          <TextInput
-            style={[styles.input, { flex: 1 }]}
-            value={email}
-            onChangeText={setEmail}
-          />
-          <TouchableOpacity>
-            <Text style={styles.changeText}>CHANGE</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* DOB */}
-        <Text style={styles.label}>Date of birth</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Date of birth"
-          value={dob}
-          onChangeText={setDob}
-        />
-
-        {/* Anniversary */}
-        <Text style={styles.label}>Anniversary</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Anniversary"
-          value={anniversary}
-          onChangeText={setAnniversary}
-        />
-
-        {/* Gender */}
-        <Text style={styles.label}>Gender</Text>
-        <View style={styles.dropdown}>
-          <Text style={{ color: gender ? "black" : "#999" }}>
-            {gender || "Gender"}
+        <TouchableOpacity onPress={handleBack} style={styles.iconBtn}>
+          <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Edit Profile</Text>
+        <TouchableOpacity 
+          style={styles.textBtn} 
+          onPress={() => setIsEditing(!isEditing)}
+        >
+          <Text style={[styles.editText, isEditing && { color: COLORS.primary }]}>
+            {isEditing ? "Done" : "Edit"}
           </Text>
-          <Ionicons name="chevron-down" size={18} color="#666" />
-        </View>
+        </TouchableOpacity>
       </View>
 
-      {/* Update Profile Button */}
-      <TouchableOpacity style={styles.disabledButton}>
-        <Text style={styles.disabledButtonText}>Update profile</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView 
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+        >
+          
+          {/* Avatar - Simple & Clean */}
+          <View style={styles.avatarContainer}>
+            <View style={styles.avatar}>
+               <Text style={styles.avatarText}>{name.charAt(0)}</Text>
+               {isEditing && (
+                 <View style={styles.editBadge}>
+                   <Ionicons name="pencil" size={12} color={COLORS.white} />
+                 </View>
+               )}
+            </View>
+            <Text style={styles.userName}>{name}</Text>
+            <Text style={styles.userPhone}>+91 {mobile}</Text>
+          </View>
+
+          {/* Form Fields - Minimalist */}
+          <View style={styles.formSection}>
+            
+            <View style={styles.inputContainer}>
+                <Text style={styles.label}>Full Name</Text>
+                <TextInput
+                    style={[styles.input, isEditing && styles.inputActive]}
+                    value={name}
+                    onChangeText={setName}
+                    editable={isEditing}
+                />
+            </View>
+
+            <View style={styles.inputContainer}>
+                <Text style={styles.label}>Email Address</Text>
+                <TextInput
+                    style={[styles.input, isEditing && styles.inputActive]}
+                    value={email}
+                    onChangeText={setEmail}
+                    editable={isEditing}
+                    placeholder="Enter email"
+                    placeholderTextColor={COLORS.muted}
+                    keyboardType="email-address"
+                />
+            </View>
+
+            <View style={styles.inputContainer}>
+                <Text style={styles.label}>Mobile Number</Text>
+                <TextInput
+                    style={[styles.input, { color: COLORS.muted, backgroundColor: '#f2f2f2' }]}
+                    value={mobile}
+                    editable={false}
+                />
+            </View>
+
+            <View style={styles.row}>
+                <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
+                    <Text style={styles.label}>Date of Birth</Text>
+                    <TouchableOpacity 
+                        style={[styles.input, isEditing && styles.inputActive, styles.dateBtn]}
+                        onPress={() => isEditing && setShowDobPicker(true)}
+                        activeOpacity={isEditing ? 0.7 : 1}
+                    >
+                        <Text style={styles.inputText}>{formatDate(dob)}</Text>
+                        <Ionicons name="calendar-outline" size={18} color={COLORS.muted} />
+                    </TouchableOpacity>
+                    {showDobPicker && (
+                        <DateTimePicker value={dob} mode="date" onChange={(e, d) => { setShowDobPicker(false); d && setDob(d); }} />
+                    )}
+                </View>
+
+                <View style={[styles.inputContainer, { flex: 1 }]}>
+                    <Text style={styles.label}>Anniversary</Text>
+                    <TouchableOpacity 
+                        style={[styles.input, isEditing && styles.inputActive, styles.dateBtn]}
+                        onPress={() => isEditing && setShowAnniversaryPicker(true)}
+                        activeOpacity={isEditing ? 0.7 : 1}
+                    >
+                        <Text style={styles.inputText}>{formatDate(anniversary)}</Text>
+                        <Ionicons name="gift-outline" size={18} color={COLORS.muted} />
+                    </TouchableOpacity>
+                    {showAnniversaryPicker && (
+                        <DateTimePicker value={anniversary} mode="date" onChange={(e, d) => { setShowAnniversaryPicker(false); d && setAnniversary(d); }} />
+                    )}
+                </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+                <Text style={styles.label}>Gender</Text>
+                <View style={styles.genderRow}>
+                    {["Male", "Female", "Other"].map((g) => {
+                        const isSelected = gender === g;
+                        return (
+                            <TouchableOpacity
+                                key={g}
+                                onPress={() => isEditing && setGender(g)}
+                                activeOpacity={0.8}
+                                style={[
+                                    styles.genderChip,
+                                    isSelected && styles.genderChipSelected,
+                                    !isEditing && !isSelected && { opacity: 0.5 }
+                                ]}
+                            >
+                                <Text style={[
+                                    styles.genderText, 
+                                    isSelected && styles.genderTextSelected
+                                ]}>{g}</Text>
+                            </TouchableOpacity>
+                        )
+                    })}
+                </View>
+            </View>
+
+          </View>
+        </ScrollView>
+
+        {isEditing && (
+            <View style={styles.footer}>
+                <TouchableOpacity style={styles.saveBtn} onPress={handleUpdateProfile}>
+                    <Text style={styles.saveBtnText}>Save Profile</Text>
+                </TouchableOpacity>
+            </View>
+        )}
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -114,91 +212,172 @@ export default YourProfile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9ff",
+    backgroundColor: COLORS.white,
   },
+  
+  /* Header */
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
-  headerText: {
+  headerTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    marginLeft: 10,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
   },
-  profileContainer: {
-    alignItems: "center",
-    marginTop: 10,
+  iconBtn: { padding: 4 },
+  textBtn: { padding: 4 },
+  editText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.muted,
+  },
+
+  scrollContent: {
+      paddingBottom: 100,
+  },
+
+  /* Avatar */
+  avatarContainer: {
+      alignItems: 'center',
+      marginTop: 24,
+      marginBottom: 32,
   },
   avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: "#dbe5ff",
-    alignItems: "center",
-    justifyContent: "center",
+      width: 90,
+      height: 90,
+      borderRadius: 45,
+      backgroundColor: COLORS.secondary, // Light Blue
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 12,
   },
   avatarText: {
-    fontSize: 32,
-    fontWeight: "600",
-    color: "#2e5aff",
+      fontSize: 36,
+      fontWeight: '700',
+      color: COLORS.primary,
   },
-  editIcon: {
-    position: "absolute",
-    bottom: 5,
-    right: 5,
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 4,
-    elevation: 3,
+  editBadge: {
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+      backgroundColor: COLORS.primary,
+      padding: 6,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: COLORS.white,
+  },
+  userName: {
+      fontSize: 22,
+      fontWeight: '700',
+      color: COLORS.textPrimary,
+  },
+  userPhone: {
+      fontSize: 14,
+      color: COLORS.muted,
+      marginTop: 2,
+  },
+
+  /* Form */
+  formSection: {
+      paddingHorizontal: 24,
   },
   inputContainer: {
-    marginTop: 20,
-    paddingHorizontal: 16,
+      marginBottom: 20,
   },
   label: {
-    fontSize: 13,
-    color: "#999",
-    marginTop: 12,
+      fontSize: 13,
+      fontWeight: '600',
+      color: COLORS.textSecondary,
+      marginBottom: 8,
+      marginLeft: 4,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: "#fff",
-    marginTop: 4,
+      backgroundColor: COLORS.background, // Very light grey #fafafa
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      height: 50,
+      fontSize: 16,
+      color: COLORS.textPrimary,
+      borderWidth: 1,
+      borderColor: 'transparent',
   },
-  rowInput: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
+  inputActive: {
+      backgroundColor: COLORS.white,
+      borderColor: COLORS.secondary,
   },
-  changeText: {
-    color: "red",
-    fontWeight: "600",
-    marginLeft: 8,
+  row: {
+      flexDirection: 'row',
   },
-  dropdown: {
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: "#fff",
-    marginTop: 4,
-    flexDirection: "row",
-    justifyContent: "space-between",
+  dateBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
   },
-  disabledButton: {
-    backgroundColor: "#e6e6e6",
-    padding: 16,
-    borderRadius: 10,
-    alignItems: "center",
-    margin: 20,
+  inputText: {
+      fontSize: 16,
+      color: COLORS.textPrimary,
   },
-  disabledButtonText: {
-    color: "#999",
-    fontSize: 16,
-    fontWeight: "600",
+
+  /* Gender */
+  genderRow: {
+      flexDirection: 'row',
+      gap: 10,
+  },
+  genderChip: {
+      flex: 1,
+      paddingVertical: 12,
+      backgroundColor: COLORS.background,
+      borderRadius: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: 'transparent',
+  },
+  genderChipSelected: {
+      backgroundColor: COLORS.secondary,
+      borderColor: COLORS.primary,
+  },
+  genderText: {
+      fontSize: 14,
+      color: COLORS.muted,
+      fontWeight: '600',
+  },
+  genderTextSelected: {
+      color: COLORS.primary,
+      fontWeight: '700',
+  },
+
+  /* Footer */
+  footer: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      padding: 24,
+      backgroundColor: COLORS.white,
+      borderTopWidth: 1,
+      borderTopColor: '#F0F0F0',
+  },
+  saveBtn: {
+      backgroundColor: COLORS.primary,
+      height: 54,
+      borderRadius: 14,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: COLORS.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+  },
+  saveBtnText: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: COLORS.white,
   },
 });

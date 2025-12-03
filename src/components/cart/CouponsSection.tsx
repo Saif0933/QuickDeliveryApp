@@ -1,10 +1,12 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {COLORS} from '../../theme/color';
 
 const CouponsSection: React.FC = () => {
   return (
     <View style={styles.couponsSection}>
+      {/* GOLD OFFER */}
       <View style={styles.goldOffer}>
         <Text style={styles.goldOfferIcon}>✓</Text>
         <Text style={styles.goldOfferText}>
@@ -12,18 +14,21 @@ const CouponsSection: React.FC = () => {
         </Text>
       </View>
 
+      {/* COUPON OFFER */}
       <View style={styles.couponOffer}>
         <MaterialCommunityIcons
           name="brightness-percent"
           size={20}
-          color="#666"
+          color={COLORS.muted}
         />
         <Text style={styles.couponText}>Save ₹80 with 'HUNGRY80'</Text>
+
         <TouchableOpacity style={styles.applyButton}>
           <Text style={styles.applyButtonText}>APPLY</Text>
         </TouchableOpacity>
       </View>
 
+      {/* VIEW ALL */}
       <TouchableOpacity style={styles.viewAllCoupons}>
         <Text style={styles.viewAllText}>View all coupons ▸</Text>
       </TouchableOpacity>
@@ -36,58 +41,63 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderTopWidth: 8,
-    borderTopColor: '#F8F8F8',
+    borderTopColor: COLORS.background,
+    backgroundColor: COLORS.white,
   },
+
   goldOffer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: COLORS.secondary,
   },
   goldOfferIcon: {
     fontSize: 16,
-    color: '#4CAF50',
+    color: COLORS.highlight, // highlight green
     marginRight: 8,
     fontWeight: 'bold',
   },
   goldOfferText: {
     fontSize: 14,
-    color: '#B8860B',
+    color: COLORS.yelow, // gold-like color
     fontWeight: '500',
   },
+
   couponOffer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: COLORS.secondary,
   },
   couponText: {
     fontSize: 14,
-    color: '#000',
+    color: COLORS.textPrimary,
     fontWeight: '500',
     flex: 1,
     marginLeft: 8,
   },
+
   applyButton: {
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderWidth: 1,
-    borderColor: '#3e0dd2ff',
+    borderColor: COLORS.primary,
     borderRadius: 4,
   },
   applyButtonText: {
     fontSize: 12,
-    color: '#3e0dd2ff',
+    color: COLORS.primary,
     fontWeight: '600',
   },
+
   viewAllCoupons: {
     paddingVertical: 8,
   },
   viewAllText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.muted,
   },
 });
 

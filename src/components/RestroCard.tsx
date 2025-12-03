@@ -1,3 +1,4 @@
+
 // FoodCard.tsx
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -63,22 +64,23 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
   const [index, setIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  // Auto change image every 5 seconds with fade
+  // Auto change image every 5 seconds with crossfade
   useEffect(() => {
     const interval = setInterval(() => {
-      Animated.sequence([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
+      // Fade out the current image
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start(() => {
+        // Change to the next image while invisible
+        setIndex((prev) => (prev + 1) % item.images.length);
+        // Fade in the new image
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 400,
           useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setIndex((prev) => (prev + 1) % item.images.length);
+        }).start();
       });
     }, 5000);
 

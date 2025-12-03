@@ -10,6 +10,8 @@ import {
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { COLORS } from "../theme/color";
 
 type RootStackParamList = {
   AccountSettings: undefined;
@@ -34,28 +36,30 @@ const AccountSettingsScreen: React.FC = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Account settings</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>   {/* ← Wrapped with SafeAreaView */}
+      <View style={{ flex: 1, backgroundColor: "#fff" }}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Account settings</Text>
+        </View>
+
+        {/* Options */}
+        <ScrollView>
+          <TouchableOpacity style={styles.option} onPress={handleChangeEmail}>
+            <Text style={styles.optionText}>Change email</Text>
+            <Icon name="chevron-right" size={24} color="#000" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.option} onPress={handleDeleteAccount}>
+            <Text style={styles.optionText}>Delete account</Text>
+            <Icon name="chevron-right" size={24} color="#000" />
+          </TouchableOpacity>
+        </ScrollView>
       </View>
-
-      {/* Options */}
-      <ScrollView>
-        <TouchableOpacity style={styles.option} onPress={handleChangeEmail}>
-          <Text style={styles.optionText}>Change email</Text>
-          <Icon name="chevron-right" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.option} onPress={handleDeleteAccount}>
-          <Text style={styles.optionText}>Delete account</Text>
-          <Icon name="chevron-right" size={24} color="#000" />
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -64,12 +68,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 14,
-    backgroundColor: "#fff",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    backgroundColor: COLORS.white,
+    // elevation: 4,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 3,
   },
   headerTitle: { fontSize: 18, fontWeight: "bold", marginLeft: 10 },
   option: {

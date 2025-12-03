@@ -243,7 +243,7 @@ import CouponsSection from '../components/cart/CouponsSection';
 import DeliverySection from '../components/cart/DeliverySection';
 import FeedingIndiaSection from '../components/cart/FeedingIndiaSection';
 import CancellationPolicy from '../components/cart/CancellationPolicy';
-import ZomatoMoney from '../components/cart/ZomatoMoney';
+// import ZomatoMoney from '../components/cart/ZomatoMoney';
 import BottomSection from '../components/cart/BottomSection';
 
 const CartScreen: React.FC = () => {
@@ -255,11 +255,11 @@ const CartScreen: React.FC = () => {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}>
         <FoodItems />
+        <FeedingIndiaSection />
         <CouponsSection />
         <DeliverySection />
-        <FeedingIndiaSection />
         <CancellationPolicy />
-        <ZomatoMoney />
+        {/* <ZomatoMoney /> */}
         <View style={{height: 100}} />
       </ScrollView>
       <BottomSection />
