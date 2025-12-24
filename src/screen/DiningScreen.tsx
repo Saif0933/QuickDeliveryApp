@@ -1,444 +1,625 @@
-
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
-  TouchableOpacity,
   Image,
+  TouchableOpacity,
   Dimensions,
   Animated,
+  StatusBar,
+  Pressable,
+  TextInput,
+  Keyboard,
 } from "react-native";
-import { useNavigation } from '@react-navigation/native';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import RestroCard from "../components/RestroCard";
-import { COLORS } from "../theme/color"; // Make sure this path is correct
+import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from "react-native-safe-area-context";
+import { COLORS } from "../theme/color"; // Assumed import path
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-const mustTries = [
-  { title: "The Great Cafes", image: "https://tse2.mm.bing.net/th/id/OIP.WqZILRKVGFfSdPInRbyJCQHaE7?pid=Api&P=0&h=180" },
-  { title: "Luxury Dining Places", image: "https://tse4.mm.bing.net/th/id/OIP.Tm7Cwudv6CWy7TNxjbajtwHaFO?pid=Api&P=0&h=180" },
-  { title: "The Bars & Lounges", image: "https://tse3.mm.bing.net/th/id/OIP.yPot9mFzGRJ1a7GF1LY8KgHaI9?pid=Api&P=0&h=180" },
-];
-
-const restaurants = [
+// --- Fixed Mock Data ---
+const PRODUCTS = [
   {
-    name: "Anardana",
-    location: "Kanka, Ranchi",
-    type: "North Indian • Kebab",
-    distance: "3.2 km",
-    price: "₹2000 for two",
-    rating: "4.5",
-    image: "https://tse4.mm.bing.net/th/id/OIP.mVOIAEYF70LEzoPmS9o7XgHaE8?pid=Api&P=0&h=180",
+    id: 1,
+    title: "Classic Chicken Breakfast Sausage",
+    subtitle: "Juicy, meaty Classic Chicken Sausages",
+    weight: "4 pieces | 4 pieces",
+    price: 199,
+    mrp: 249,
+    discount: "20% off",
+    deliveryTime: "Today in 45 mins",
+    image: "https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500", 
+    isNew: false,
+    tag: "Juicy"
   },
   {
-    name: "Biryani By Kilo",
-    location: "Ahirtoli, Ranchi",
-    type: "Biryani • Hyderabadi",
-    distance: "5.7 km",
-    price: "₹600 for two",
-    rating: "4.3",
-    image: "https://tse4.mm.bing.net/th/id/OIP.pfk5JNbSATK_pTPNYbAevQHaEK?pid=Api&P=0&h=180",
+    id: 2,
+    title: "Crispy Chicken Nuggets",
+    subtitle: "Premium cuts of chicken minced & coated in breadcrumbs",
+    weight: "250 g | 12 pieces | serves 3-4",
+    price: 180,
+    mrp: 189,
+    discount: "5% off",
+    deliveryTime: "Today in 45 mins",
+    image: "https://images.unsplash.com/photo-1562967914-608f82629710?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    isNew: true,
+    tag: null
   },
+  {
+    id: 3,
+    title: "Chunky Continental Chicken Spread",
+    subtitle: "Creamy spread with chunks of roasted chicken",
+    weight: "200 g | 1 pack",
+    price: 149,
+    mrp: 199,
+    discount: "25% off",
+    deliveryTime: "Tomorrow 8 AM - 11 AM",
+    image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    isNew: false,
+    tag: null
+  },
+  {
+    id: 4,
+    title: "Spicy Chicken Wings",
+    subtitle: "Hot and spicy wings, ready to fry",
+    weight: "300 g | 10 pieces",
+    price: 220,
+    mrp: 260,
+    discount: "15% off",
+    deliveryTime: "Today in 30 mins",
+    image: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+    isNew: true,
+    tag: "Spicy"
+  }
 ];
 
-const animatedBanners = [
-  { image: "https://platform.eater.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/25174207/DSC_8016.jpg?quality=90&strip=all&crop=0,24.244383771615,100,51.511232456771&w=2400" },
-  { image: "https://imgs.search.brave.com/fhrEiRX2Rmn4OxE88gesLUtVTMloYCUB2mQyNVca8eA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTI4/NjQwODQ4Mi9waG90/by93aW5kb3ctb2Yt/YW4tZW1wdHktcmVz/dGF1cmFudC1mb3Jj/ZWQtdG8tY2xvc2Ut/YW1pZC1jb3ZpZC0x/OS1wYW5kZW1pYy5q/cGc_cz02MTJ4NjEy/Jnc9MCZrPTIwJmM9/M1BJTHJ6OWx3VXpu/a0NfNi1HaW0tU2Zs/S3duNmcyaDZTbVZz/U3REUXdfYz0" },
-  { image: "https://platform.eater.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/25174207/DSC_8016.jpg?quality=90&strip=all&crop=0,24.244383771615,100,51.511232456771&w=2400" },
-];
-
-const DiningScreen = () => {
+const MeatDeliveryScreen = () => {
   const navigation = useNavigation();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [cartCount, setCartCount] = useState(0);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  
+  // Search State
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const searchInputRef = useRef(null);
+  
+  // --- Animations ---
+  const slideAnim = useRef(new Animated.Value(height)).current; 
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  const bannerFadeAnim = useRef(new Animated.Value(1)).current;
+  const bannerFade = useRef(new Animated.Value(0)).current;
+  const bannerTranslate = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
-    Animated.sequence([
-      Animated.timing(fadeAnim, {
+    Animated.parallel([
+      Animated.timing(bannerFade, {
         toValue: 1,
         duration: 800,
         useNativeDriver: true,
       }),
-      Animated.timing(slideAnim, {
+      Animated.spring(bannerTranslate, {
         toValue: 0,
-        duration: 800,
+        friction: 6,
+        tension: 40,
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      Animated.timing(bannerFadeAnim, {
+  // --- Handlers ---
+  const handleBack = () => {
+    if (isSearchVisible) {
+      setIsSearchVisible(false);
+      setSearchText("");
+      Keyboard.dismiss();
+    } else {
+      navigation.goBack();
+    }
+  };
+
+  const handleSearchToggle = () => {
+    setIsSearchVisible(!isSearchVisible);
+    if (!isSearchVisible) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    } else {
+      setSearchText("");
+      Keyboard.dismiss();
+    }
+  };
+
+  const handleAddToCart = () => {
+    setCartCount(prev => prev + 1);
+    openSheet();
+  };
+
+  // --- Sheet Logic ---
+  const openSheet = () => {
+    setIsSheetOpen(true);
+    slideAnim.setValue(height); 
+    
+    Animated.parallel([
+      Animated.timing(slideAnim, {
         toValue: 0,
         duration: 400,
         useNativeDriver: true,
-      }).start(() => {
-        setCurrentIndex((prev) => (prev + 1) % animatedBanners.length);
-        Animated.timing(bannerFadeAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }).start();
-      });
-    }, 4000);
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      })
+    ]).start();
+  };
 
-    return () => clearInterval(timer);
-  }, [bannerFadeAnim]);
+  const closeSheet = () => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: height,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      })
+    ]).start(() => {
+      setIsSheetOpen(false);
+    });
+  };
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        style={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* HEADER */}
-        <Animated.View
-          style={[
-            styles.header,
-            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-          ]}
-        >
-          <View>
-            <Text style={styles.subLocation}>Delatoli, Ranchi</Text>
-            <Text style={styles.location}>Harmu Housing Colony</Text>
-          </View>
-
-          <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="heart-outline" size={22} color="#333" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="person-circle-outline" size={26} color="#333" />
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
-
-        {/* SEARCH BAR */}
-        <Animated.View
-          style={[
-            styles.searchBarContainer,
-            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
-          ]}
-        >
-          <View style={styles.searchBar}>
-            <Ionicons name="search-outline" size={20} color={COLORS.primary} />
-            <TextInput
-              placeholder="Restaurant, cuisine or dish"
-              placeholderTextColor="#999"
-              style={styles.searchInput}
-            />
-            <TouchableOpacity>
-              <Ionicons name="mic-outline" size={18} color={COLORS.primary} />
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
-
-        {/* FILTERS */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterRow}
-          contentContainerStyle={styles.filterContent}
-        >
-          {[
-            { icon: "filter-outline", label: "Filters" },
-            { icon: "tag-outline", label: "Offers" },
-            { icon: "star-outline", label: "Top Rated" },
-            { icon: "clock-outline", label: "Fast" },
-          ].map((item, idx) => (
-            <TouchableOpacity key={idx} style={styles.filterBtn}>
-              <Ionicons name={item.icon} size={16} color="#444" />
-              <Text style={styles.filterText}>{item.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* BANNER */}
-        <View style={styles.bannerSection}>
-          <Text style={styles.sectionTitle}>Special Offers</Text>
-
-          <View style={styles.animatedBannerContainer}>
-            <View style={styles.bannerImageWrapper}>
-              <Animated.Image
-                source={{ uri: animatedBanners[currentIndex].image }}
-                style={[styles.animatedBannerImage, { opacity: bannerFadeAnim }]}
-                resizeMode="cover"
-              />
-              <View style={styles.bannerOverlay} />
-            </View>
-          </View>
-
-          <View style={styles.bannerDots}>
-            {animatedBanners.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  index === currentIndex
-                    ? { backgroundColor: COLORS.primary, transform: [{ scale: 1.3 }] }
-                    : { backgroundColor: "#CFCFCF" }
-                ]}
-              />
-            ))}
-          </View>
-        </View>
-
-        {/* MUST TRIES */}
-        <Text style={styles.sectionTitle}>Must-Tries in Ranchi</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.mustTryContainer}
-        >
-          {mustTries.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.mustTryCard}>
-              <Image source={{ uri: item.image }} style={styles.mustTryImage} />
-              <View style={styles.mustTryBadge}>
-                <Text style={styles.mustTryText}>{item.title}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* RESTAURANTS */}
-        <Text style={styles.sectionTitle}>Popular Restaurants Around You</Text>
-
-        {restaurants.map((item, index) => (
-          <TouchableOpacity key={index} style={styles.restaurantCard}>
-            <Image source={{ uri: item.image }} style={styles.restaurantImage} />
-
-            <View style={styles.restaurantInfo}>
-              <View style={styles.restaurantHeader}>
-                <Text style={styles.restaurantName}>{item.name}</Text>
-                <View style={styles.ratingBox}>
-                  <Ionicons name="star" size={14} color="#fff" />
-                  <Text style={styles.rating}>{item.rating}</Text>
-                </View>
-              </View>
-
-              <Text style={styles.restaurantDetails}>{item.location}</Text>
-              <Text style={styles.restaurantType}>{item.type}</Text>
-
-              <View style={styles.restaurantFooter}>
-                <Text style={styles.restaurantPrice}>{item.price}</Text>
-                <Text style={styles.restaurantDistance}>{item.distance}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-
-        <RestroCard />
-
-        <View style={{ height: 80 }} />
-      </ScrollView>
-
-      {/* BOTTOM NAV */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialCommunityIcons name="moped" size={26} color="#A0A0A0" />
-          <Text style={styles.navText}>Delivery</Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+      
+      {/* --- HEADER --- */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleBack} style={styles.iconButton}>
+           <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialCommunityIcons name="silverware-fork-knife" size={26} color={COLORS.primary} />
-          <Text style={styles.navTextActive}>Dining</Text>
-        </TouchableOpacity>
+        {isSearchVisible ? (
+          <TextInput
+            ref={searchInputRef}
+            style={styles.searchInput}
+            placeholder="Search for meat, cuts..."
+            placeholderTextColor={COLORS.muted}
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+        ) : (
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>Chicken & Sausages</Text>
+            <Text style={styles.headerSubtitle}>40 Items</Text>
+          </View>
+        )}
 
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialCommunityIcons name="wallet-membership" size={26} color="#A0A0A0" />
-          <Text style={styles.navText}>Money</Text>
+        <TouchableOpacity onPress={handleSearchToggle} style={styles.iconButton}>
+           <Ionicons name={isSearchVisible ? "close" : "search"} size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
       </View>
-    </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        
+        {/* --- 1. HERO BANNER --- */}
+        <View style={styles.heroBanner}>
+           <Animated.View 
+             style={[
+               styles.heroContent, 
+               { 
+                 opacity: bannerFade, 
+                 transform: [{ translateY: bannerTranslate }] 
+               }
+             ]}
+           >
+              <View style={styles.heroTextContainer}>
+                 <Text style={styles.heroHeading}>Fresh &{'\n'}Fast Delivery</Text>
+                 
+                 <View style={styles.heroFeatures}>
+                   <View style={styles.checkRow}>
+                      <MaterialCommunityIcons name="checkbox-marked-circle" size={18} color={COLORS.primary} />
+                      <Text style={styles.checkText}>Veg and Non-veg </Text>
+                   </View>
+                   <View style={styles.checkRow}>
+                      <MaterialCommunityIcons name="checkbox-marked-circle" size={18} color={COLORS.primary} />
+                      <Text style={styles.checkText}>Best Quality</Text> 
+                   </View>
+                   <View style={styles.checkRow}>
+                      <MaterialCommunityIcons name="checkbox-marked-circle" size={18} color={COLORS.primary} />
+                      <Text style={styles.checkText}>Affordable Price</Text>
+                   </View>
+                 </View>
+              </View>
+              
+              <Image 
+                source={{ uri: "https://images.immediate.co.uk/production/volatile/sites/30/2022/06/Party-food-recipes-fcfb3af.jpg?resize=1366,1503" }} 
+                style={styles.heroImage} 
+              />
+           </Animated.View>
+        </View>
+
+        {/* --- 2. FILTER STRIP --- */}
+        <View style={styles.filterStrip}>
+          <TouchableOpacity style={styles.filterBtn}>
+            <Ionicons name="options-outline" size={16} color={COLORS.textPrimary} />
+            <Text style={styles.filterBtnText}>Filters</Text>
+          </TouchableOpacity>
+          <View style={{flex:1}}/>
+          <Text style={styles.itemCount}>{PRODUCTS.length} items</Text>
+        </View>
+
+        {/* --- 3. PRODUCT LIST --- */}
+        {PRODUCTS.map((item) => (
+          <View key={item.id} style={styles.card}>
+            {/* Image Area */}
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: item.image }} style={styles.productImage} />
+              
+              <View style={styles.paginationDots}>
+                <View style={[styles.dot, styles.activeDot]} />
+                <View style={styles.dot} />
+                <View style={styles.dot} />
+              </View>
+
+              {item.isNew && (
+                <View style={styles.newTag}>
+                  <Text style={styles.newTagText}>NEW</Text>
+                </View>
+              )}
+              {!item.isNew && item.tag && (
+                 <View style={[styles.newTag, { backgroundColor: COLORS.accent }]}>
+                    <Ionicons name="water-outline" size={10} color={COLORS.white} style={{marginRight:2}}/>
+                    <Text style={styles.newTagText}>{item.tag}</Text>
+                 </View>
+              )}
+              
+              <View style={styles.vegIconContainer}>
+                 <View style={styles.nonVegBox}>
+                   <View style={styles.nonVegDot} />
+                 </View>
+              </View>
+            </View>
+
+            {/* Content Area */}
+            <View style={styles.cardContent}>
+              <Text style={styles.productTitle}>{item.title}</Text>
+              <Text style={styles.productSubtitle} numberOfLines={1}>{item.subtitle}</Text>
+              
+              <View style={styles.weightBadge}>
+                 <Text style={styles.weightText}>{item.weight}</Text>
+              </View>
+
+              <View style={styles.deliveryRow}>
+                 <Ionicons name="flash" size={14} color={COLORS.yelow} />
+                 <Text style={styles.deliveryText}>{item.deliveryTime}</Text>
+              </View>
+
+              <View style={styles.priceRow}>
+                 <View>
+                    <View style={styles.priceContainer}>
+                       <Text style={styles.currentPrice}>₹{item.price}</Text>
+                       <Text style={styles.mrpPrice}>₹{item.mrp}</Text>
+                       <Text style={styles.discountText}>{item.discount}</Text>
+                    </View>
+                 </View>
+
+                 <View style={styles.addBtnWrapper}>
+                    <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
+                       <Text style={styles.addBtnText}>Add +</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.chooseMoreText}>Choose more</Text>
+                 </View>
+              </View>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* --- 4. SHEET ANIMATION --- */}
+      {isSheetOpen && (
+        <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+          {/* Dark Overlay */}
+          <Pressable onPress={closeSheet} style={StyleSheet.absoluteFill}>
+            <Animated.View style={[styles.overlay, { opacity: fadeAnim }]} />
+          </Pressable>
+
+          {/* Sliding Sheet */}
+          <Animated.View 
+            style={[
+              styles.bottomSheet, 
+              { transform: [{ translateY: slideAnim }] }
+            ]}
+          >
+            <View style={styles.sheetHandle} />
+            
+            <View style={styles.sheetHeader}>
+              <View>
+                 <Text style={styles.sheetTitle}>{cartCount} Items added</Text>
+                 <Text style={styles.sheetSubtitle}>Total Savings: ₹50</Text>
+              </View>
+              <TouchableOpacity onPress={closeSheet}>
+                <Ionicons name="close" size={24} color={COLORS.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.cartSummary}>
+              <View style={styles.cartRow}>
+                 <Text style={styles.cartLabel}>Subtotal</Text>
+                 <Text style={styles.cartValue}>₹{PRODUCTS[0].price * cartCount}</Text>
+              </View>
+              <View style={styles.cartRow}>
+                 <Text style={styles.cartLabel}>Delivery Fee</Text>
+                 <Text style={[styles.cartValue, { color: COLORS.highlight }]}>FREE</Text>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.cartRow}>
+                 <Text style={styles.cartTotalLabel}>To Pay</Text>
+                 <Text style={styles.cartTotalValue}>₹{PRODUCTS[0].price * cartCount}</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.checkoutBtn}>
+               <Text style={styles.checkoutText}>Proceed to Checkout</Text>
+               <Ionicons name="chevron-forward" size={18} color={COLORS.white} />
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      )}
+    </SafeAreaView>
   );
 };
 
-export default DiningScreen;
-
-
-/* --------------------------
-     MODERN MINIMAL STYLES
----------------------------- */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F7F8FA" },
-
-  scrollContainer: { flex: 1 },
-
+  container: { flex: 1, backgroundColor: COLORS.background },
+  
+  // --- Header ---
   header: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderColor: "#eee",
-  },
-  subLocation: { fontSize: 12, color: "#8B8B8B", fontWeight: "500" },
-  location: { fontSize: 16, fontWeight: "700", color: "#222" },
-  headerIcons: { flexDirection: "row", gap: 12 },
-  iconButton: {
-    padding: 6,
-    borderRadius: 50,
-    backgroundColor: "#F1F1F1",
-  },
-
-  searchBarContainer: { paddingHorizontal: 18, marginTop: 12 },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    height: 46,
-    borderWidth: 1,
-    borderColor: "#E6E6E6",
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  searchInput: { marginLeft: 10, fontSize: 14, flex: 1, color: "#333" },
-
-  filterRow: { marginTop: 14, paddingLeft: 18 },
-  filterContent: { gap: 12 },
-  filterBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: "#E6E6E6",
-  },
-  filterText: { marginLeft: 6, fontSize: 13, color: "#444", fontWeight: "600" },
-
-  bannerSection: { marginTop: 22 },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 12,
-    color: "#222",
-    paddingHorizontal: 18,
-  },
-  animatedBannerContainer: { height: 190 },
-  bannerImageWrapper: {
-    width: width - 36,
-    height: 190,
-    marginHorizontal: 18,
-    borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: "#ddd",
-  },
-  animatedBannerImage: { width: "100%", height: "100%" },
-  bannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.1)",
-  },
-  bannerDots: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 10,
-    gap: 6,
-  },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-
-  mustTryContainer: { paddingLeft: 18, marginTop: 10 },
-  mustTryCard: {
-    borderRadius: 12,
-    overflow: "hidden",
-    marginRight: 14,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  mustTryImage: { width: 160, height: 110 },
-  mustTryBadge: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    paddingVertical: 6,
-    backgroundColor: "rgba(0,0,0,0.45)",
-  },
-  mustTryText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 12,
-    textAlign: "center",
-  },
-
-  restaurantCard: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    marginHorizontal: 18,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#E5E5E5",
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  restaurantImage: { width: 110, height: "100%" },
-  restaurantInfo: { flex: 1, padding: 14 },
-  restaurantHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 6,
-  },
-  restaurantName: { fontSize: 16, fontWeight: "700", color: "#222", flex: 1 },
-  ratingBox: {
-    backgroundColor: "#4CAF50",
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  rating: { color: "#fff", marginLeft: 3, fontSize: 12, fontWeight: "600" },
-  restaurantDetails: { fontSize: 12, color: "#999", marginBottom: 2 },
-  restaurantType: { fontSize: 12, color: "#777", marginBottom: 6 },
-  restaurantFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 6,
-  },
-  restaurantPrice: { fontSize: 13, fontWeight: "700", color: "#222" },
-  restaurantDistance: { fontSize: 12, color: "#777" },
-
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "#fff",
     paddingVertical: 12,
-    borderTopWidth: 1,
-    borderColor: "#E6E6E6",
-    elevation: 12,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.SOFT_BLUE,
+    height: 60,
+    elevation: 2,
+    zIndex: 10
   },
-  navItem: { alignItems: "center" },
-  navText: {
-    fontSize: 10,
-    color: "#A0A0A0",
-    marginTop: 4,
-    fontWeight: "600",
+  headerTextContainer: { alignItems: 'flex-start', flex: 1, marginLeft: 16 },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary },
+  headerSubtitle: { fontSize: 12, color: COLORS.muted },
+  iconButton: { padding: 4 },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: COLORS.SOFT_BLUE,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginHorizontal: 12,
+    color: COLORS.textPrimary
   },
-  navTextActive: {
-    fontSize: 10,
-    color: COLORS.primary,
-    marginTop: 4,
-    fontWeight: "800",
+
+  // --- Hero Banner ---
+  heroBanner: {
+    backgroundColor: COLORS.SOFT_BLUE, // Lavender/Soft Pink background
+    height: 220, 
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    overflow: 'hidden',
   },
+  heroContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  heroTextContainer: { flex: 1, paddingRight: 10 },
+  heroHeading: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: COLORS.primary, // Deep Blue
+    marginBottom: 12,
+    lineHeight: 28,
+  },
+  heroFeatures: { gap: 6 },
+  checkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkText: {
+    fontSize: 13,
+    color: COLORS.textPrimary,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  heroImage: {
+    width: 140, 
+    height: 140,
+    borderRadius: 70, 
+    borderWidth: 4,
+    borderColor: COLORS.white,
+    resizeMode: 'cover',
+  },
+
+  // --- Filter Strip ---
+  filterStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.SOFT_BLUE,
+    marginBottom: 10,
+    gap: 10
+  },
+  filterBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.LITE_GRAY,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 5,
+    backgroundColor: COLORS.white,
+  },
+  filterBtnText: { marginLeft: 6, fontSize: 12, fontWeight: '600', color: COLORS.textPrimary },
+  itemCount: { fontSize: 13, color: COLORS.muted, fontWeight: '500' },
+
+  // --- Product Card ---
+  card: {
+    backgroundColor: COLORS.white,
+    marginBottom: 12,
+    paddingBottom: 16,
+  },
+  imageContainer: {
+    width: width,
+    height: 220,
+    position: 'relative',
+    backgroundColor: COLORS.SOFT_BLUE // Placeholder color
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  paginationDots: {
+    position: 'absolute',
+    bottom: 12,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6
+  },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.6)' },
+  activeDot: { backgroundColor: COLORS.white, width: 8, height: 8, borderRadius: 4 },
+  
+  newTag: {
+    position: 'absolute',
+    top: 12,
+    left: 0,
+    backgroundColor: COLORS.RED,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderTopRightRadius: 4,
+    borderBottomRightRadius: 4,
+    flexDirection:'row',
+    alignItems:'center'
+  },
+  newTagText: { color: COLORS.white, fontSize: 10, fontWeight: '700' },
+  
+  vegIconContainer: {
+    position: 'absolute',
+    top: 12,
+    right: 16,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    padding: 3,
+    borderRadius: 2,
+  },
+  nonVegBox: {
+    width: 14,
+    height: 14,
+    borderWidth: 1,
+    borderColor: COLORS.RED,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  nonVegDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.RED },
+
+  cardContent: { paddingHorizontal: 16, paddingTop: 14 },
+  productTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 4, letterSpacing: 0.3 },
+  productSubtitle: { fontSize: 13, color: COLORS.muted, marginBottom: 10 },
+  
+  weightBadge: { 
+      alignSelf: 'flex-start',
+      backgroundColor: COLORS.SOFT_BLUE, 
+      paddingHorizontal: 6, 
+      paddingVertical: 3, 
+      borderRadius: 3,
+      marginBottom: 10
+  },
+  weightText: { fontSize: 11, color: COLORS.textSecondary, fontWeight:'500' },
+  
+  deliveryRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
+  deliveryText: { fontSize: 11, fontWeight: '700', color: COLORS.textPrimary, marginLeft: 4 },
+
+  priceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  priceContainer: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  currentPrice: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary },
+  mrpPrice: { fontSize: 14, textDecorationLine: 'line-through', color: COLORS.LITE_GRAY },
+  discountText: { fontSize: 14, color: COLORS.highlight, fontWeight: '700' },
+
+  addBtnWrapper: { alignItems: 'center' },
+  addButton: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 26,
+    paddingVertical: 9,
+    borderRadius: 4,
+  },
+  addBtnText: { color: COLORS.white, fontWeight: '700', fontSize: 14 },
+  chooseMoreText: { fontSize: 10, color: COLORS.muted, marginTop: 4 },
+
+  // --- Bottom Sheet ---
+  overlay: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    zIndex: 100,
+  },
+  bottomSheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 20,
+    zIndex: 101,
+    elevation: 20,
+    height: 320,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5
+  },
+  sheetHandle: {
+    width: 36,
+    height: 4,
+    backgroundColor: COLORS.LITE_GRAY,
+    alignSelf: 'center',
+    borderRadius: 2,
+    marginBottom: 20,
+  },
+  sheetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  sheetTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary },
+  sheetSubtitle: { fontSize: 12, color: COLORS.highlight, fontWeight: '600', marginTop: 2 },
+  
+  cartSummary: { marginBottom: 20 },
+  cartRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  cartLabel: { fontSize: 14, color: COLORS.textSecondary },
+  cartValue: { fontSize: 14, color: COLORS.textPrimary, fontWeight: '600' },
+  divider: { height: 1, backgroundColor: COLORS.SOFT_BLUE, marginVertical: 10 },
+  cartTotalLabel: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary },
+  cartTotalValue: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary },
+  
+  checkoutBtn: {
+    backgroundColor: COLORS.primary,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  checkoutText: { color: COLORS.white, fontSize: 15, fontWeight: '700' },
 });
+
+export default MeatDeliveryScreen;

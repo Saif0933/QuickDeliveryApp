@@ -38,10 +38,10 @@ const AboutScreen = () => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.row}>
+        {/* <TouchableOpacity style={styles.row}>
           <Text style={styles.title}>Open Source Libraries</Text>
           <Ionicons name="chevron-forward" size={22} color="#000" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity style={styles.row}>
           <Text style={styles.title}>Licenses and Registrations</Text>

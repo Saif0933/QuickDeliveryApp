@@ -2,24 +2,28 @@
 // OrdersScreen.tsx
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  FlatList,
-  TextInput,
   Alert,
+  FlatList,
+  Image,
   Share,
   StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Modal,
+  TouchableWithoutFeedback,
+  Dimensions // Import Dimensions
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { useGetAllOrders } from "../api/hooks/order.service";
 import { COLORS } from '../theme/color';
 
 // --- THEME COLORS ---
-const BG_COLOR = '#F5F7FA'; // Slightly cooler grey for modern feel
+const BG_COLOR = '#F5F7FA';
 const CARD_BG = '#FFFFFF';
 const TEXT_DARK = '#1F2937';
 const TEXT_GREY = '#9CA3AF';
@@ -77,6 +81,11 @@ const YourOrders = ({ navigation }: any) => {
   ]);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // --- POPUP MENU STATE ---
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
   // Filter orders based on search
   const filteredOrders = orders.filter(
     (order) =>
@@ -120,6 +129,10 @@ const YourOrders = ({ navigation }: any) => {
       console.error(err);
     }
   };
+
+  // --- API INTEGRATION ---
+  const { data: orderData, isLoading } = useGetAllOrders({});
+  // console.log(orderData); // Commented out to reduce noise
 
   // Status Badge Component
   const StatusBadge = ({ status, extra }: { status: Order["status"]; extra?: string }) => {
@@ -173,19 +186,20 @@ const YourOrders = ({ navigation }: any) => {
           </View>
         </View>
 
+        {/* --- MODIFIED: THREE DOT BUTTON --- */}
         <TouchableOpacity
           style={styles.optionsButton}
-          onPress={() =>
-            Alert.alert("Options", "", [
-              { text: "Delete Order", onPress: () => handleDelete(item.id) },
-              { text: "View Details", onPress: () => handleDetails(item) },
-              { text: "Share Restaurant", onPress: () => handleShare(item.restaurant, item.location) },
-              { text: "Cancel", style: "cancel" },
-            ])
-          }
+          onPress={(event) => {
+            // Get click coordinates to position the popup
+            const { pageY } = event.nativeEvent;
+            setMenuPosition({ top: pageY, right: 30 }); // 30 is approx margin
+            setSelectedOrder(item);
+            setMenuVisible(true);
+          }}
         >
           <MaterialCommunityIcons name="dots-vertical" size={20} color={COLORS.muted} />
         </TouchableOpacity>
+        {/* ---------------------------------- */}
       </View>
 
       {/* Dashed Divider */}
@@ -273,6 +287,62 @@ const YourOrders = ({ navigation }: any) => {
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* --- POPUP MENU MODAL --- */}
+      <Modal
+        visible={menuVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <View 
+              style={[
+                styles.popupMenu, 
+                { top: menuPosition.top + 10, right: menuPosition.right } // Adjust position
+              ]}
+            >
+              {/* Option 1: Share restaurant */}
+              <TouchableOpacity 
+                style={styles.popupMenuItem}
+                onPress={() => {
+                  setMenuVisible(false);
+                  if (selectedOrder) handleShare(selectedOrder.restaurant, selectedOrder.location);
+                }}
+              >
+                <Ionicons name="arrow-redo-outline" size={20} color={TEXT_DARK} />
+                <Text style={styles.popupMenuText}>Share restaurant</Text>
+              </TouchableOpacity>
+
+              {/* Option 2: Order details */}
+              <TouchableOpacity 
+                style={styles.popupMenuItem}
+                onPress={() => {
+                  setMenuVisible(false);
+                  if (selectedOrder) handleDetails(selectedOrder);
+                }}
+              >
+                <Ionicons name="receipt-outline" size={20} color={TEXT_DARK} />
+                <Text style={styles.popupMenuText}>Order details</Text>
+              </TouchableOpacity>
+
+              {/* Option 3: Delete this order */}
+              <TouchableOpacity 
+                style={styles.popupMenuItem}
+                onPress={() => {
+                  setMenuVisible(false);
+                  if (selectedOrder) handleDelete(selectedOrder.id);
+                }}
+              >
+                <Ionicons name="trash-outline" size={20} color={TEXT_DARK} />
+                <Text style={styles.popupMenuText}>Delete this order</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
     </SafeAreaView>
   );
 };
@@ -282,7 +352,7 @@ export default YourOrders;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
   },
   
   /* Header */
@@ -291,7 +361,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 14,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
   },
   backButton: {
     padding: 8,
@@ -319,7 +389,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: COLORS.white,
     borderRadius: 16,
     paddingHorizontal: 16,
     height: 52,
@@ -547,5 +617,36 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
     paddingHorizontal: 40,
+  },
+
+  /* --- POPUP MENU STYLES --- */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'transparent', // Transparent to see behind
+  },
+  popupMenu: {
+    position: 'absolute',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    width: 200,
+    paddingVertical: 8,
+    // Shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  popupMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  popupMenuText: {
+    fontSize: 14,
+    color: TEXT_DARK,
+    marginLeft: 12,
+    fontWeight: '500',
   },
 });

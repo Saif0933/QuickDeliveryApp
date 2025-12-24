@@ -1,25 +1,24 @@
-
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import {
   Animated,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Dimensions,
+  FlatList,
+  ActivityIndicator,
+  ImageSourcePropType,
 } from "react-native";
 
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { COLORS } from "../theme/color";
-
-// Navigation Types
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../types/types";
+import { RootStack } from "../types/types";
+import { useGetAllVendors } from "../api/hooks/useVender";
+import { Vendor } from "../../Vender.types";
 
-// Adding the interface here to ensure Type Safety based on your usage
 interface FoodItem {
   id: string;
   name: string;
@@ -30,57 +29,40 @@ interface FoodItem {
   rating: string;
   offer: string;
   discount: string;
-  images: any[];
+  images: (ImageSourcePropType | { uri: string })[]; 
 }
 
-const data: FoodItem[] = [
-  {
-    id: "1",
-    name: "The Wok",
-    dish: "Paneer Roll",
-    price: "₹75",
-    time: "15-20 mins",
-    distance: "1.3 km",
-    rating: "3.9",
-    offer: "Extra 20% OFF",
-    discount: "FLAT 50% OFF",
-    images: [
-      require("../assets/food1.jpg"),
-      require("../assets/north.jpg"),
-      require("../assets/roll.jpg"),
-    ],
-  },
-  {
-    id: "2",
-    name: "Xona",
-    dish: "North Indian",
-    price: "₹450 for one",
-    time: "30-40 mins",
+const mapVendorToFoodItem = (vendor: Vendor): FoodItem => {
+  return {
+    id: vendor.id.toString(),
+    // Fallback to company name if shop name is missing
+    name: vendor.shopName || vendor.companyName || "Unknown Restaurant", 
+    // Static placeholders since these fields aren't in the backend response yet
+    dish: "North Indian • Chinese", 
+    price: "₹200 for one", 
+    time: "30-45 mins",
     distance: "2.5 km",
-    rating: "4.5",
-    offer: "20% OFF",
+    rating: "4.2",
+    offer: "Extra 20% OFF",
     discount: "FLAT 40% OFF",
-    images: [
-      require("../assets/food.jpg"),
-      require("../assets/roll.jpg"),
-      require("../assets/north.jpg"),
-    ],
-  },
-];
+    // Backend returns single image object; UI expects array for carousel
+    images: vendor.images?.url 
+      ? [{ uri: vendor.images.url }] 
+      : [require("../assets/food1.jpg")], // Fallback image if null
+  };
+};
 
+// --- COMPONENT: FoodCard ---
 const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStack>>();
 
   const [index, setIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
-
-  const [isFavorite, setIsFavorite] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const handleFavorite = () => {
     setIsFavorite(!isFavorite);
-
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.8,
@@ -95,7 +77,11 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
     ]).start();
   };
 
+  // Carousel Animation Logic
   useEffect(() => {
+    // Only animate if there is more than 1 image
+    if (item.images.length <= 1) return;
+
     const interval = setInterval(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -143,29 +129,22 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
           </Animated.View>
         </TouchableOpacity>
 
-        {/* Floating Tag (Dish/Price) */}
+        {/* Floating Tag */}
         <View style={styles.glassTag}>
-          <Text style={styles.glassTagText}>
-            {item.dish}
+          <Text style={styles.glassTagText} numberOfLines={1}>
+            {item.dish.split('•')[0]}
           </Text>
         </View>
       </View>
 
       {/* Content Section */}
       <View style={styles.contentContainer}>
-        
-        {/* Header Row: Name, Cuisine, Time & Rating */}
         <View style={styles.headerRow}>
-          
-          {/* Info Column */}
           <View style={styles.infoColumn}>
             <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-            
             <Text style={styles.cuisineText}>
               {item.dish} • {item.price}
             </Text>
-
-            {/* 🔥 UPDATED: Time & Distance Row with Icon */}
             <View style={styles.metaRow}>
               <View style={styles.timePill}>
                  <Ionicons name="time-outline" size={12} color="#555" style={{marginRight: 3}} />
@@ -176,25 +155,20 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
             </View>
           </View>
           
-          {/* Rating Box */}
           <View style={styles.ratingBox}>
             <Text style={styles.ratingText}>{item.rating}</Text>
             <Ionicons name="star" size={10} color="#fff" style={{ marginLeft: 2 }} />
           </View>
         </View>
 
-        {/* Dashed Separator */}
         <View style={styles.divider} />
 
-        {/* Footer: Offers & Discount */}
         <View style={styles.footerRow}>
           <View style={styles.offerItem}>
              <MaterialIcons name="local-offer" size={15} color="#1665D8" />
              <Text style={styles.offerText}>{item.offer}</Text>
           </View>
-          
           <View style={styles.dotSeparator} />
-
           <View style={styles.offerItem}>
              <Ionicons name="trending-up" size={15} color="#28A745" />
              <Text style={styles.discountText}>{item.discount}</Text>
@@ -205,19 +179,80 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
   );
 };
 
+// --- MAIN COMPONENT: FoodList (Infinite Scroll) ---
 const FoodList: React.FC = () => {
+  // 1. Fetch Data with Infinite Query
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError
+  } = useGetAllVendors({ limit: 10 }); // Fetch 10 items per page
+
+  // 2. Flatten Pages into a single array & Map to FoodItem
+  const foodItems = useMemo(() => {
+    if (!data) return [];
+    return data.pages.flatMap((page) => 
+      page.vendors.map((vendor) => mapVendorToFoodItem(vendor))
+    );
+  }, [data]);
+
+  // 3. Render Footer Loader
+  const renderFooter = () => {
+    if (!isFetchingNextPage) return <View style={{ height: 40 }} />;
+    return (
+      <View style={{ paddingVertical: 20 }}>
+        <ActivityIndicator size="small" color={COLORS.primary} />
+      </View>
+    );
+  };
+
+  // 4. Handle Empty State
+  if (isLoading) {
+    return (
+      <View style={{ padding: 20, alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={{ marginTop: 10, color: '#888' }}>Loading Restaurants...</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={{ padding: 20, alignItems: 'center' }}>
+         <Text style={{ color: 'red' }}>Failed to load restaurants.</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: "#fff" }}
-      contentContainerStyle={{ paddingVertical: 15 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text style={styles.sectionHeader}>RECOMMENDED FOR YOU</Text>
-      {data.map((item) => (
-        <FoodCard key={item.id} item={item} />
-      ))}
-      <View style={{ height: 40 }} />
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      <Text style={styles.sectionHeader}>
+        {foodItems.length > 0 
+          ? `${foodItems.length}+ Restaurants near by you` 
+          : "No Restaurants found"}
+      </Text>
+
+      <FlatList
+        data={foodItems}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <FoodCard item={item} />}
+        
+        // Infinite Scroll Props
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.5} // Trigger when half a screen away from bottom
+        
+        ListFooterComponent={renderFooter}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      />
+    </View>
   );
 };
 
@@ -229,13 +264,13 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     paddingHorizontal: 16,
     marginBottom: 12,
+    marginTop: 15,
   },
   card: {
     backgroundColor: "#fff",
     borderRadius: 16,
     marginBottom: 20, 
     marginHorizontal: 16,
-    // Refined Shadow
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
@@ -255,7 +290,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  // Floating Actions on Image
   bookmarkWrapper: {
     position: "absolute",
     top: 10,
@@ -288,8 +322,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 0.3,
   },
-  
-  // Content Area
   contentContainer: {
     padding: 14, 
     backgroundColor: '#fff',
@@ -316,8 +348,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginBottom: 6,
   },
-
-  // 🔥 Meta Row Styling (Time & Distance)
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -340,8 +370,6 @@ const styles = StyleSheet.create({
     color: '#ccc',
     marginHorizontal: 6,
   },
-
-  // Rating
   ratingBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -356,8 +384,6 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     fontSize: 11,
   },
-
-  // Separator
   divider: {
     height: 1,
     backgroundColor: "#F0F0F0",
@@ -367,8 +393,6 @@ const styles = StyleSheet.create({
     borderColor: '#eee', 
     borderRadius: 1,
   },
-
-  // Footer
   footerRow: {
     flexDirection: "row",
     alignItems: "center",

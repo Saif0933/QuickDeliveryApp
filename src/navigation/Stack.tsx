@@ -1,36 +1,40 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import CategoryScreen from '../screen/Category';
-import HomeScreen from '../screen/HomeScreen';
-import Login from '../screen/Login';
-import Otp from '../screen/Otp';
-import ProfileScreen from '../screen/ProfileScreen';
-import ZomatoMoneyPage from '../screen/ZomatoMoneyPage';
-import LocationScreen from '../screen/LoctionScreen';
-import DiningScreen from '../screen/DiningScreen';
-import YourProfile from '../screen/YourProfile';
-import YourOrder from '../screen/YourOrder';
-import VegMode from '../screen/VegMode';
-import AddressBookScreen from '../screen/AddressBookScreen';
-import AboutScreen from '../screen/AboutScreen';
-import ActivityScreen from '../screen/ActivityScreen';
-import SettingsScreen from '../screen/SettingScreen';
-import FeedbackScreen from '../screen/FeedbackScreen';
-import GoldScreen from '../screen/GoldScreen';
-import BookingScreen from '../screen/BookingScreen';
-import NotificationScreen from '../screen/NotificationScreen';
-import AccountSettingsScreen from '../screen/AccountSettingsScreen';
-import AccessibilitySettings from '../screen/AccessibilitySettings';
-import CheckoutScreen from '../screen/CheckoutScreen';
-import PaymentSettings from '../screen/PaymentSettings';
-import SupportScreen from '../screen/SupportScreen';
-import ReportEmergencyScreen from '../screen/ReportEmergencyScreen';
-import CartScreen from '../screen/CheckoutScreen';
-import Splash from '../screen/Splash';
+import OrderPlacedScreen from '../components/cart/OrderPlacedScreen';
 import FoodList from '../components/categories/FoodList';
 import ProductScreen from '../components/categories/ProductScreen';
-import PaymentSuccessScreen from '../components/cart/PaymentSuccessScreen';
-import RestaurantInfoScreen from '../components/categories/RestaurantInfoScreen'
+import RestaurantInfoScreen from '../components/categories/RestaurantInfoScreen';
+import AboutScreen from '../screen/AboutScreen';
+import AccessibilitySettings from '../screen/AccessibilitySettings';
+import AccountSettingsScreen from '../screen/AccountSettingsScreen';
+import ActivityScreen from '../screen/ActivityScreen';
+import AddressBookScreen from '../screen/AddressBookScreen';
+import BookingScreen from '../screen/BookingScreen';
+import CategoryScreen from '../screen/Category';
+import { default as CartScreen, default as CheckoutScreen } from '../screen/CheckoutScreen';
+import DiningScreen from '../screen/DiningScreen';
+import FeedbackScreen from '../screen/FeedbackScreen';
+import GoldScreen from '../screen/GoldScreen';
+import HomeScreen from '../screen/HomeScreen';
+import LocationScreen from '../screen/LoctionScreen';
+import Login from '../screen/Login';
+import NotificationScreen from '../screen/NotificationScreen';
+import Otp from '../screen/Otp';
+import PaymentSettings from '../screen/PaymentSettings';
+import ProfileScreen from '../screen/ProfileScreen';
+import ReportEmergencyScreen from '../screen/ReportEmergencyScreen';
+import SearchScreen from '../screen/SearchScreen';
+import SettingsScreen from '../screen/SettingScreen';
+import Splash from '../screen/Splash';
+import SupportScreen from '../screen/SupportScreen';
+import VegMode from '../screen/VegMode';
+import YourOrder from '../screen/YourOrder';
+import YourProfile from '../screen/YourProfile';
+import ZomatoMoneyPage from '../screen/ZomatoMoneyPage';
+import SelectAddressScreen from '../screen/SelectAddressScreen';
+import MealsUnderScreen from '../components/categories/MealsUnderScreen';
+import OrderDetailsScreen from '../screen/OrderDetailsScreen';
+import OrderTrackingScreen from '../components/cart/OrderTrackingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,7 +43,7 @@ const MyStack = () => {
     // ✅ Added return
     <NavigationContainer>
       <Stack.Navigator
-        // initialRouteName="Login"
+        // initialRouteName="OrderTrackingScreen"
         screenOptions={{ headerShown: false }}
       >
         {/* <Stack.Screen name="FoodList" component={FoodList} /> */}
@@ -64,9 +68,13 @@ const MyStack = () => {
         <Stack.Screen name="BookingScreen" component={BookingScreen} />
         <Stack.Screen name="FoodList" component={FoodList} />
         <Stack.Screen name="ProductScreen" component={ProductScreen} />
-        <Stack.Screen name="PaymentSuccessScreen" component={PaymentSuccessScreen} />
+        <Stack.Screen name="OrderPlacedScreen" component={OrderPlacedScreen} />
         <Stack.Screen name="RestaurantInfoScreen" component={RestaurantInfoScreen} />
-        
+        <Stack.Screen name="SearchScreen" component={SearchScreen} />
+        <Stack.Screen name="SelectAddressScreen" component={SelectAddressScreen} />
+        <Stack.Screen name="MealsUnderScreen" component={MealsUnderScreen} />
+        <Stack.Screen name="OrderDetailsScreen" component={OrderDetailsScreen} />
+        <Stack.Screen name="OrderTrackingScreen" component={OrderTrackingScreen} />
         <Stack.Screen
           name="NotificationScreen"
           component={NotificationScreen}

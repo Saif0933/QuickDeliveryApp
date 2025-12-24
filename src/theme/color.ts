@@ -14,5 +14,6 @@ export const COLORS = {
   TEXT_DARK: '#1F2937',
   SOFT_BLUE: "#DBEAFE",
   SOFT_RED: "#FEE2E2",
-  SOFT_GREEN: "#DCFCE7"
+  SOFT_GREEN: "#DCFCE7",
+  LITE_GRAY: "#9ca3af",
 };
