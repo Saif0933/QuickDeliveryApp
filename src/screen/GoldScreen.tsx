@@ -33,7 +33,7 @@ const GoldScreen = () => {
   const handleBack = () => Alert.alert("Back", "Go back to the previous screen");
 
   const handleJoinGold = () =>
-    Alert.alert("Success", "You have joined Zomato Gold!");
+    Alert.alert("Success", "You have joined RESTRO Gold!");
 
   const handleApplyCoupon = () => {
     if (coupon.trim() === "") {

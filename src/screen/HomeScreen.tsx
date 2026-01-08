@@ -914,7 +914,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Video from 'react-native-video';
+// Replaced Video import with LottieView
+import LottieView from 'lottie-react-native';
 
 // --- CUSTOM IMPORTS ---
 import FoodList from '../components/FoodCard';
@@ -938,7 +939,7 @@ type RootStackParamList = {
   DiningScreen: undefined;
   VegMode: undefined;
   SearchScreen: undefined;
-  MealsUnderScreen: undefined; // Added this based on usage in code
+  MealsUnderScreen: undefined;
 };
 
 // --- DATA ---
@@ -1501,7 +1502,7 @@ const HomeScreen: React.FC = () => {
           <Text style={styles.navTextActive}>Delivery</Text>
         </TouchableOpacity>
 
-        {/* Floating Ready Bites Button */}
+        {/* Floating Lottie Button (Replaces Video) */}
         <TouchableOpacity
           onPress={() => navigation.navigate('DiningScreen')}
           style={{
@@ -1510,6 +1511,7 @@ const HomeScreen: React.FC = () => {
             left: "50%",
             transform: [{ translateX: -35 }],
             zIndex: 99,
+            alignItems: 'center'
           }}
         >
           <View
@@ -1528,15 +1530,11 @@ const HomeScreen: React.FC = () => {
               alignItems: "center",
             }}
           >
-            <Video
-              source={{
-                uri: "https://media.istockphoto.com/id/451665541/video/50-60-70-80-90-off.mp4?s=mp4-640x640-is&k=20&c=k3HxjEbfbKjyzGwBVk5GWt1PUx_2gEyp5ANh0AULTQE=",
-              }}
-              style={{ width: "100%", height: "100%", }}
-              resizeMode="cover"
-              repeat
-              muted
-              paused={false}
+            <LottieView
+              source={require('../assets/PaymentFailed.json')}
+              style={{ width: 60, height: 60 }}
+              autoPlay
+              loop
             />
           </View>
           <Text style={styles.navTextActive}>Under 50%</Text>

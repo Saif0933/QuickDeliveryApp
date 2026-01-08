@@ -44,7 +44,7 @@ const MyStack = () => {
     // ✅ Added return
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="OrderTrackingScreen"
+        // initialRouteName="OrderPlacedScreen"
         screenOptions={{ headerShown: false }}
       >
         {/* <Stack.Screen name="FoodList" component={FoodList} /> */}
