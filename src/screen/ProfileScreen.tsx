@@ -243,7 +243,7 @@ const ProfileScreen = () => {
                 <View style={styles.listCard}>
                     <ListItem icon="book-open-page-variant-outline" label="Address book" onPress={() => navigation.navigate('AddressBookScreen')} />
                     <ListItem icon="bookmark-outline" label="Your favourite" onPress={() => navigation.navigate('BookingScreen')} />
-                    <ListItem icon="heart-outline" label="Your wishlist" onPress={() => navigation.navigate('BookingScreen')} />
+                    {/* <ListItem icon="heart-outline" label="Your wishlist" onPress={() => navigation.navigate('BookingScreen')} /> */}
                      <ListItem icon="account-outline" label="Profile Settings" onPress={() => navigation.navigate('YourProfile')} last />
                 </View>
             </View>

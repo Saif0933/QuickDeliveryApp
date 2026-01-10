@@ -147,12 +147,10 @@
 //     return () => clearInterval(interval);
 //   }, [activeIndex]);
 
-//   // --- ANIMATION CONFIGURATION (Fixed Ranges to leave a gap) ---
+//   // --- ANIMATION CONFIGURATION ---
   
-//   // We use range 0 to 180.
-//   // 320 (Card Top) - 180 (Scroll) = 140 (Visual Top)
-//   // Sticky Header Height = 90
-//   // Gap = 140 - 90 = 50px (Visible Banner Part)
+//   // FIX: Increased scroll target to 230 to hide banner completely under sticky header
+//   const EXPAND_SCROLL_Y = 230; 
 
 //   const textOpacity = scrollY.interpolate({
 //     inputRange: [0, 60],
@@ -161,37 +159,38 @@
 //   });
 
 //   const mapWidth = scrollY.interpolate({
-//     inputRange: [0, 180], // Animation completes at 180
-//     outputRange: [110, CARD_WIDTH],
+//     inputRange: [0, EXPAND_SCROLL_Y], // Updated range
+//     outputRange: [110, width], 
 //     extrapolate: 'clamp',
 //   });
 
 //   const mapHeight = scrollY.interpolate({
-//     inputRange: [0, 180], // Animation completes at 180
-//     outputRange: [110, 300],
+//     inputRange: [0, EXPAND_SCROLL_Y], // Updated range
+//     outputRange: [110, 320], 
 //     extrapolate: 'clamp',
 //   });
 
 //   const cardHeight = scrollY.interpolate({
-//     inputRange: [0, 180], // Animation completes at 180
+//     inputRange: [0, EXPAND_SCROLL_Y], // Updated range
 //     outputRange: [140, 320],
 //     extrapolate: 'clamp',
 //   });
 
 //   const initialMapX = CARD_WIDTH - 110 - 16;
+  
 //   const mapTranslateX = scrollY.interpolate({
-//     inputRange: [0, 180], // Animation completes at 180
-//     outputRange: [initialMapX, 0],
+//     inputRange: [0, EXPAND_SCROLL_Y], // Updated range
+//     outputRange: [initialMapX, -CARD_MARGIN], 
 //     extrapolate: 'clamp',
 //   });
 
 //   const mapTranslateY = scrollY.interpolate({
-//     inputRange: [0, 180], // Animation completes at 180
+//     inputRange: [0, EXPAND_SCROLL_Y], // Updated range
 //     outputRange: [16, 0],
 //     extrapolate: 'clamp',
 //   });
 
-//   // Sticky Header Fades in
+//   // Sticky Header Fades in (Keep this starting earlier for smooth effect)
 //   const stickyHeaderOpacity = scrollY.interpolate({
 //     inputRange: [120, 180], 
 //     outputRange: [0, 1],
@@ -205,7 +204,7 @@
 //   });
 
 //   const collapseIconOpacity = scrollY.interpolate({
-//     inputRange: [120, 180],
+//     inputRange: [150, EXPAND_SCROLL_Y], // Updated range
 //     outputRange: [0, 1],
 //     extrapolate: 'clamp',
 //   });
@@ -228,8 +227,8 @@
 //   };
 
 //   const handleExpandMap = () => {
-//     // Scroll to 180 to leave a small gap ("thoda sa part")
-//     (mainScrollViewRef.current as any)?.scrollTo({ y: 180, animated: true });
+//     // FIX: Scroll to 230 instead of 180
+//     (mainScrollViewRef.current as any)?.scrollTo({ y: EXPAND_SCROLL_Y, animated: true });
 //   };
 
 //   const handleCollapseMap = () => {
@@ -249,7 +248,7 @@
 //         style={[styles.stickyHeader, { opacity: stickyHeaderOpacity }]}
 //       >
 //         <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-//             <TouchableOpacity onPress={() => navigation?.goBack()}>
+//             <TouchableOpacity onPress={() => navigation?.popToTop()}>
 //             <Ionicons name="arrow-back" size={24} color="white" />
 //             </TouchableOpacity>
 //             <View style={{ marginLeft: 16 }}>
@@ -451,14 +450,6 @@
 //             </View>
 //           </View>
 //           <View style={styles.divider} />
-//           {/* <TouchableOpacity style={styles.row}>
-//             <MaterialCommunityIcons name="shield-check" size={20} color={COLORS.primary} style={{ marginRight: 12 }} />
-//             <View style={{ flex: 1 }}>
-//               <Text style={styles.smallText}>Your Blinkit store is 1.6 km away.</Text>
-//               <Text style={[styles.smallText, { color: COLORS.gray }]}>Learn about delivery partner safety</Text>
-//             </View>
-//             <MaterialIcons name="chevron-right" size={20} color="#ccc" />
-//           </TouchableOpacity> */}
 //         </View>
 
 //         {/* Instructions */}
@@ -484,7 +475,7 @@
 //                 />
 //             </TouchableOpacity>
 //           </TouchableOpacity>
-           
+            
 //           {/* Collapsible Content */}
 //           {isInstructionsOpen && (
 //             <View style={styles.instructionContainer}>
@@ -511,7 +502,7 @@
 //           <View style={{ padding: 16, paddingBottom: 0 }}>
 //             <Text style={styles.cardTitle}>Your delivery details</Text>
 //           </View>
-           
+            
 //           <View 
 //             style={[styles.row, { alignItems: 'flex-start' }]} 
 //           >
@@ -540,7 +531,7 @@
 //               <Text style={styles.okText}>OK</Text>
 //             </TouchableOpacity>
 //           </View>
-           
+            
 //           <TouchableOpacity onPress={openPhoneDialer}>
 //             <Text style={styles.phoneText}>Ravindra, 70506XXXXX</Text>
 //           </TouchableOpacity>
@@ -568,7 +559,7 @@
 //               <Ionicons name="copy-outline" size={14} color="#666" />
 //             </Text>
 //           </View>
-           
+            
 //           <View style={{ marginBottom: 16 }}>
 //             <ScrollView 
 //                 horizontal 
@@ -598,14 +589,14 @@
 //         <View style={styles.card}>
 //           <View style={{ padding: 16 }}>
 //             <Text style={styles.cardTitle}>Rate and review</Text>
-             
+              
 //             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16 }}>
 //                 {/* User Avatar */}
 //                 <Image 
 //                     source={{ uri: 'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg' }} 
 //                     style={styles.avatar} 
 //                 />
-                 
+                  
 //                 {/* Stars */}
 //                 <View style={styles.starContainer}>
 //                     {[1, 2, 3, 4, 5].map((star) => (
@@ -658,9 +649,9 @@
 //                             )}
 //                         </TouchableOpacity>
 //                     ))}
-//                      <TouchableOpacity style={styles.tipChip}>
-//                          <Text style={styles.tipText}>Custom</Text>
-//                      </TouchableOpacity>
+//                       <TouchableOpacity style={styles.tipChip}>
+//                           <Text style={styles.tipText}>Custom</Text>
+//                       </TouchableOpacity>
 //                 </ScrollView>
 //             </View>
 //         </View>
@@ -782,13 +773,13 @@
 //   dynamicCardContainer: {
 //     backgroundColor: COLORS.white,
 //     marginHorizontal: CARD_MARGIN,
-//     borderRadius: 15,
+//     borderRadius: 12,
 //     marginBottom: 12,
-//     // elevation: 4,
-//     // shadowColor: '#000',
-//     // shadowOpacity: 0.1,
-//     // shadowRadius: 4,
-//     // shadowOffset: { width: 0, height: 2 },
+//     elevation: 4,
+//     shadowColor: '#000',
+//     shadowOpacity: 0.1,
+//     shadowRadius: 4,
+//     shadowOffset: { width: 0, height: 2 },
 //   },
 //   staticTextLayer: {
 //     position: 'absolute',
@@ -810,7 +801,7 @@
 //     position: 'absolute',
 //     top: 0,
 //     left: 0,
-//     borderRadius: 12,
+//     // borderRadius: 12,
 //     overflow: 'hidden',
 //     borderWidth: 1,
 //     borderColor: '#eee',
@@ -1111,19 +1102,20 @@ const { width, height } = Dimensions.get('window');
 const CARD_MARGIN = 12;
 const CARD_WIDTH = width - CARD_MARGIN * 2;
 
+// --- UPDATED THEME COLORS ---
 const COLORS = {
-  primary: '#0C831F', // Blinkit Green
-  secondary: '#F8CB46', // Blinkit Yellow
-  blue: '#4285F4', // User Location Color
-  bg: '#F4F6FB',
+  primary: '#0049AD',      // Deep Purple/Blue (Main Brand)
+  secondary: '#fbc02d',    // Mapped to 'yelow' for Stars/Ratings
+  blue: '#0049AD',         // User Location (Matched to Primary)
+  bg: '#fafafa',           // Default background
   white: '#ffffff',
   black: '#000000',
-  text: '#1C1C1C',
-  gray: '#999',
-  lightRed: '#FFF5F5',
-  redText: '#D32F2F',
-  lightYellow: '#FFF3C7',
-  orange: '#D97706',
+  text: '#222222',         // Text Primary
+  gray: '#888888',         // Muted
+  lightRed: '#FEE2E2',     // SOFT_RED (Alert Backgrounds)
+  redText: '#b91c1c',      // RED (Alert Text)
+  lightYellow: '#DBEAFE',  // Mapped to SOFT_BLUE (To replace old yellow banners with blue theme)
+  orange: '#0049AD',       // Mapped to Primary (To replace orange buttons with brand blue)
 };
 
 // --- COORDINATES FOR TRACKING (UNCHANGED) ---
@@ -1213,6 +1205,9 @@ const BlinkitFinalClone = ({ navigation }: any) => {
 
   // --- ANIMATION CONFIGURATION ---
   
+  // FIX: Increased scroll target to 230 to hide banner completely under sticky header
+  const EXPAND_SCROLL_Y = 230; 
+
   const textOpacity = scrollY.interpolate({
     inputRange: [0, 60],
     outputRange: [1, 0],
@@ -1220,38 +1215,38 @@ const BlinkitFinalClone = ({ navigation }: any) => {
   });
 
   const mapWidth = scrollY.interpolate({
-    inputRange: [0, 180], 
-    outputRange: [110, CARD_WIDTH],
+    inputRange: [0, EXPAND_SCROLL_Y], // Updated range
+    outputRange: [110, width], 
     extrapolate: 'clamp',
   });
 
-  // UPDATED HERE: Changed outputRange max from 300 to 320 to match cardHeight
   const mapHeight = scrollY.interpolate({
-    inputRange: [0, 180], 
+    inputRange: [0, EXPAND_SCROLL_Y], // Updated range
     outputRange: [110, 320], 
     extrapolate: 'clamp',
   });
 
   const cardHeight = scrollY.interpolate({
-    inputRange: [0, 180], 
+    inputRange: [0, EXPAND_SCROLL_Y], // Updated range
     outputRange: [140, 320],
     extrapolate: 'clamp',
   });
 
   const initialMapX = CARD_WIDTH - 110 - 16;
+  
   const mapTranslateX = scrollY.interpolate({
-    inputRange: [0, 180], 
-    outputRange: [initialMapX, 0],
+    inputRange: [0, EXPAND_SCROLL_Y], // Updated range
+    outputRange: [initialMapX, -CARD_MARGIN], 
     extrapolate: 'clamp',
   });
 
   const mapTranslateY = scrollY.interpolate({
-    inputRange: [0, 180], 
+    inputRange: [0, EXPAND_SCROLL_Y], // Updated range
     outputRange: [16, 0],
     extrapolate: 'clamp',
   });
 
-  // Sticky Header Fades in
+  // Sticky Header Fades in (Keep this starting earlier for smooth effect)
   const stickyHeaderOpacity = scrollY.interpolate({
     inputRange: [120, 180], 
     outputRange: [0, 1],
@@ -1265,7 +1260,7 @@ const BlinkitFinalClone = ({ navigation }: any) => {
   });
 
   const collapseIconOpacity = scrollY.interpolate({
-    inputRange: [120, 180],
+    inputRange: [150, EXPAND_SCROLL_Y], // Updated range
     outputRange: [0, 1],
     extrapolate: 'clamp',
   });
@@ -1288,7 +1283,8 @@ const BlinkitFinalClone = ({ navigation }: any) => {
   };
 
   const handleExpandMap = () => {
-    (mainScrollViewRef.current as any)?.scrollTo({ y: 180, animated: true });
+    // FIX: Scroll to 230 instead of 180
+    (mainScrollViewRef.current as any)?.scrollTo({ y: EXPAND_SCROLL_Y, animated: true });
   };
 
   const handleCollapseMap = () => {
@@ -1308,7 +1304,7 @@ const BlinkitFinalClone = ({ navigation }: any) => {
         style={[styles.stickyHeader, { opacity: stickyHeaderOpacity }]}
       >
         <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-            <TouchableOpacity onPress={() => navigation?.goBack()}>
+            <TouchableOpacity onPress={() => navigation?.popToTop()}>
             <Ionicons name="arrow-back" size={24} color="white" />
             </TouchableOpacity>
             <View style={{ marginLeft: 16 }}>
@@ -1510,14 +1506,6 @@ const BlinkitFinalClone = ({ navigation }: any) => {
             </View>
           </View>
           <View style={styles.divider} />
-          <TouchableOpacity style={styles.row}>
-            <MaterialCommunityIcons name="shield-check" size={20} color={COLORS.primary} style={{ marginRight: 12 }} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.smallText}>Your Blinkit store is 1.6 km away.</Text>
-              <Text style={[styles.smallText, { color: COLORS.gray }]}>Learn about delivery partner safety</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={20} color="#ccc" />
-          </TouchableOpacity>
         </View>
 
         {/* Instructions */}
@@ -1543,7 +1531,7 @@ const BlinkitFinalClone = ({ navigation }: any) => {
                 />
             </TouchableOpacity>
           </TouchableOpacity>
-           
+            
           {/* Collapsible Content */}
           {isInstructionsOpen && (
             <View style={styles.instructionContainer}>
@@ -1570,7 +1558,7 @@ const BlinkitFinalClone = ({ navigation }: any) => {
           <View style={{ padding: 16, paddingBottom: 0 }}>
             <Text style={styles.cardTitle}>Your delivery details</Text>
           </View>
-           
+            
           <View 
             style={[styles.row, { alignItems: 'flex-start' }]} 
           >
@@ -1599,7 +1587,7 @@ const BlinkitFinalClone = ({ navigation }: any) => {
               <Text style={styles.okText}>OK</Text>
             </TouchableOpacity>
           </View>
-           
+            
           <TouchableOpacity onPress={openPhoneDialer}>
             <Text style={styles.phoneText}>Ravindra, 70506XXXXX</Text>
           </TouchableOpacity>
@@ -1627,7 +1615,7 @@ const BlinkitFinalClone = ({ navigation }: any) => {
               <Ionicons name="copy-outline" size={14} color="#666" />
             </Text>
           </View>
-           
+            
           <View style={{ marginBottom: 16 }}>
             <ScrollView 
                 horizontal 
@@ -1657,14 +1645,14 @@ const BlinkitFinalClone = ({ navigation }: any) => {
         <View style={styles.card}>
           <View style={{ padding: 16 }}>
             <Text style={styles.cardTitle}>Rate and review</Text>
-             
+              
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16 }}>
                 {/* User Avatar */}
                 <Image 
                     source={{ uri: 'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg' }} 
                     style={styles.avatar} 
                 />
-                 
+                  
                 {/* Stars */}
                 <View style={styles.starContainer}>
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -1717,9 +1705,9 @@ const BlinkitFinalClone = ({ navigation }: any) => {
                             )}
                         </TouchableOpacity>
                     ))}
-                     <TouchableOpacity style={styles.tipChip}>
-                         <Text style={styles.tipText}>Custom</Text>
-                     </TouchableOpacity>
+                      <TouchableOpacity style={styles.tipChip}>
+                          <Text style={styles.tipText}>Custom</Text>
+                      </TouchableOpacity>
                 </ScrollView>
             </View>
         </View>

@@ -1,4 +1,5 @@
 
+
 // import React, { useEffect, useRef } from "react";
 // import {
 //   View,
@@ -8,7 +9,7 @@
 //   Easing,
 //   Dimensions,
 //   TouchableOpacity,
-//   ImageBackground, // 1. Imported ImageBackground
+//   ImageBackground,
 // } from "react-native";
 // import Ionicons from "react-native-vector-icons/Ionicons";
 // import { useNavigation } from '@react-navigation/native';
@@ -57,13 +58,11 @@
 //   }, []);
 
 //   return (
-//     // 2. Used ImageBackground as the main container
 //     <ImageBackground 
 //       source={require('../../assets/background.jpeg')} // Update this path to your image
 //       style={styles.container}
 //       resizeMode="cover"
 //     >
-//       {/* 3. Added a dark overlay so white text is readable on the pattern */}
 //       <View style={styles.darkOverlay} />
 
 //       {/* Lottie Animation */}
@@ -80,7 +79,7 @@
 //         style={{
 //           opacity: textOpacity,
 //           transform: [{ translateY: textTranslate }],
-//           marginTop: 40,
+//           marginTop: 10, // Changed from 40 to 10 to decrease space
 //         }}
 //       >
 //         <View style={styles.row}>
@@ -117,15 +116,13 @@
 // const styles = StyleSheet.create({
 //   container: {
 //     flex: 1,
-//     // backgroundColor: "#1a1a1a", // Removed solid background color
 //     justifyContent: "center",
 //     alignItems: "center",
 //     paddingHorizontal: 20,
 //   },
-//   // 4. Style for the dark overlay
 //   darkOverlay: {
 //     ...StyleSheet.absoluteFillObject,
-//     backgroundColor: 'rgba(26, 26, 26, 0.9)', // Dark overlay (90% opacity) to make text pop
+//     backgroundColor: 'rgba(26, 26, 26, 0.9)',
 //   },
 //   successImage: {
 //       width: 300,
@@ -135,7 +132,7 @@
 //     flexDirection: "row",
 //     alignItems: "center",
 //     justifyContent: "center",
-//     marginBottom: 8,
+//     marginBottom: 10,
 //   },
 //   locationTitle: {
 //     fontSize: 19,
@@ -184,7 +181,6 @@ import {
   Text,
   StyleSheet,
   Animated,
-  Easing,
   Dimensions,
   TouchableOpacity,
   ImageBackground,
@@ -257,7 +253,7 @@ const OrderPlacedScreen: React.FC = () => {
         style={{
           opacity: textOpacity,
           transform: [{ translateY: textTranslate }],
-          marginTop: 10, // Changed from 40 to 10 to decrease space
+          marginTop: 10,
         }}
       >
         <View style={styles.row}>
@@ -276,7 +272,14 @@ const OrderPlacedScreen: React.FC = () => {
             alignItems: 'center',
         }}
       >
-        <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('OrderTrackingScreen')}>
+        {/* --- FIXED: Using replace instead of reset --- */}
+        {/* Since OrderTrackingScreen handles the Back button logic, replace prevents the crash */}
+        <TouchableOpacity 
+            style={styles.primaryButton} 
+            onPress={() => {
+                navigation.replace('OrderTrackingScreen');
+            }}
+        >
             <Text style={styles.primaryButtonText}>Track My Order</Text>
         </TouchableOpacity>
 

@@ -1,4 +1,5 @@
 
+
 // import { useFocusEffect, useNavigation } from '@react-navigation/native';
 // import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 // import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -19,7 +20,8 @@
 // import { SafeAreaView } from 'react-native-safe-area-context';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 // import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-// import Video from 'react-native-video';
+// // Replaced Video import with LottieView
+// import LottieView from 'lottie-react-native';
 
 // // --- CUSTOM IMPORTS ---
 // import FoodList from '../components/FoodCard';
@@ -43,10 +45,10 @@
 //   DiningScreen: undefined;
 //   VegMode: undefined;
 //   SearchScreen: undefined;
+//   MealsUnderScreen: undefined;
 // };
 
 // // --- DATA ---
-// // 1. Defined Static Categories (Special & All) with structure matching API
 // const staticCategories = [
 //   {
 //     id: 'special_1',
@@ -76,17 +78,17 @@
 // const HomeScreen: React.FC = () => {
 //   const [vegMode, setVegMode] = useState(false);
 //   const [selectedCategory, setSelectedCategory] = useState('All');
-//   // const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
 
 //   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-//   // --- ADDED: Reset category to 'All' when screen focuses ---
+//   // --- SCROLL Y REFERENCE ---
+//   const scrollY = useRef(new Animated.Value(0)).current;
+
 //   useFocusEffect(
 //     useCallback(() => {
 //       setSelectedCategory('All');
 //     }, [])
 //   );
-//   // ---------------------------------------------------------
 
 //   const cartCount = 2;
 //   const restaurant = {
@@ -99,7 +101,6 @@
 
 //   const slideAnim = useRef(new Animated.Value(0)).current;
 
-//   // Function to handle veg switch toggle
 //   const handleVegToggle = (val: boolean) => {
 //     setVegMode(val);
 //   };
@@ -147,28 +148,59 @@
 
 //   // --- API INTEGRATION ---
 //   const { data: restaurantData, isLoading } = useGetAllVendors({ limit: 20 });
-
-//   // 2. Fetch Category Data
 //   const { data: categoryData, isLoading: categoryLoading } = useGetAllCategory({});
 
-//   // 3. Merge Static Categories with API Categories
 //   const displayCategories = [
 //     ...staticCategories,
 //     ...(categoryData || [])
 //   ];
 
-//   // Flatten the pages into a single array
 //   const allVendors = restaurantData?.pages.flatMap(page => page.vendors).slice(0, 20) || [];
-
-//   // Logic to split data into two rows
 //   const midPoint = Math.ceil(allVendors.length / 2);
 //   const firstRowVendors = allVendors.slice(0, midPoint);
 //   const secondRowVendors = allVendors.slice(midPoint);
 
+//   // --- STICKY HEADER ANIMATION LOGIC (Search Bar) ---
+//   const stickyHeaderOpacity = scrollY.interpolate({
+//     inputRange: [HEADER_HEIGHT, HEADER_HEIGHT + 20],
+//     outputRange: [0, 1],
+//     extrapolate: 'clamp',
+//   });
+
+//   const stickyHeaderTranslateY = scrollY.interpolate({
+//     inputRange: [HEADER_HEIGHT, HEADER_HEIGHT + 20],
+//     // FIX 1: Changed -20 to -150. Moves it WAY off screen so it doesn't block Header buttons
+//     outputRange: [-150, 0], 
+//     extrapolate: 'clamp',
+//   });
+
+//   // --- STICKY CATEGORY ANIMATION LOGIC ---
+//   const CATEGORY_TRIGGER = HERO_HEIGHT - 70;
+
+//   const stickyCategoryOpacity = scrollY.interpolate({
+//     inputRange: [CATEGORY_TRIGGER, CATEGORY_TRIGGER + 20],
+//     outputRange: [0, 1],
+//     extrapolate: 'clamp',
+//   });
+
+//   const stickyCategoryTranslateY = scrollY.interpolate({
+//     inputRange: [CATEGORY_TRIGGER, CATEGORY_TRIGGER + 20],
+//     // FIX 2: Changed -10 to -200. Moves it WAY off screen so it doesn't block Veg Toggle
+//     outputRange: [-200, 0], 
+//     extrapolate: 'clamp',
+//   });
+
 //   return (
 //     <SafeAreaView style={styles.container}>
 
-//       <ScrollView showsVerticalScrollIndicator={false}>
+//       <ScrollView
+//         showsVerticalScrollIndicator={false}
+//         onScroll={Animated.event(
+//           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+//           { useNativeDriver: false }
+//         )}
+//         scrollEventThrottle={16}
+//       >
 
 //         {/* Hero Section */}
 //         <View style={styles.heroContainer}>
@@ -236,7 +268,8 @@
 //               </TouchableOpacity>
 //             </View>
 //           </View>
-//           {/* Search Bar */}
+          
+//           {/* ORIGINAL SEARCH BAR */}
 //           <View style={styles.searchWrapper}>
 //             <View style={styles.searchRow}>
 //               <View style={styles.searchBar}>
@@ -245,7 +278,7 @@
 //                   placeholder='Search "momos"'
 //                   style={styles.searchInput}
 //                   placeholderTextColor="#888"
-//                   onPress={() => navigation.navigate('SearchScreen')}
+//                   onPressIn={() => navigation.navigate('SearchScreen')} // changed onPress to onPressIn for better response
 //                 />
 //                 <View style={styles.verticalLine} />
 //                 <Ionicons
@@ -273,7 +306,7 @@
 //           </View>
 //         </View>
 
-//         {/* Categories Section - UPDATED */}
+//         {/* Categories Section (Original) */}
 //         <View style={styles.categoriesContainer}>
 //           {categoryLoading ? (
 //             <ActivityIndicator size="small" color={COLORS.primary} style={{ marginLeft: 20 }} />
@@ -287,8 +320,6 @@
 //                   key={c.id || index}
 //                   style={styles.categoryItem}
 //                   onPress={() => {
-//                     // Prevent navigation for the static "Special" banner if needed
-//                     // or define logic as per requirement
 //                     if (!c.isSpecial) {
 //                       setSelectedCategory(c.name);
 //                       navigation.navigate('FoodList', { category: c.name });
@@ -299,7 +330,6 @@
 //                     <TouchableOpacity onPress={() => navigation.navigate('MealsUnderScreen')}>
 //                     <View style={styles.specialCategory}>
 //                       <Image
-//                         // Use c.image.url based on backend schema
 //                         source={{ uri: c.image?.url }}
 //                         style={styles.specialCategoryImg}
 //                       />
@@ -315,7 +345,6 @@
 //                   ) : (
 //                     <>
 //                       <Image
-//                         // Use c.image.url based on backend schema
 //                         source={{ uri: c.image?.url }}
 //                         style={styles.categoryImg}
 //                       />
@@ -326,7 +355,6 @@
 //                           styles.categoryTextSelected,
 //                         ]}
 //                       >
-//                         {/* Capitalize first letter of name just in case backend sends lowercase */}
 //                         {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
 //                       </Text>
 //                       {selectedCategory === c.name && (
@@ -420,6 +448,130 @@
 
 //       </ScrollView>
 
+//       {/* --- STICKY SEARCH BAR (Overlay) --- */}
+//       <Animated.View 
+//         style={[
+//           styles.searchWrapper, 
+//           { 
+//             position: 'absolute', 
+//             top: 0, 
+//             left: 0, 
+//             right: 0,
+//             zIndex: 100, 
+//             backgroundColor: '#fff', 
+//             borderBottomWidth: 1,
+//             borderBottomColor: '#f0f0f0',
+//             paddingTop: 10, 
+//             opacity: stickyHeaderOpacity,
+//             transform: [{ translateY: stickyHeaderTranslateY }],
+//             elevation: 5
+//           }
+//         ]}
+//       >
+//         <View style={styles.searchRow}>
+//           <View style={styles.searchBar}>
+//             <Ionicons name="search" size={20} color={COLORS.primary} />
+//             <TextInput
+//               placeholder='Search "momos"'
+//               style={styles.searchInput}
+//               placeholderTextColor="#888"
+//               onPressIn={() => navigation.navigate('SearchScreen')}
+//             />
+//             <View style={styles.verticalLine} />
+//             <Ionicons
+//               name="mic-outline"
+//               size={22}
+//               color={COLORS.primary}
+//               style={{ marginLeft: 8 }}
+//             />
+//           </View>
+
+//           <View style={styles.vegModeContainer}>
+//             <Switch
+//               value={vegMode}
+//               onValueChange={handleVegToggle}
+//               trackColor={{ false: '#E0E0E0', true: '#007E33' }}
+//               thumbColor="#fff"
+//               style={styles.vegSwitch}
+//             />
+//             <View style={styles.vegTextColumn}>
+//               <Text style={[styles.vegModeLabel, vegMode && { color: '#007E33' }]}>VEG</Text>
+//               <Text style={[styles.vegModeSubLabel, vegMode && { color: '#007E33' }]}>MODE</Text>
+//             </View>
+//           </View>
+//         </View>
+//       </Animated.View>
+
+//       {/* --- NEW: STICKY CATEGORIES BAR (Appears under Search Bar) --- */}
+//       <Animated.View
+//         style={{
+//             position: 'absolute',
+//             top: 68, // Roughly the height of the sticky search bar
+//             left: 0,
+//             right: 0,
+//             zIndex: 99, // Below search bar (100) but above content
+//             backgroundColor: '#fff',
+//             opacity: stickyCategoryOpacity,
+//             transform: [{ translateY: stickyCategoryTranslateY }],
+//             elevation: 4,
+//             paddingBottom: 10,
+//             borderBottomWidth: 1,
+//             borderBottomColor: '#f0f0f0'
+//         }}
+//       >
+//         <View style={{ paddingLeft: 12, paddingTop: 10 }}>
+//           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+//               {displayCategories.map((c: any, index: number) => (
+//                 <TouchableOpacity
+//                   key={c.id || index}
+//                   style={styles.categoryItem}
+//                   onPress={() => {
+//                     if (!c.isSpecial) {
+//                       setSelectedCategory(c.name);
+//                       navigation.navigate('FoodList', { category: c.name });
+//                     }
+//                   }}
+//                 >
+//                   {c.isSpecial ? (
+//                       <TouchableOpacity onPress={() => navigation.navigate('MealsUnderScreen')}>
+//                     <View style={styles.specialCategory}>
+//                       <Image
+//                         source={{ uri: c.image?.url }}
+//                         style={styles.specialCategoryImg}
+//                       />
+//                       <View style={styles.specialCategoryOverlay}>
+//                         <Text style={styles.specialCategoryText}>MEALS UNDER</Text>
+//                         <Text style={styles.specialCategoryPrice}>₹250</Text>
+//                       </View>
+//                     </View>
+//                     </TouchableOpacity>
+//                   ) : (
+//                     <>
+//                       <Image
+//                         source={{ uri: c.image?.url }}
+//                         style={styles.categoryImg}
+//                       />
+//                       <Text
+//                         style={[
+//                           styles.categoryText,
+//                           selectedCategory === c.name &&
+//                           styles.categoryTextSelected,
+//                         ]}
+//                       >
+//                         {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
+//                       </Text>
+//                       {selectedCategory === c.name && (
+//                         <View style={styles.categoryUnderline} />
+//                       )}
+//                     </>
+//                   )}
+//                 </TouchableOpacity>
+//               ))}
+//             </ScrollView>
+//         </View>
+//       </Animated.View>
+
+
 //       {/* Floating Cart */}
 //       <View style={styles.viewCartContainer}>
 //         <TouchableOpacity
@@ -456,7 +608,7 @@
 //           <Text style={styles.navTextActive}>Delivery</Text>
 //         </TouchableOpacity>
 
-//         {/* Floating Ready Bites Button */}
+//         {/* Floating Lottie Button (Replaces Video) */}
 //         <TouchableOpacity
 //           onPress={() => navigation.navigate('DiningScreen')}
 //           style={{
@@ -465,6 +617,7 @@
 //             left: "50%",
 //             transform: [{ translateX: -35 }],
 //             zIndex: 99,
+//             alignItems: 'center'
 //           }}
 //         >
 //           <View
@@ -483,15 +636,11 @@
 //               alignItems: "center",
 //             }}
 //           >
-//             <Video
-//               source={{
-//                 uri: "https://media.istockphoto.com/id/451665541/video/50-60-70-80-90-off.mp4?s=mp4-640x640-is&k=20&c=k3HxjEbfbKjyzGwBVk5GWt1PUx_2gEyp5ANh0AULTQE=",
-//               }}
-//               style={{ width: "100%", height: "100%", }}
-//               resizeMode="cover"
-//               repeat
-//               muted
-//               paused={false}
+//             <LottieView
+//               source={require('../assets/PaymentFailed.json')}
+//               style={{ width: 60, height: 60 }}
+//               autoPlay
+//               loop
 //             />
 //           </View>
 //           <Text style={styles.navTextActive}>Under 50%</Text>
@@ -623,7 +772,7 @@
 //     paddingHorizontal: 15,
 //     height: 48, // Taller for better touch target
 //     borderWidth: 0.5,
-//     borderColor: '#e0e0e0',
+//     borderColor: COLORS.SOFT_BLUE,
 //     marginRight: 10,
 //     // Enhanced Shadow
 //     elevation: 4,
@@ -851,7 +1000,7 @@
 //     shadowOpacity: 0.2,
 //     shadowRadius: 4,
 //     elevation: 5,
-//     marginBottom: 15,
+//     marginBottom: 20,
 //   },
 //   cartLeft: { flexDirection: 'row', alignItems: 'center' },
 //   cartImg: { width: 40, height: 40, borderRadius: 8, marginRight: 10 },
@@ -876,7 +1025,7 @@
 //     borderTopWidth: 1,
 //     borderTopColor: '#eee',
 //     elevation: 20,
-//     height: 60,
+//     height: 70,
 //     position: "relative",
 //   },
 
@@ -891,7 +1040,6 @@
 // });
 
 // export default HomeScreen;
-
 
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -1350,7 +1498,7 @@ const HomeScreen: React.FC = () => {
             position: 'absolute', 
             top: 0, 
             left: 0, 
-            right: 0,
+            right: 0, 
             zIndex: 100, 
             backgroundColor: '#fff', 
             borderBottomWidth: 1,
@@ -1880,8 +2028,9 @@ const styles = StyleSheet.create({
   viewCartContainer: {
     position: 'absolute',
     bottom: 60,
-    left: 10,
-    right: 10,
+    // CHANGED: Removed left/right, added width and alignSelf
+    width: '85%', 
+    alignSelf: 'center',
     backgroundColor: '#fff',
     borderRadius: 12,
     flexDirection: 'row',
@@ -1894,7 +2043,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
-    marginBottom: 15,
+    marginBottom: 20,
   },
   cartLeft: { flexDirection: 'row', alignItems: 'center' },
   cartImg: { width: 40, height: 40, borderRadius: 8, marginRight: 10 },
@@ -1919,7 +2068,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#eee',
     elevation: 20,
-    height: 60,
+    height: 70,
     position: "relative",
   },
 
