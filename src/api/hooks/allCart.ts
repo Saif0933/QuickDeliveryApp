@@ -66,7 +66,7 @@
 // };
 
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import api from "../api"; // Verify this path matches your project
 
 /* ===================== TYPES ===================== */
@@ -122,13 +122,13 @@ export interface CartResponse {
   };
 }
 
-export interface AddToCartPayload {
-  vendorProductId: number;
-  productVariantId?: number;
-  vendorId: number;
-  quantity: number;
-  notes?: string;
-}
+// export interface AddToCartPayload {
+//   vendorProductId: number;
+//   productVariantId?: number;
+//   vendorId: number;
+//   quantity: number;
+//   notes?: string;
+// }
 
 /* ===================== API FUNCTIONS ===================== */
 
@@ -138,17 +138,17 @@ export const getUserCart = async () => {
   return res.data.data;
 };
 
-// 2. ADD TO CART
-export const addToCart = async (payload: AddToCartPayload) => {
-  const res = await api.post("/user/cart/add", payload);
-  return res.data;
-};
+// // 2. ADD TO CART
+// export const addToCart = async (payload: AddToCartPayload) => {
+//   const res = await api.post("/user/cart/add", payload);
+//   return res.data;
+// };
 
-// 3. REMOVE FROM CART
-export const removeCartItem = async (cartItemId: number) => {
-  const res = await api.delete(`/user/cart/remove/${cartItemId}`);
-  return res.data;
-};
+// // 3. REMOVE FROM CART
+// export const removeCartItem = async (cartItemId: number) => {
+//   const res = await api.delete(`/user/cart/remove/${cartItemId}`);
+//   return res.data;
+// };
 
 /* ===================== HOOKS ===================== */
 
@@ -159,25 +159,25 @@ export const useGetUserCart = () => {
   });
 };
 
-// This was missing or named incorrectly causing the error
-export const useAddToCart = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: addToCart,
-    onSuccess: () => {
-      // 🔄 Refresh cart data automatically after add
-      queryClient.invalidateQueries({ queryKey: ["user-cart"] });
-    },
-  });
-};
+// // This was missing or named incorrectly causing the error
+// export const useAddToCart = () => {
+//   const queryClient = useQueryClient();
+//   return useMutation({
+//     mutationFn: addToCart,
+//     onSuccess: () => {
+//       // 🔄 Refresh cart data automatically after add
+//       queryClient.invalidateQueries({ queryKey: ["user-cart"] });
+//     },
+//   });
+// };
 
-export const useRemoveCartItem = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: removeCartItem,
-    onSuccess: () => {
-      // 🔄 Refresh cart data automatically after remove
-      queryClient.invalidateQueries({ queryKey: ["user-cart"] });
-    },
-  });
-};
+// export const useRemoveCartItem = () => {
+//   const queryClient = useQueryClient();
+//   return useMutation({
+//     mutationFn: removeCartItem,
+//     onSuccess: () => {
+//       // 🔄 Refresh cart data automatically after remove
+//       queryClient.invalidateQueries({ queryKey: ["user-cart"] });
+//     },
+//   });
+// };

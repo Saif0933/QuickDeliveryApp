@@ -231,7 +231,6 @@
 
 import React from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -245,6 +244,7 @@ import FeedingIndiaSection from '../components/cart/FeedingIndiaSection';
 import CancellationPolicy from '../components/cart/CancellationPolicy';
 // import ZomatoMoney from '../components/cart/ZomatoMoney';
 import BottomSection from '../components/cart/BottomSection';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CartScreen: React.FC = () => {
   return (

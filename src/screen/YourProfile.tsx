@@ -1,21 +1,24 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  ScrollView,
   StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { useGetUserProfile, useUpdateUser } from "../api/hooks/user";
 import { COLORS } from "../theme/color";
+import { ErrorMessage, SuccessMessage } from "../utils/utils";
 
 
 type Props = {
@@ -23,24 +26,46 @@ type Props = {
 };
 
 const YourProfile: React.FC<Props> = ({ navigation }) => {
-  const [name, setName] = useState("Saif");
-  const [mobile, setMobile] = useState("9334804356");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [dob, setDob] = useState(new Date());
-  const [anniversary, setAnniversary] = useState(new Date());
-  const [gender, setGender] = useState("");
+  const [mobile, setMobile] = useState(""); // Read-only mobile
   const [isEditing, setIsEditing] = useState(false);
 
-  const [showDobPicker, setShowDobPicker] = useState(false);
-  const [showAnniversaryPicker, setShowAnniversaryPicker] = useState(false);
+  // Fetch user profile data
+  const { data: userProfile, isLoading: isLoadingProfile } = useGetUserProfile();
+  
+  // Use the update user mutation
+  const { mutate: updateUser, isPending } = useUpdateUser();
+
+  // Pre-populate form with user data when it loads
+  useEffect(() => {
+    if (userProfile) {
+      setName(userProfile.name || "");
+      setEmail(userProfile.email || "");
+      setMobile(userProfile.mobile || ""); // Set mobile from API
+    }
+  }, [userProfile]);
 
   const handleUpdateProfile = () => {
-    if (!email || !gender) {
-      Alert.alert("Incomplete", "Please fill in email and gender.");
+    if (!name.trim()) {
+      Alert.alert("Error", "Please enter your name.");
       return;
     }
-    Alert.alert("Success", "Profile updated successfully!");
-    setIsEditing(false);
+
+    const payload: { name?: string; email?: string } = {};
+    
+    if (name.trim()) payload.name = name.trim();
+    if (email.trim()) payload.email = email.trim();
+
+    updateUser(payload, {
+      onSuccess: () => {
+        SuccessMessage("Profile updated successfully!");
+        setIsEditing(false);
+      },
+      onError: (error) => {
+        ErrorMessage(error);
+      }
+    });
   };
 
   const handleBack = () => {
@@ -53,8 +78,6 @@ const YourProfile: React.FC<Props> = ({ navigation }) => {
       navigation?.goBack();
     }
   };
-
-  const formatDate = (d: Date) => d.toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
@@ -71,7 +94,7 @@ const YourProfile: React.FC<Props> = ({ navigation }) => {
           onPress={() => setIsEditing(!isEditing)}
         >
           <Text style={[styles.editText, isEditing && { color: COLORS.primary }]}>
-            {isEditing ? "Done" : "Edit"}
+            {isEditing ? "Cancel" : "Edit"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -80,6 +103,12 @@ const YourProfile: React.FC<Props> = ({ navigation }) => {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
+        {isLoadingProfile ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={{ marginTop: 12, color: COLORS.muted }}>Loading profile...</Text>
+          </View>
+        ) : (
         <ScrollView 
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
@@ -88,7 +117,7 @@ const YourProfile: React.FC<Props> = ({ navigation }) => {
           {/* Avatar - Simple & Clean */}
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-               <Text style={styles.avatarText}>{name.charAt(0)}</Text>
+               <Text style={styles.avatarText}>{name.charAt(0).toUpperCase()}</Text>
                {isEditing && (
                  <View style={styles.editBadge}>
                    <Ionicons name="pencil" size={12} color={COLORS.white} />
@@ -109,6 +138,8 @@ const YourProfile: React.FC<Props> = ({ navigation }) => {
                     value={name}
                     onChangeText={setName}
                     editable={isEditing}
+                    placeholder="Enter your name"
+                    placeholderTextColor={COLORS.muted}
                 />
             </View>
 
@@ -122,83 +153,37 @@ const YourProfile: React.FC<Props> = ({ navigation }) => {
                     placeholder="Enter email"
                     placeholderTextColor={COLORS.muted}
                     keyboardType="email-address"
+                    autoCapitalize="none"
                 />
             </View>
 
+            {/* Mobile Number - Read Only */}
             <View style={styles.inputContainer}>
-                <Text style={styles.label}>Mobile Number</Text>
+                <Text style={styles.label}>Mobile Number (Registered)</Text>
                 <TextInput
-                    style={[styles.input, { color: COLORS.muted, backgroundColor: '#f2f2f2' }]}
+                    style={[styles.input, styles.inputDisabled]}
                     value={mobile}
                     editable={false}
+                    placeholder="Mobile number"
+                    placeholderTextColor={COLORS.muted}
                 />
-            </View>
-
-            <View style={styles.row}>
-                <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
-                    <Text style={styles.label}>Date of Birth</Text>
-                    <TouchableOpacity 
-                        style={[styles.input, isEditing && styles.inputActive, styles.dateBtn]}
-                        onPress={() => isEditing && setShowDobPicker(true)}
-                        activeOpacity={isEditing ? 0.7 : 1}
-                    >
-                        <Text style={styles.inputText}>{formatDate(dob)}</Text>
-                        <Ionicons name="calendar-outline" size={18} color={COLORS.muted} />
-                    </TouchableOpacity>
-                    {showDobPicker && (
-                        <DateTimePicker value={dob} mode="date" onChange={(e, d) => { setShowDobPicker(false); d && setDob(d); }} />
-                    )}
-                </View>
-
-                <View style={[styles.inputContainer, { flex: 1 }]}>
-                    <Text style={styles.label}>Anniversary</Text>
-                    <TouchableOpacity 
-                        style={[styles.input, isEditing && styles.inputActive, styles.dateBtn]}
-                        onPress={() => isEditing && setShowAnniversaryPicker(true)}
-                        activeOpacity={isEditing ? 0.7 : 1}
-                    >
-                        <Text style={styles.inputText}>{formatDate(anniversary)}</Text>
-                        <Ionicons name="gift-outline" size={18} color={COLORS.muted} />
-                    </TouchableOpacity>
-                    {showAnniversaryPicker && (
-                        <DateTimePicker value={anniversary} mode="date" onChange={(e, d) => { setShowAnniversaryPicker(false); d && setAnniversary(d); }} />
-                    )}
-                </View>
-            </View>
-
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Gender</Text>
-                <View style={styles.genderRow}>
-                    {["Male", "Female", "Other"].map((g) => {
-                        const isSelected = gender === g;
-                        return (
-                            <TouchableOpacity
-                                key={g}
-                                onPress={() => isEditing && setGender(g)}
-                                activeOpacity={0.8}
-                                style={[
-                                    styles.genderChip,
-                                    isSelected && styles.genderChipSelected,
-                                    !isEditing && !isSelected && { opacity: 0.5 }
-                                ]}
-                            >
-                                <Text style={[
-                                    styles.genderText, 
-                                    isSelected && styles.genderTextSelected
-                                ]}>{g}</Text>
-                            </TouchableOpacity>
-                        )
-                    })}
-                </View>
             </View>
 
           </View>
         </ScrollView>
-
+        )}
         {isEditing && (
             <View style={styles.footer}>
-                <TouchableOpacity style={styles.saveBtn} onPress={handleUpdateProfile}>
-                    <Text style={styles.saveBtnText}>Save Profile</Text>
+                <TouchableOpacity 
+                  style={[styles.saveBtn, isPending && { opacity: 0.7 }]} 
+                  onPress={handleUpdateProfile}
+                  disabled={isPending}
+                >
+                    {isPending ? (
+                      <ActivityIndicator color={COLORS.white} />
+                    ) : (
+                      <Text style={styles.saveBtnText}>Save Profile</Text>
+                    )}
                 </TouchableOpacity>
             </View>
         )}
@@ -311,46 +296,11 @@ const styles = StyleSheet.create({
       backgroundColor: COLORS.white,
       borderColor: COLORS.secondary,
   },
-  row: {
-      flexDirection: 'row',
-  },
-  dateBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-  },
-  inputText: {
-      fontSize: 16,
-      color: COLORS.textPrimary,
+  inputDisabled: {
+      backgroundColor: '#f2f2f2',
+      color: COLORS.muted,
   },
 
-  /* Gender */
-  genderRow: {
-      flexDirection: 'row',
-      gap: 10,
-  },
-  genderChip: {
-      flex: 1,
-      paddingVertical: 12,
-      backgroundColor: COLORS.background,
-      borderRadius: 12,
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: 'transparent',
-  },
-  genderChipSelected: {
-      backgroundColor: COLORS.secondary,
-      borderColor: COLORS.primary,
-  },
-  genderText: {
-      fontSize: 14,
-      color: COLORS.muted,
-      fontWeight: '600',
-  },
-  genderTextSelected: {
-      color: COLORS.primary,
-      fontWeight: '700',
-  },
 
   /* Footer */
   footer: {

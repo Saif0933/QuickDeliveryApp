@@ -16,6 +16,7 @@ export interface AddToCartResponse {
   message: string;
   data: any; // cart item (depends on backend)
 }
+
 export const addToCart = async (
   payload: AddToCartPayload
 ): Promise<AddToCartResponse> => {

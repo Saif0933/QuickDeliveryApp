@@ -288,15 +288,19 @@
 // export default FoodItems;
 import React, { useMemo } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
   ActivityIndicator,
+  Alert,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { useGetUserCart } from '../../api/hooks/allCart'; // Only get cart from allCart
+import { useAddToCart } from '../../api/hooks/cart'; // Use the original addToCart from cart.ts
 import { COLORS } from '../../theme/color';
-import { useGetUserCart, useAddToCart, useRemoveCartItem } from '../../api/hooks/allCart';
 
 interface FlexibleCartItem {
   id: number;
@@ -321,8 +325,8 @@ interface FlexibleCartItem {
 const FoodItems: React.FC = () => {
   const { data: cartData, isLoading } = useGetUserCart();
   
-  const { mutate: addToCart } = useAddToCart();
-  const { mutate: removeCartItem } = useRemoveCartItem();
+  // Use the single useAddToCart from cart.ts for both add and quantity update
+  const { mutate: addToCart, isPending } = useAddToCart();
 
   // --- FIXED DATA LOGIC ---
   const cartItems = useMemo(() => {
@@ -357,30 +361,57 @@ const FoodItems: React.FC = () => {
     return processedItems;
   }, [cartData]);
 
+  // Handle quantity increase/decrease using the same useAddToCart hook
   const handleQuantityChange = (item: FlexibleCartItem, change: number) => {
     // Debug Logs
-    console.log(`Action: ${change > 0 ? 'Add' : 'Remove'} | Item: ${item.product?.name}`);
+    console.log(`Action: ${change > 0 ? 'Increase' : 'Decrease'} | Item: ${item.product?.name}`);
+    console.log(`Current Qty: ${item.quantity} | Change: ${change}`);
     console.log(`Payload IDs -> VendorID: ${item.vendorId}, ProductID: ${item.vendorProductId}`);
 
     // Validation
     if (!item.vendorId || !item.vendorProductId) {
-      console.error("❌ ERROR: Still missing IDs after fix.");
+      console.error("❌ ERROR: Missing required IDs.");
       return;
     }
 
-    // 1. REMOVE ITEM LOGIC (If Qty is 1 and user clicks -)
-    if (change === -1 && item.quantity === 1) {
-        removeCartItem(item.id);
-        return;
-    }
+    const newQuantity = item.quantity + change;
+    console.log(`New Quantity to send: ${newQuantity <= 0 ? 0 : newQuantity}`);
 
-    // 2. UPDATE QUANTITY LOGIC
-    addToCart({
-        vendorId: item.vendorId, // Now guaranteed to be at least 1
+    // If quantity becomes 0 or less, send 0 to remove the item
+    if (newQuantity <= 0) {
+      addToCart({
+        vendorId: item.vendorId,
         vendorProductId: item.vendorProductId,
         productVariantId: item.productVariantId || undefined,
-        quantity: change, // +1 or -1
-        notes: item.notes
+        quantity: 0, // Send 0 to remove the item
+      }, {
+        onSuccess: () => {
+          if (Platform.OS === 'android') {
+            ToastAndroid.show("Item removed from cart", ToastAndroid.SHORT);
+          }
+        },
+        onError: (error) => {
+          console.error("Error removing item:", error);
+          Alert.alert("Error", "Failed to remove item from cart");
+        }
+      });
+      return;
+    }
+
+    // UPDATE QUANTITY: Send the NEW TOTAL QUANTITY
+    addToCart({
+        vendorId: item.vendorId,
+        vendorProductId: item.vendorProductId,
+        productVariantId: item.productVariantId || undefined,
+        quantity: newQuantity, // Send the new total quantity
+    }, {
+      onSuccess: () => {
+        console.log(`✅ Quantity updated to ${newQuantity}`);
+      },
+      onError: (error) => {
+        console.error("Error updating quantity:", error);
+        Alert.alert("Error", "Failed to update quantity");
+      }
     });
   };
 

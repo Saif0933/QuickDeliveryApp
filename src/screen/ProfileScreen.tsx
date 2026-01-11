@@ -19,6 +19,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS } from '../theme/color';
 import VegMode from './VegMode';
+import { useGetUserProfile } from '../api/hooks/user';
 
 type RootStackParamList = {
   ProfilePage: undefined;
@@ -110,6 +111,8 @@ const ProfileScreen = () => {
     extrapolate: 'clamp',
   });
 
+  const { data: userProfile, isLoading, error } = useGetUserProfile();
+
   return (
     <View style={styles.root}>
       <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
@@ -130,8 +133,8 @@ const ProfileScreen = () => {
             <View style={styles.avatarCircle}>
                 <MaterialCommunityIcons name="account" size={50} color={COLORS.secondary} />
             </View>
-            <Text style={styles.headerTitle}>Saif</Text>
-            <Text style={styles.headerSubtitle}>+91 98765 43210</Text> 
+            <Text style={styles.headerTitle}>{userProfile?.name}</Text>
+            <Text style={styles.headerSubtitle}>+91 {userProfile?.mobile}</Text> 
         </Animated.View>
       </Animated.View>
 

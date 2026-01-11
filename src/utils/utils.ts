@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { ToastAndroid } from "react-native";
+import { Alert, Platform, ToastAndroid } from "react-native";
 
 type DecimalObj = {s: number; e: number; d: number[]};
 
@@ -15,7 +15,7 @@ export function parseToDecimal(
 }
 
 
-export const ErrorMessage = (error: AxiosError | Error) => {
+export const `ErrorMessage` = (error: AxiosError | Error) => {
   if (error instanceof AxiosError) {
     ToastAndroid.show(error.response?.data?.message || 'Something went wrong', ToastAndroid.LONG);
   } else {
@@ -24,5 +24,9 @@ export const ErrorMessage = (error: AxiosError | Error) => {
 }
 
 export const SuccessMessage = (message: string) => {
-  ToastAndroid.show(message, ToastAndroid.LONG);
+  if(Platform.OS === 'android') {
+    ToastAndroid.show(message, ToastAndroid.LONG);
+  } else {
+    Alert.alert('Success', message);
+  }
 }
