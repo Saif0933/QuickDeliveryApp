@@ -35,6 +35,7 @@ import SelectAddressScreen from '../screen/SelectAddressScreen';
 import MealsUnderScreen from '../components/categories/MealsUnderScreen';
 import OrderDetailsScreen from '../screen/OrderDetailsScreen';
 import OrderTrackingScreen from '../components/cart/OrderTrackingScreen';
+import AllRestaurantCart from '../components/cart/AllRestaurantCart';
 
 const Stack = createNativeStackNavigator();
 
@@ -44,7 +45,7 @@ const MyStack = () => {
     // ✅ Added return
     <NavigationContainer>
       <Stack.Navigator
-        // initialRouteName="OrderPlacedScreen"
+        // initialRouteName="AllRestaurantCart"
         screenOptions={{ headerShown: false }}
       >
         {/* <Stack.Screen name="FoodList" component={FoodList} /> */}
@@ -96,6 +97,7 @@ const MyStack = () => {
           component={ReportEmergencyScreen}
         />
         <Stack.Screen name="cart" component={CartScreen} />
+        <Stack.Screen name="AllRestaurantCart" component={AllRestaurantCart} />
       </Stack.Navigator>
     </NavigationContainer>
   );

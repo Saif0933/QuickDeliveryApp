@@ -15,7 +15,7 @@ export function parseToDecimal(
 }
 
 
-export const `ErrorMessage` = (error: AxiosError | Error) => {
+export const ErrorMessage = (error: AxiosError | Error) => {
   if (error instanceof AxiosError) {
     ToastAndroid.show(error.response?.data?.message || 'Something went wrong', ToastAndroid.LONG);
   } else {

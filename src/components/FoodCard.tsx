@@ -1,23 +1,23 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
+  FlatList,
+  ImageSourcePropType,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  FlatList,
-  ActivityIndicator,
-  ImageSourcePropType,
 } from "react-native";
 
-import Ionicons from "react-native-vector-icons/Ionicons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { COLORS } from "../theme/color";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStack } from "../types/types";
-import { useGetAllVendors } from "../api/hooks/useVender";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { Vendor } from "../../Vender.types";
+import { useGetAllVendors } from "../api/hooks/useVender";
+import { COLORS } from "../theme/color";
+import { RootStack } from "../types/types";
 
 interface FoodItem {
   id: string;
@@ -104,7 +104,13 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
     <TouchableOpacity
       style={styles.card}
       activeOpacity={0.95}
-      onPress={() => navigation.navigate("ProductScreen")}
+      onPress={() => navigation.navigate("ProductScreen", {
+        vendorId: item.id,
+        vendorName: item.name,
+        vendorImage: (typeof item.images[0] === 'object' && 'uri' in item.images[0] 
+          ? item.images[0].uri 
+          : "") || ""
+      })}
     >
       {/* Image Section */}
       <View style={styles.imageContainer}>

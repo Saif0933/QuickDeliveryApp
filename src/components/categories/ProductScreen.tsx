@@ -1245,32 +1245,32 @@
 
 
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useState, useRef, useMemo, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  StatusBar,
-  Dimensions,
-  Modal,
-  Platform,
-  Animated,
-  TouchableWithoutFeedback,
-  TextInput,
-  KeyboardAvoidingView,
-  ActivityIndicator,
-  Alert,
-  ToastAndroid, // <--- Added ToastAndroid import
+    ActivityIndicator,
+    Alert,
+    Animated,
+    Dimensions,
+    Image,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    ToastAndroid,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { COLORS } from "../../theme/color";
 // Make sure this path is correct for your project structure
-import { useGetVendorInventory, VendorProduct, ProductVariant } from "../../api/hooks/vendorInventory.ts"; 
-import { useAddToCart } from "../../api/hooks/cart.ts"; 
+import { useAddToCart } from "../../api/hooks/cart.ts";
+import { ProductVariant, useGetVendorInventory, VendorProduct } from "../../api/hooks/vendorInventory.ts";
 
 type RootStackParamList = {
   RestaurantInfoScreen: undefined 
@@ -1560,7 +1560,17 @@ const AddItemModal = ({ visible, onClose, productData }: AddItemModalProps) => {
 
 
 // --- MAIN SCREEN ---
-export default function PizzaProjectScreen({ navigation }: { navigation: any }) {
+// Define route params type
+type ProductScreenRouteParams = {
+  vendorId: string;
+  vendorName: string;
+  vendorImage: string;
+};
+
+export default function PizzaProjectScreen({ navigation, route }: { navigation: any; route: any }) {
+  // Get route params
+  const { vendorId = "1", vendorName = "Restaurant", vendorImage = "" } = (route?.params || {}) as ProductScreenRouteParams;
+  
   const [menuVisible, setMenuVisible] = useState(false);
   
   // State for Add Item Modal
@@ -1571,8 +1581,8 @@ export default function PizzaProjectScreen({ navigation }: { navigation: any }) 
   const [searchText, setSearchText] = useState(""); 
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  // --- API DATA FETCHING ---
-  const { data: vendorData, isLoading: vendorLoading } = useGetVendorInventory({vendorId: "1"});
+  // --- API DATA FETCHING (Using vendorId from route params) ---
+  const { data: vendorData, isLoading: vendorLoading } = useGetVendorInventory({ vendorId });
 
   // --- 1. FLATTEN DATA ---
   const flatProducts = useMemo(() => {
@@ -1645,7 +1655,7 @@ export default function PizzaProjectScreen({ navigation }: { navigation: any }) 
         ]}
       >
           <Image
-            source={{ uri: "https://imgs.search.brave.com/yDZbLQCBr64QsZN02kHvj4CxqYXS0tLUYlVpJVoGVSQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzA3LzIyLzMwLzgx/LzM2MF9GXzcyMjMw/ODE4Nl9vUmtwclVC/djJJM0dMTUFaa1d1/c3hpUXJaRXVEVlhw/UC5qcGc" }}
+            source={{ uri: vendorImage || "https://via.placeholder.com/800x400?text=Restaurant" }}
             style={styles.heroImage}
           />
           <View style={styles.heroOverlay} />
@@ -1697,7 +1707,7 @@ export default function PizzaProjectScreen({ navigation }: { navigation: any }) 
                 <View style={styles.sheetHandle} />
                 <View style={styles.resHeaderRow}>
                     <View style={{flex: 1}}>
-                        <Text style={styles.resTitleMain}>The Pizza Project</Text>
+                        <Text style={styles.resTitleMain}>{vendorName}</Text>
                         <View style={styles.resTitleSubRow}>
                             <Text style={styles.resTitleSub}>By Oven Story</Text>
                         </View>
@@ -1786,9 +1796,12 @@ export default function PizzaProjectScreen({ navigation }: { navigation: any }) 
                     {/* Empty State */}
                     {filteredProducts.length === 0 && (
                         <View style={{padding: 32, alignItems: 'center'}}>
-                            <Ionicons name="search-outline" size={40} color={COLORS.secondary} />
-                            <Text style={{textAlign:'center', marginTop: 10, color: COLORS.textSecondary}}>
-                                No items found matching "{activeFilter}"
+                            <MaterialCommunityIcons name="store-off-outline" size={50} color={COLORS.muted} />
+                            <Text style={{textAlign:'center', marginTop: 12, fontSize: 16, fontWeight: '600', color: COLORS.textSecondary}}>
+                                {flatProducts.length === 0 
+                                  ? "Product is not found" 
+                                  : `No items found matching "${activeFilter}"`
+                                }
                             </Text>
                         </View>
                     )}
