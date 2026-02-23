@@ -1,7 +1,10 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import AllRestaurantCart from '../components/cart/AllRestaurantCart';
 import OrderPlacedScreen from '../components/cart/OrderPlacedScreen';
+import OrderTrackingScreen from '../components/cart/OrderTrackingScreen';
 import FoodList from '../components/categories/FoodList';
+import MealsUnderScreen from '../components/categories/MealsUnderScreen';
 import ProductScreen from '../components/categories/ProductScreen';
 import RestaurantInfoScreen from '../components/categories/RestaurantInfoScreen';
 import AboutScreen from '../screen/AboutScreen';
@@ -19,11 +22,13 @@ import HomeScreen from '../screen/HomeScreen';
 import LocationScreen from '../screen/LoctionScreen';
 import Login from '../screen/Login';
 import NotificationScreen from '../screen/NotificationScreen';
+import OrderDetailsScreen from '../screen/OrderDetailsScreen';
 import Otp from '../screen/Otp';
 import PaymentSettings from '../screen/PaymentSettings';
 import ProfileScreen from '../screen/ProfileScreen';
 import ReportEmergencyScreen from '../screen/ReportEmergencyScreen';
 import SearchScreen from '../screen/SearchScreen';
+import SelectAddressScreen from '../screen/SelectAddressScreen';
 import SettingsScreen from '../screen/SettingScreen';
 import Splash from '../screen/Splash';
 import SupportScreen from '../screen/SupportScreen';
@@ -31,11 +36,9 @@ import VegMode from '../screen/VegMode';
 import YourOrder from '../screen/YourOrder';
 import YourProfile from '../screen/YourProfile';
 import ZomatoMoneyPage from '../screen/ZomatoMoneyPage';
-import SelectAddressScreen from '../screen/SelectAddressScreen';
-import MealsUnderScreen from '../components/categories/MealsUnderScreen';
-import OrderDetailsScreen from '../screen/OrderDetailsScreen';
-import OrderTrackingScreen from '../components/cart/OrderTrackingScreen';
-import AllRestaurantCart from '../components/cart/AllRestaurantCart';
+import PrivacyPolicy from '../screen/legal/PrivacyPolicy';
+import RefundPolicy from '../screen/legal/RefundPolicy';
+import TermsAndConditions from '../screen/legal/TermsAndConditions';
 
 const Stack = createNativeStackNavigator();
 
@@ -60,7 +63,11 @@ const MyStack = () => {
         <Stack.Screen name="DiningScreen" component={DiningScreen} />
         <Stack.Screen name="YourProfile" component={YourProfile} />
         <Stack.Screen name="YourOrder" component={YourOrder} />
-        <Stack.Screen name="VegMode" component={VegMode} />
+        <Stack.Screen 
+          name="VegMode" 
+          component={VegMode} 
+          options={{ presentation: 'transparentModal' }} 
+        />
         <Stack.Screen name="AddressBookScreen" component={AddressBookScreen} />
         <Stack.Screen name="AboutScreen" component={AboutScreen} />
         <Stack.Screen name="ActivityScreen" component={ActivityScreen} />
@@ -98,6 +105,9 @@ const MyStack = () => {
         />
         <Stack.Screen name="cart" component={CartScreen} />
         <Stack.Screen name="AllRestaurantCart" component={AllRestaurantCart} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+        <Stack.Screen name="RefundPolicy" component={RefundPolicy} />
+        <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -17,6 +17,11 @@ export interface AddToCartResponse {
   data: any; // cart item (depends on backend)
 }
 
+export interface ClearCartResponse {
+  success: boolean;
+  message: string;
+}
+
 export const addToCart = async (
   payload: AddToCartPayload
 ): Promise<AddToCartResponse> => {
@@ -35,6 +40,26 @@ export const useAddToCart = () => {
 
     onSuccess: () => {
       // 🔄 Refresh cart data after adding item
+      queryClient.invalidateQueries({
+        queryKey: ["user-cart"],
+      });
+    },
+  });
+};
+
+export const clearCart = async (): Promise<ClearCartResponse> => {
+  const res = await api.delete("/user/cart/clear");
+  return res.data;
+};
+
+export const useClearCart = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: clearCart,
+
+    onSuccess: () => {
+      // 🔄 Refresh cart data after clearing
       queryClient.invalidateQueries({
         queryKey: ["user-cart"],
       });

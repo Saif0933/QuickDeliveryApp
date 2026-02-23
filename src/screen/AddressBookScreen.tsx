@@ -8,21 +8,6 @@
 //   ScrollView,
 //   Alert,
 //   StatusBar,
-//   Share,
-//   Modal,
-//   TouchableWithoutFeedback,
-// } from "react-native";
-// import Ionicons from "react-native-vector-icons/Ionicons";
-// import { useNavigation } from "@react-navigation/native";
-// import { COLORS } from "../theme/color";
-// import { SafeAreaView } from "react-native-safe-area-context";
-
-// // --- THEME ---
-// const BG_COLOR = "#F8F9FD";
-// const CARD_BG = "#FFFFFF";
-// const TEXT_DARK = "#1A1D1E";
-// const TEXT_GREY = "#6C7278";
-
 // type Address = {
 //   id: string;
 //   label: string;
@@ -465,24 +450,25 @@
 //   }
 // });
 
-
+import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  Share,
+  StatusBar,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Alert,
-  StatusBar,
-  Share,
-  Modal,
   TouchableWithoutFeedback,
+  View,
 } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
-import { COLORS } from "../theme/color";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { Address, useAddresses, useDeleteAddress } from '../api/hooks/address';
+import { COLORS } from "../theme/color";
 
 // --- THEME ---
 const BG_COLOR = "#F8F9FD";
@@ -490,38 +476,16 @@ const CARD_BG = "#FFFFFF";
 const TEXT_DARK = "#1A1D1E";
 const TEXT_GREY = "#6C7278";
 
-type Address = {
-  id: string;
-  label: string;
-  details: string;
-  distance: string;
-  phone: string;
-  type: "home" | "work" | "other";
-};
 
 const AddressBookScreen: React.FC = () => {
-  // FIXED: Added <any> to resolve the navigation type error
   const navigation = useNavigation<any>();
 
-  // --- STATE ---
-  const [addresses, setAddresses] = useState<Address[]>([
-    {
-      id: "1",
-      label: "My Place",
-      details: "4th Floor, Balpan Children Hospital, Bariatu, Ranchi",
-      distance: "8 km",
-      phone: "9334804356",
-      type: "other",
-    },
-    {
-      id: "2",
-      label: "Home",
-      details: "1st floor, Tarulia, Krishnapur, Kestopur, Kolkata",
-      distance: "332 km",
-      phone: "9876543210",
-      type: "home",
-    },
-  ]);
+  // --- API HOOKS ---
+  const { data: addressesData, isLoading } = useAddresses();
+  const deleteMutation = useDeleteAddress();
+
+  // Reverse so newest is on top ("on first")
+  const addresses = addressesData ? [...addressesData].reverse() : [];
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
@@ -532,10 +496,10 @@ const AddressBookScreen: React.FC = () => {
   const handleAddAddress = () => Alert.alert("Add", "Open Add Form");
 
   // --- SHARE FUNCTION ---
-  const handleShare = async (addr: Address) => {
+  const handleShare = async (addr: any) => {
     try {
       await Share.share({
-        message: `Address: ${addr.label}\n${addr.details}\nPhone: ${addr.phone}`,
+        message: `Address: ${addr.type}\n${addr.completeAddress}\nPhone: ${addr.receiverContact}`,
       });
     } catch (error: any) {
       Alert.alert(error.message);
@@ -558,9 +522,9 @@ const AddressBookScreen: React.FC = () => {
   // Option 1: Edit
   const handleEditOption = () => {
     if (selectedAddress) {
-      Alert.alert("Edit", `Edit address ${selectedAddress.id}`);
+      closeOptions();
+      navigation.navigate('SelectAddressScreen', { address: selectedAddress });
     }
-    closeOptions();
   };
 
   // Option 2: Delete
@@ -571,9 +535,14 @@ const AddressBookScreen: React.FC = () => {
             { 
                 text: "Delete", 
                 style: "destructive", 
-                onPress: () => {
-                    setAddresses(prev => prev.filter(a => a.id !== selectedAddress.id));
-                    closeOptions();
+                onPress: async () => {
+                    try {
+                        await deleteMutation.mutateAsync(selectedAddress.id);
+                        closeOptions();
+                    } catch (error: any) {
+                        const msg = error.response?.data?.message || error.message || "Failed to delete address";
+                        Alert.alert("Error", `${msg}\n\nDetails: ${JSON.stringify(error.response?.data || error)}`);
+                    }
                 }
             }
         ]);
@@ -583,7 +552,7 @@ const AddressBookScreen: React.FC = () => {
   // Option 3: Update Delivery Instructions
   const handleUpdateInstructions = () => {
     if (selectedAddress) {
-        Alert.alert("Update", "Update Delivery Instructions for " + selectedAddress.label);
+        Alert.alert("Update", "Update Delivery Instructions for " + selectedAddress.type);
     }
     closeOptions();
   };
@@ -621,10 +590,13 @@ const AddressBookScreen: React.FC = () => {
 
         {/* Address List */}
         <View style={styles.listContainer}>
-          {addresses.map((addr) => {
-            const isHome = addr.type === "home";
+          {isLoading ? (
+            <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />
+          ) : addresses.map((addr: any) => {
+            const type = (addr.type || "other").toLowerCase();
+            const isHome = type === "home";
             const iconName = isHome ? "home-outline" : "location-outline";
-            const iconColor = isHome ? COLORS.primary : "#F97316"; // Orange for other
+            const iconColor = isHome ? COLORS.primary : "#F97316"; 
             const iconBg = isHome ? "#E3F2FD" : "#FFF7ED";
 
             return (
@@ -638,14 +610,13 @@ const AddressBookScreen: React.FC = () => {
                       <Ionicons name={iconName} size={20} color={iconColor} />
                     </View>
                     <View>
-                      <Text style={styles.label}>{addr.label}</Text>
-                      <Text style={styles.tag}>{addr.type.toUpperCase()}</Text>
+                      <Text style={styles.label}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
+                      <Text style={styles.tag}>{addr.city || "Ranchi"}</Text>
                     </View>
                   </View>
 
                   {/* Simple Actions */}
                   <View style={styles.actionsRow}>
-                    {/* Opens the Modal Popup */}
                     <TouchableOpacity
                       style={styles.actionIconBtn}
                       onPress={() => openOptions(addr)}
@@ -664,19 +635,19 @@ const AddressBookScreen: React.FC = () => {
 
                 {/* Details */}
                 <Text style={styles.detailsText} numberOfLines={2}>
-                  {addr.details}
+                  {addr.completeAddress}
                 </Text>
 
                 {/* Footer Info */}
                 <View style={styles.cardFooter}>
                   <View style={styles.metaItem}>
                     <Ionicons name="call-outline" size={14} color={TEXT_GREY} />
-                    <Text style={styles.metaText}>{addr.phone}</Text>
+                    <Text style={styles.metaText}>{addr.receiverContact}</Text>
                   </View>
                   <View style={styles.dot} />
                   <View style={styles.metaItem}>
-                    <Ionicons name="navigate-outline" size={14} color={TEXT_GREY} />
-                    <Text style={styles.metaText}>{addr.distance}</Text>
+                    <Ionicons name="person-outline" size={14} color={TEXT_GREY} />
+                    <Text style={styles.metaText}>{addr.receiverName}</Text>
                   </View>
                 </View>
               </View>
@@ -715,7 +686,7 @@ const AddressBookScreen: React.FC = () => {
                 <Text style={styles.modalTitle}>Address options</Text>
 
                 {/* Option 1: Edit */}
-                <TouchableOpacity style={styles.optionItem} onPress={() => navigation.navigate('SelectAddressScreen')}>
+                <TouchableOpacity style={styles.optionItem} onPress={handleEditOption}>
                     <Ionicons name="pencil-outline" size={22} color={TEXT_DARK} />
                     <Text style={styles.optionText}>Edit Address</Text>
                     <Ionicons name="chevron-forward" size={20} color={TEXT_GREY} style={{marginLeft: 'auto'}} />

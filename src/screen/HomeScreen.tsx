@@ -10,7 +10,6 @@ import {
   Dimensions,
   Easing,
   Image,
-  Modal,
   ScrollView,
   StyleSheet,
   Switch,
@@ -27,6 +26,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useGetAllCategory } from '../api/hooks/getAllCategory';
 import { useGetAllVendors } from '../api/hooks/useVender';
 import FoodList from '../components/FoodCard';
+import FloatingCart from '../components/cart/FloatingCart';
 import { COLORS } from '../theme/color';
 
 const { width } = Dimensions.get('window');
@@ -71,14 +71,13 @@ const BANNER_HEIGHT = 220;
 const HERO_HEIGHT = HEADER_HEIGHT + SEARCH_HEIGHT + BANNER_HEIGHT;
 
 const banners = [
-  { id: '1', img: 'https://media1.tokyodisneyresort.jp/food_menu/image/1000004251_1.3_1_1k7Tlv26.jpg' },
+  { id: '1', img: require('../assets/restro.jpeg') },
   { id: '2', img: 'https://media.edinburgh.org/wp-content/uploads/2023/04/26161552/thumb_40653_point_of_interest_bigger.jpeg' },
 ];
 
 const HomeScreen: React.FC = () => {
   const [vegMode, setVegMode] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [showAllCarts, setShowAllCarts] = useState(false); 
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -90,25 +89,6 @@ const HomeScreen: React.FC = () => {
       setSelectedCategory('All');
     }, [])
   );
-
-  const cartCount = 1;
-  const restaurant = {
-    name: 'Subway',
-    logo: 'https://media1.tokyodisneyresort.jp/food_menu/image/1000004251_1.3_1_1k7Tlv26.jpg', 
-  };
-
-  const secondCart = {
-    name: 'Pizza Hut',
-    logo: 'https://media.edinburgh.org/wp-content/uploads/2023/04/26161552/thumb_40653_point_of_interest_bigger.jpeg', 
-    cartCount: 1,
-  };
-
-  // --- LOGIC: Check for multiple carts ---
-  const hasMultipleCarts = true; 
-
-  const handleMenuPress = () => {
-    console.log('Menu pressed');
-  };
 
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -148,7 +128,7 @@ const HomeScreen: React.FC = () => {
     return (
       <View key={index} style={styles.bannerSlide}>
         <Image
-          source={{ uri: item.img }}
+          source={typeof item.img === 'string' ? { uri: item.img } : item.img}
           style={styles.bannerImage}
           resizeMode="cover"
         />
@@ -377,6 +357,39 @@ const HomeScreen: React.FC = () => {
           )}
         </View>
 
+        {/* Filters Section */}
+        <View style={styles.filtersContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filtersScrollContent}
+          >
+            {[
+              { id: 'filter', name: 'Filter', icon: 'chevron-down' },
+              { id: 'near_fast', name: 'Near & Fast' },
+              { id: 'new_to_you', name: 'New to You' },
+              { id: 'great_offers', name: 'Great Offers' },
+              { id: 'under_200', name: 'Under 200' },
+              { id: 'rating_4', name: 'Rating 4.0+', icon: 'star' },
+              { id: 'prev_ordered', name: 'Previously Ordered' },
+              { id: 'pure_veg', name: 'Pure Veg', icon: 'leaf' },
+            ].map((f) => (
+              <TouchableOpacity key={f.id} style={styles.filterChip}>
+                {f.icon === 'star' && (
+                  <Ionicons name="star" size={12} color="#FFB300" style={{ marginRight: 4 }} />
+                )}
+                <Text style={[styles.filterText, f.id === 'near_fast' && { color: COLORS.primary }]}>
+                  {f.name}
+                </Text>
+                {f.icon === 'leaf' && (
+                  <MaterialCommunityIcons name="leaf" size={14} color="#007E33" style={{ marginLeft: 4 }} />
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+
         {/* --- DYNAMIC RECOMMENDED SECTION --- */}
         <Text style={styles.sectionTitle}>RECOMMENDED FOR YOU</Text>
 
@@ -588,120 +601,8 @@ const HomeScreen: React.FC = () => {
         </View>
       </Animated.View>
 
-      {/* --- FLOATING CART (With "All carts" Button) --- */}
-      <View style={styles.viewCartContainer}>
-        
-        {/* LOGIC: All Carts Badge - WRAPPED FOR PERFECT CENTERING */}
-        {hasMultipleCarts && (
-          <View style={styles.allCartsBadgeWrapper}>
-            <TouchableOpacity
-              style={styles.allCartsBadge}
-              activeOpacity={0.8}
-              onPress={() => setShowAllCarts(true)} 
-            >
-                <Text style={styles.allCartsText}>All carts</Text>
-                <Ionicons name="caret-up-sharp" size={12} color={COLORS.primary} style={{ marginTop: 2, marginLeft: 2 }} />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        <TouchableOpacity
-          style={styles.cartLeft}
-          onPress={handleMenuPress}
-          activeOpacity={0.7}
-        >
-          <Image source={{ uri: restaurant.logo }} style={styles.cartImg} />
-          <View>
-            <Text style={styles.cartTitle}>{restaurant.name}</Text>
-            <Text style={styles.cartSubtitle}>View Menu ➝</Text>
-          </View>
-        </TouchableOpacity>
-
-        <View style={styles.cartRightSide}>
-          <TouchableOpacity
-            style={styles.viewCartBtn}
-            onPress={() => navigation.navigate('CheckoutScreen')}
-          >
-            <Text style={styles.viewCartText}>View Cart</Text>
-            <Text style={styles.itemCount}>{cartCount} item</Text>
-          </TouchableOpacity>
-          
-          {/* Main Cart Close Button */}
-          <TouchableOpacity style={styles.mainCartCloseBtn}>
-             <Ionicons name="close" size={16} color="#555" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* --- YOUR CARTS MODAL --- */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showAllCarts}
-        onRequestClose={() => setShowAllCarts(false)}
-      >
-        <View style={styles.allCartsModalOverlay}>
-          
-          {/* Floating Close Button for Modal */}
-          <View style={styles.modalCloseContainer}>
-             <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setShowAllCarts(false)}>
-                <Ionicons name="close" size={24} color="#fff" />
-             </TouchableOpacity>
-          </View>
-
-          <View style={styles.allCartsModalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Your Carts (2)</Text>
-              <TouchableOpacity style={styles.checkoutAllBtn} onPress={() => navigation.navigate('AllRestaurantCart')}>
-                <Text style={styles.checkoutAllText}>Checkout all</Text>
-                <Ionicons name="caret-forward-sharp" size={14} color={COLORS.primary} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.cartList}>
-              {/* Cart 1 */}
-              <View style={styles.cartItemCard}>
-                <TouchableOpacity style={styles.cartLeft} onPress={handleMenuPress} activeOpacity={0.7}>
-                  <Image source={{ uri: secondCart.logo }} style={styles.cartImg} />
-                  <View>
-                    <Text style={styles.cartTitle}>{secondCart.name}</Text>
-                    <Text style={styles.cartSubtitle}>View Menu ➝</Text>
-                  </View>
-                </TouchableOpacity>
-                <View style={styles.cartItemRight}>
-                  <TouchableOpacity style={styles.viewCartBtnSmall} onPress={() => navigation.navigate('CheckoutScreen')}>
-                    <Text style={styles.viewCartTextSmall}>View Cart</Text>
-                    <Text style={styles.itemCountSmall}>{secondCart.cartCount} item</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.closeCartBtn}>
-                    <Ionicons name="close" size={16} color="#666" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Cart 2 */}
-              <View style={styles.cartItemCard}>
-                <TouchableOpacity style={styles.cartLeft} onPress={handleMenuPress} activeOpacity={0.7}>
-                  <Image source={{ uri: restaurant.logo }} style={styles.cartImg} />
-                  <View>
-                    <Text style={styles.cartTitle}>{restaurant.name}</Text>
-                    <Text style={styles.cartSubtitle}>View Menu ➝</Text>
-                  </View>
-                </TouchableOpacity>
-                <View style={styles.cartItemRight}>
-                  <TouchableOpacity style={styles.viewCartBtnSmall} onPress={() => navigation.navigate('CheckoutScreen')}>
-                    <Text style={styles.viewCartTextSmall}>View Cart</Text>
-                    <Text style={styles.itemCountSmall}>{cartCount} item</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.closeCartBtn}>
-                    <Ionicons name="close" size={16} color="#666" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
+      {/* --- FLOATING CART (Self-contained component with dynamic data) --- */}
+      <FloatingCart />
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
@@ -869,6 +770,26 @@ const styles = StyleSheet.create({
   categoryTextSelected: { color: COLORS.primary, fontWeight: '900', },
   categoryUnderline: { width: 50, height: 3, backgroundColor: COLORS.primary, borderRadius: 2, marginTop: 4 },
 
+  filtersContainer: { paddingLeft: 12, marginBottom: 10, marginTop: 5 },
+  filtersScrollContent: { paddingRight: 12, paddingVertical: 5 },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
+    marginRight: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  filterText: { fontSize: 13, color: '#1C1C1C', fontWeight: '700' },
+
   sectionTitle: { fontSize: 13, fontWeight: '800', color: COLORS.muted, marginLeft: 12, marginBottom: 12, letterSpacing: 1 },
   recommendedContainer: { paddingLeft: 12, marginBottom: 10, },
   recommendedRow: { flexDirection: 'row', marginBottom: 12 },
@@ -888,7 +809,7 @@ const styles = StyleSheet.create({
   // --- FLOATING CART STYLES ---
   viewCartContainer: {
     position: 'absolute',
-    bottom: 80,
+    bottom: 95,
     width: '85%', 
     alignSelf: 'center',
     backgroundColor: '#fff',
@@ -997,7 +918,7 @@ const styles = StyleSheet.create({
   itemCountSmall: { color: '#fff', fontSize: 11 },
   closeCartBtn: { marginLeft: 12, padding: 6, borderRadius: 50, backgroundColor: '#f8f8f8', alignItems: 'center', justifyContent: 'center' },
 
-  bottomNav: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#fff', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#eee', elevation: 20, height: 70, position: "relative", zIndex: 40 },
+  bottomNav: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#fff', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#eee', elevation: 20, height: 85, position: "relative", zIndex: 40 },
   navItem: { alignItems: 'center', },
   navText: { fontSize: 10, color: COLORS.primary, marginTop: 4, fontWeight: '600' },
   navTextActive: { fontSize: 10, color: COLORS.primary, marginTop: 0, fontWeight: '800' },

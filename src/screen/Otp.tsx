@@ -526,10 +526,10 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import api from "../api/api";
-import { ErrorMessage } from "../utils/utils";
-import { AppNavigation } from "../types/types";
 import { useAuth } from "../Context/AuthContext";
 import { COLORS } from "../theme/color";
+import { AppNavigation } from "../types/types";
+import { ErrorMessage } from "../utils/utils";
 
 
 const { width } = Dimensions.get("window");
@@ -559,9 +559,10 @@ export default function OtpScreen({ navigation }: AppNavigation) {
   useEffect(() => {
     const filled = otp.join("");
     if (filled.length === 4 && !loading) {
-      setTimeout(() => handleVerify(filled), 300);
+      const timeout = setTimeout(() => handleVerify(filled), 300);
+      return () => clearTimeout(timeout);
     }
-  }, [otp]);
+  }, [otp, loading]);
 
   const handleChange = (text: string, index: number) => {
     const newOtp = [...otp];
@@ -587,6 +588,7 @@ export default function OtpScreen({ navigation }: AppNavigation) {
   };
 
   const handleVerify = async (otpValue?: string) => {
+    if (loading) return;
     const value = otpValue || otp.join("").trim();
     if (value.length !== 4) {
       ToastAndroid.show("Please enter a valid 4-digit OTP", ToastAndroid.SHORT);
@@ -675,7 +677,7 @@ export default function OtpScreen({ navigation }: AppNavigation) {
         {otp.map((digit, index) => (
           <Animated.View key={index} style={{ transform: [{ scale: autoFilling ? 1.1 : 1 }] }}>
             <TextInput
-              ref={(ref) => (inputs.current[index] = ref)}
+              ref={(ref) => { inputs.current[index] = ref; }}
               style={[
                 styles.otpInput,
                 otp[index] && styles.filledInput,

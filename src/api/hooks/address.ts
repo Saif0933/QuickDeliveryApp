@@ -1,9 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import api from '../api/api';
+import api from '../api';
 
-// --- TYPES (Unchanged) ---
 export type Address = {
-  id: number;
+  id: any;
   type: string;
   mainAddress: string;
   completeAddress: string;
@@ -18,9 +17,7 @@ export type Address = {
   longitude?: number;
 };
 
-// --- HOOKS ---
-
-// 1. Fetch Addresses
+// Fetch all addresses
 export const useAddresses = () => {
   return useQuery<Address[], Error>({
     queryKey: ['addresses'],
@@ -31,7 +28,7 @@ export const useAddresses = () => {
   });
 };
 
-// 2. Create Address
+// Create a new address
 export const useCreateAddress = () => {
   const queryClient = useQueryClient();
 
@@ -41,19 +38,22 @@ export const useCreateAddress = () => {
       return res.data.data;
     },
     onSuccess: () => {
-      // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
     },
   });
 };
 
-// 3. Delete Address
+// Delete an address
 export const useDeleteAddress = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: number) => {
-      await api.delete(`/user/address/delete/${id}`);
+    mutationFn: async (id: any) => {
+      const res = await api.delete(`/user/address/${id}`);
+      if (res.data.success === false) {
+        throw new Error(res.data.message || "Failed to delete address");
+      }
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
@@ -61,7 +61,22 @@ export const useDeleteAddress = () => {
   });
 };
 
-// 4. Set Default Address
+// Update an address
+export const useUpdateAddress = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Address> }) => {
+      const res = await api.put(`/user/address/${id}`, data);
+      return res.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
+    },
+  });
+};
+
+// Set address as default
 export const useSetDefaultAddress = () => {
   const queryClient = useQueryClient();
 

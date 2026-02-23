@@ -1,19 +1,20 @@
-import React, { useMemo, useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useMemo, useRef, useState } from 'react';
+import {
+    Animated,
+    Image,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { COLORS } from '../../theme/color';
 import { useGetUserCart } from '../../api/hooks/allCart';
+import { useClearCart } from '../../api/hooks/cart';
+import { COLORS } from '../../theme/color';
 
 // Define Types for Navigation
 type RootStackParamList = {
@@ -40,8 +41,35 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ onMenuPress }) => {
   const [showAllCarts, setShowAllCarts] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
+  const swipeAnim = useRef(new Animated.Value(0)).current;
+  const [isSwiped, setIsSwiped] = useState(false);
+  const { mutate: clearCartMutate } = useClearCart();
+
+  const toggleSwipe = () => {
+    if (isSwiped) {
+      Animated.spring(swipeAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+      }).start();
+      setIsSwiped(false);
+    } else {
+      Animated.spring(swipeAnim, {
+        toValue: -70,
+        useNativeDriver: true,
+      }).start();
+      setIsSwiped(true);
+    }
+  };
+
+  const handleClearCart = () => {
+    clearCartMutate();
+    swipeAnim.setValue(0);
+    setIsSwiped(false);
+  };
+
   // --- FETCH CART DATA FROM API ---
   const { data: cartData, isLoading: cartLoading } = useGetUserCart();
+  console.log('cartData', cartData);
 
   // --- FIXED: Group cart items by vendor (Handles both Vendors and Items structure) ---
   const vendorCarts = useMemo<VendorCart[]>(() => {
@@ -150,33 +178,49 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ onMenuPress }) => {
 
         {/* Inner Cart Content */}
         <View style={styles.innerCartContainer}>
-          <TouchableOpacity
-            style={styles.cartLeft}
-            onPress={() => handleVendorPress(firstVendorCart)}
-            activeOpacity={0.7}
+          <TouchableOpacity 
+            style={styles.deleteArea} 
+            onPress={handleClearCart}
+            activeOpacity={0.8}
           >
-            <Image source={{ uri: firstVendorCart?.vendorLogo }} style={styles.cartImg} />
-            <View>
-              <Text style={styles.cartTitle} numberOfLines={1}>{firstVendorCart?.vendorName}</Text>
-              <Text style={styles.cartSubtitle}>View Menu ➝</Text>
-            </View>
+            <Ionicons name="trash-outline" size={22} color="#fff" />
           </TouchableOpacity>
 
-          <View style={styles.cartRightSide}>
+          <Animated.View style={[
+            styles.cartContentAnimated,
+            { transform: [{ translateX: swipeAnim }] }
+          ]}>
             <TouchableOpacity
-              style={styles.viewCartBtn}
-              onPress={() => navigation.navigate('CheckoutScreen')}
+              style={styles.cartLeft}
+              onPress={() => handleVendorPress(firstVendorCart)}
+              activeOpacity={0.7}
             >
-              <Text style={styles.viewCartText}>View Cart</Text>
-              <Text style={styles.itemCount}>
-                {totalCartCount} {totalCartCount === 1 ? 'item' : 'items'}
-              </Text>
+              <Image source={{ uri: firstVendorCart?.vendorLogo }} style={styles.cartImg} />
+              <View>
+                <Text style={styles.cartTitle} numberOfLines={1}>{firstVendorCart?.vendorName}</Text>
+                <Text style={styles.cartSubtitle}>View Menu ➝</Text>
+              </View>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.mainCartCloseBtn}>
-              <Ionicons name="close" size={16} color="#555" />
-            </TouchableOpacity>
-          </View>
+            <View style={styles.cartRightSide}>
+              <TouchableOpacity
+                style={styles.viewCartBtn}
+                onPress={() => navigation.navigate('CheckoutScreen')}
+              >
+                <Text style={styles.viewCartText}>View Cart</Text>
+                <Text style={styles.itemCount}>
+                  {totalCartCount} {totalCartCount === 1 ? 'item' : 'items'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.mainCartCloseBtn}
+                onPress={toggleSwipe}
+              >
+                <Ionicons name={isSwiped ? "arrow-forward" : "close"} size={16} color="#555" />
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
         </View>
       </View>
 
@@ -306,11 +350,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     width: '100%',
     borderRadius: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -319,6 +359,27 @@ const styles = StyleSheet.create({
     zIndex: 101,
     borderWidth: 0.5,
     borderColor: '#f0f0f0',
+    position: 'relative',
+  },
+  cartContentAnimated: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    width: '100%',
+    backgroundColor: '#fff',
+  },
+  deleteArea: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 70,
+    backgroundColor: COLORS.RED,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 0,
   },
 
   cartLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },

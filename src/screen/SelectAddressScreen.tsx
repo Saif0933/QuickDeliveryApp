@@ -1,4 +1,6 @@
 
+import { useNavigation, useRoute } from '@react-navigation/native'; // 1. Imported useNavigation
+import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -16,7 +18,10 @@ import {
   View,
 } from 'react-native';
 import MapView, { Region } from 'react-native-maps';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../api/api';
+import { Address, useAddresses } from '../api/hooks/address';
+import { COLORS } from '../theme/color';
 import {
   checkLocationPermission,
   getAddressFromCoords,
@@ -24,14 +29,16 @@ import {
   requestLocationPermission,
   turnOnLocation,
 } from '../utils/location';
-import { COLORS } from '../theme/color';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native'; // 1. Imported useNavigation
 
 const { height, width } = Dimensions.get('window');
 
 function AddAddress() {
-  const navigation = useNavigation(); // 2. Initialized navigation
+  const navigation = useNavigation<any>(); // 2. Initialized navigation
+  const route = useRoute<any>();
+  const editAddress = route.params?.address;
+
+  const queryClient = useQueryClient();
+  const { data: savedAddresses, isLoading: isAddressesLoading } = useAddresses();
 
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -127,14 +134,66 @@ function AddAddress() {
       } else {
         await handleLocationPermission();
       }
-    } catch (error) {
     } finally {
       setLoadingLocation(false);
     }
   };
 
+  const handleSelectSavedAddress = (addr: Address) => {
+    setCurrentAddress(addr.mainAddress);
+    setCompleteAddress(addr.completeAddress);
+    setReceiverName(addr.receiverName);
+    setReceiverContact(addr.receiverContact);
+    setFloor(addr.floor || '');
+    setLandmark(addr.landMark || '');
+    setInstructions(addr.instructions || '');
+    setSelectedTag(addr.type.charAt(0).toUpperCase() + addr.type.slice(1).toLowerCase());
+    
+    if (addr.latitude && addr.longitude) {
+      const coords = { latitude: addr.latitude, longitude: addr.longitude };
+      setSelectedCoords(coords);
+      mapRef.current?.animateToRegion(
+        {
+          ...coords,
+          latitudeDelta: initialRegion.latitudeDelta,
+          longitudeDelta: initialRegion.longitudeDelta,
+        },
+        1000,
+      );
+    }
+    
+    setShowSearchModal(false);
+  };
+
+  useEffect(() => {
+    if (editAddress) {
+      setSelectedTag(editAddress.type?.charAt(0).toUpperCase() + editAddress.type?.slice(1).toLowerCase() || 'Home');
+      setCompleteAddress(editAddress.completeAddress || '');
+      setFloor(editAddress.floor || '');
+      setLandmark(editAddress.landMark || '');
+      setInstructions(editAddress.instructions || '');
+      setReceiverName(editAddress.receiverName || '');
+      setReceiverContact(editAddress.receiverContact || '');
+      setCurrentAddress(editAddress.mainAddress || '');
+      if (editAddress.latitude && editAddress.longitude) {
+        const coords = {
+          latitude: Number(editAddress.latitude),
+          longitude: Number(editAddress.longitude),
+        };
+        setSelectedCoords(coords);
+        mapRef.current?.animateToRegion({
+          ...coords,
+          latitudeDelta: initialRegion.latitudeDelta,
+          longitudeDelta: initialRegion.longitudeDelta,
+        }, 1000);
+      }
+      setShowBottomSheet(true);
+    }
+  }, [editAddress]);
+
   useEffect(() => {
     const initLocationSetup = async () => {
+      if (editAddress) return; // Skip auto-location if editing
       setLoadingLocation(true);
       try {
         const granted = await checkLocationPermission();
@@ -197,7 +256,7 @@ function AddAddress() {
 
   useEffect(() => {
     const updateAddress = async () => {
-      if (selectedCoords) {
+      if (selectedCoords && !editAddress) { // Only auto-update address string if not editing (manual move still works)
         const address = await getAddressFromCoords(
           selectedCoords.latitude,
           selectedCoords.longitude,
@@ -206,7 +265,7 @@ function AddAddress() {
       }
     };
     updateAddress();
-  }, [selectedCoords]);
+  }, [selectedCoords, editAddress]);
 
   const tags = ['Home', 'Work', 'Other'];
   const onRegionChangeComplete = (region: Region) => {
@@ -452,35 +511,56 @@ function AddAddress() {
                   if (!isFormValid) return;
                   try {
                     setFormSubmitting(true);
-                    const res = await api.post('/user/address/create', {
-                      type: selectedTag.toUpperCase(),
-                      mainAddress: currentAddress || 'Unknown',
-                      completeAddress,
-                      receiverName,
-                      receiverContact,
-                      landMark: landmark,
-                      floor,
-                      city: 'Ranchi',
-                      instructions,
-                      latitude: selectedCoords?.latitude,
-                      longitude: selectedCoords?.longitude,
-                    });
+                    let res;
+                    if (editAddress) {
+                      res = await api.put(`/user/address/${editAddress.id}`, {
+                        type: selectedTag.toUpperCase(),
+                        mainAddress: currentAddress || 'Unknown',
+                        completeAddress,
+                        receiverName,
+                        receiverContact,
+                        landMark: landmark,
+                        floor,
+                        city: 'Ranchi',
+                        instructions,
+                        latitude: selectedCoords?.latitude,
+                        longitude: selectedCoords?.longitude,
+                        isDefault: editAddress.isDefault || false,
+                      });
+                    } else {
+                      res = await api.post('/user/address/create', {
+                        type: selectedTag.toUpperCase(),
+                        mainAddress: currentAddress || 'Unknown',
+                        completeAddress,
+                        receiverName,
+                        receiverContact,
+                        landMark: landmark,
+                        floor,
+                        city: 'Ranchi',
+                        instructions,
+                        latitude: selectedCoords?.latitude,
+                        longitude: selectedCoords?.longitude,
+                      });
+                    }
+                    
                     if (res.data.success) {
+                      queryClient.invalidateQueries({ queryKey: ['addresses'] });
                       ToastAndroid.show(
-                        `${res.data.message || 'Address added successfully'}`,
+                        `${res.data.message || (editAddress ? 'Address updated successfully' : 'Address added successfully')}`,
                         ToastAndroid.LONG,
                       );
+                      navigation.goBack();
                     }
                   } catch (error) {
                     if (error instanceof AxiosError) {
                       ToastAndroid.show(
                         error.response?.data?.message ||
-                          'Failed to add address',
+                          `Failed to ${editAddress ? 'update' : 'add'} address`,
                         ToastAndroid.LONG,
                       );
                     } else {
                       ToastAndroid.show(
-                        'Failed to add address',
+                        `Failed to ${editAddress ? 'update' : 'add'} address`,
                         ToastAndroid.LONG,
                       );
                     }
@@ -497,7 +577,7 @@ function AddAddress() {
                     formSubmitting && styles.confirmButtonTextSubmitting,
                   ]}
                 >
-                  {formSubmitting ? 'Submitting...' : 'Confirm Address'}
+                  {formSubmitting ? 'Submitting...' : editAddress ? 'Update Address' : 'Confirm Address'}
                 </Text>
               </TouchableOpacity>
             </ScrollView>
@@ -556,34 +636,29 @@ function AddAddress() {
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.locationSection}>
-                <Text style={styles.sectionTitle}>NEARBY LOCATIONS</Text>
-                <TouchableOpacity style={styles.locationItem}>
-                  <Text style={styles.locationPin}>📍</Text>
-                  <View style={styles.locationDetails}>
-                    <Text style={styles.locationName}>
-                      Itsy Hotels Cradle Regency
-                    </Text>
-                    <Text style={styles.locationAddress}>
-                      Beside New AG Colony Road, Basant Vihar, Kadru, Ashok
-                      Nagar, Ranchi, J...
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.locationSection}>
-                <Text style={styles.sectionTitle}>RECENT LOCATIONS</Text>
-                <TouchableOpacity style={styles.locationItem}>
-                  <View style={styles.recentLocationIcon}>
-                    <Text style={styles.clockIcon}>🕐</Text>
-                    <Text style={styles.distanceText}>0 m</Text>
-                  </View>
-                  <View style={styles.locationDetails}>
-                    <Text style={styles.locationName}>Work</Text>
-                    <Text style={styles.locationAddress}>
-                      Harmu Housing Colony, Delatoli, Ranchi
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+                <Text style={styles.sectionTitle}>SAVED ADDRESSES</Text>
+                {isAddressesLoading ? (
+                  <ActivityIndicator size="small" color={COLORS.primary} style={{ marginVertical: 20 }} />
+                ) : (
+                  savedAddresses?.map((addr) => (
+                    <TouchableOpacity 
+                      key={addr.id} 
+                      style={styles.locationItem}
+                      onPress={() => handleSelectSavedAddress(addr)}
+                    >
+                      <Text style={styles.locationPin}>
+                        {addr.type.toUpperCase() === 'HOME' ? '🏠' : addr.type.toUpperCase() === 'WORK' ? '🏢' : '📍'}
+                      </Text>
+                      <View style={styles.locationDetails}>
+                        <Text style={styles.locationName}>{addr.type}</Text>
+                        <Text style={styles.locationAddress}>{addr.completeAddress}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))
+                )}
+                {(!isAddressesLoading && (!savedAddresses || savedAddresses.length === 0)) && (
+                   <Text style={{ textAlign: 'center', color: COLORS.muted, marginVertical: 10 }}>No saved addresses</Text>
+                )}
               </View>
               <View style={styles.googleAttribution}>
                 <Text style={styles.poweredByText}>powered by </Text>

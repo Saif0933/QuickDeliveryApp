@@ -17,9 +17,11 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useGetUserProfile } from '../api/hooks/user';
+import { useAuth } from '../Context/AuthContext';
 import { COLORS } from '../theme/color';
 import VegMode from './VegMode';
-import { useGetUserProfile } from '../api/hooks/user';
+
 
 type RootStackParamList = {
   ProfilePage: undefined;
@@ -42,6 +44,9 @@ type RootStackParamList = {
   NotificationScreen: undefined;
   AccountSettingsScreen: undefined;
   ShareApp: undefined;
+  PrivacyPolicy: undefined;
+  RefundPolicy: undefined;
+  TermsAndConditions: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -53,6 +58,8 @@ const ProfileScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [vegModeVisible, setVegModeVisible] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
+  const { logout } = useAuth();
+
 
   // --- Share Function ---
   const onShare = async () => {
@@ -272,7 +279,22 @@ const ProfileScreen = () => {
                     <ListItem icon="information-outline" label="About us" onPress={() => navigation.navigate('AboutScreen')} />
                     <ListItem icon="lock-outline" label="Account privacy" onPress={() => navigation.navigate('AccountSettingsScreen')}/>
                     <ListItem icon="bell-outline" label="Notification preferences" onPress={() => navigation.navigate('NotificationScreen')}/>
-                    <ListItem icon="logout" label="Log out" onPress={() => navigation.navigate('Login')} last />
+                    <ListItem icon="file-document-outline" label="Terms & Conditions" onPress={() => navigation.navigate('TermsAndConditions')} />
+                    <ListItem icon="shield-check-outline" label="Privacy & Policy" onPress={() => navigation.navigate('PrivacyPolicy')} />
+                    <ListItem icon="cash-refund" label="Return & Refund Policy" onPress={() => navigation.navigate('RefundPolicy')} />
+                    <ListItem 
+                      icon="logout" 
+                      label="Log out" 
+                      onPress={async () => {
+                        await logout();
+                        navigation.reset({
+                          index: 0,
+                          routes: [{ name: 'Login' }],
+                        });
+                      }} 
+                      last 
+                    />
+
                 </View>
             </View>
 

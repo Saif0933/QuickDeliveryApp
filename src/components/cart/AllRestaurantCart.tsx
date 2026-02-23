@@ -1,35 +1,63 @@
+
 // import React, { useState } from 'react';
 // import {
-//   View,
-//   Text,
-//   StyleSheet,
-//   ScrollView,
-//   TouchableOpacity,
-//   Image,
-//   TextInput,
+//     Image,
+//     ScrollView,
+//     StyleSheet,
+//     Text,
+//     TextInput,
+//     TouchableOpacity,
+//     View,
 // } from 'react-native';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 // import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// // --- Colors ---
-// const COLORS = {
-//   primary: '#E23744',
-//   blueBanner: '#EAF2FF',
-//   blueText: '#2D74D4',
-//   greenBanner: '#F0FFF4',
-//   greenText: '#24963F',
-//   pinkBanner: '#FFF5F6',
-//   pinkText: '#E23744',
-//   textPrimary: '#1C1C1C',
-//   textSecondary: '#686B78',
-//   border: '#E0E0E0',
-//   background: '#F4F5F8',
-//   white: '#FFFFFF',
+// // --- New Theme Colors ---
+// export const COLORS = {
+//   primary: '#0049AD',      // Deep Purple (for buttons, highlights)
+//   accent: '#9facf8ff',     // Lavender (hover, subtle accents)
+//   secondary: '#b6d2f8ff',  // Soft Pink (for backgrounds, cards)
+//   highlight: '#52b957ff',  // Coral/Peach (alerts, badges) - Used for Veg/Success
+//   background: '#fafafa',   // Default background
+//   white: '#ffffff',        // White color
+//   textPrimary: '#222222',  // Main text
+//   textSecondary: '#4a4a4a',// Secondary text
+//   muted: '#888888',        // Muted text or icons
+//   yelow: '#fbc02d',        // Gold/Yellow color
+//   black: '#000000',
+//   RED: '#b91c1c',          // Red color (Non-Veg)
+//   TEXT_DARK: '#1F2937',
+//   SOFT_BLUE: "#DBEAFE",
+//   SOFT_RED: "#FEE2E2",
+//   SOFT_GREEN: "#DCFCE7",
+//   LITE_GRAY: "#9ca3af",
 // };
 
+// // --- TypeScript Interfaces ---
+// interface CartItem {
+//   id: number;
+//   restaurant: string;
+//   name: string;
+//   description: string;
+//   price: number;
+//   isVeg: boolean;
+//   quantity: number;
+// }
+
+// interface OrderItemProps {
+//   item: CartItem;
+//   onInc: () => void;
+//   onDec: () => void;
+// }
+
+// interface SectionHeaderProps {
+//   title: string;
+//   onRemove: () => void;
+// }
+
 // const CheckoutScreen = () => {
-//   // --- State for Items (To handle Quantity) ---
-//   const [cartItems, setCartItems] = useState([
+//   // --- State for Items ---
+//   const [cartItems, setCartItems] = useState<CartItem[]>([
 //     {
 //       id: 1,
 //       restaurant: 'Pizza Hut',
@@ -53,7 +81,7 @@
 //   const [donationAmount, setDonationAmount] = useState('3');
 
 //   // --- Handlers ---
-//   const handleIncrement = (id) => {
+//   const handleIncrement = (id: number) => {
 //     setCartItems((prevItems) =>
 //       prevItems.map((item) =>
 //         item.id === id ? { ...item, quantity: item.quantity + 1 } : item
@@ -61,7 +89,7 @@
 //     );
 //   };
 
-//   const handleDecrement = (id) => {
+//   const handleDecrement = (id: number) => {
 //     setCartItems((prevItems) =>
 //       prevItems.map((item) =>
 //         item.id === id && item.quantity > 1
@@ -72,7 +100,7 @@
 //   };
 
 //   // --- Reusable Components ---
-//   const SectionHeader = ({ title, onRemove }) => (
+//   const SectionHeader = ({ title, onRemove }: SectionHeaderProps) => (
 //     <View style={styles.sectionHeader}>
 //       <View style={styles.restaurantInfo}>
 //         <Image
@@ -90,17 +118,17 @@
 //     </View>
 //   );
 
-//   // Updated OrderItem to accept quantity and handlers
-//   const OrderItem = ({ item, onInc, onDec }) => (
+//   // --- Fixed OrderItem with Types ---
+//   const OrderItem = ({ item, onInc, onDec }: OrderItemProps) => (
 //     <View style={styles.orderItemContainer}>
 //       <View style={styles.itemDetails}>
 //         <View style={styles.vegNonVegIcon}>
 //           <MaterialCommunityIcons
 //             name="square-rounded"
 //             size={16}
-//             color={item.isVeg ? 'green' : 'red'}
+//             color={item.isVeg ? COLORS.highlight : COLORS.RED}
 //           />
-//           <View style={[styles.innerDot, { backgroundColor: item.isVeg ? 'green' : 'red' }]} />
+//           <View style={[styles.innerDot, { backgroundColor: item.isVeg ? COLORS.highlight : COLORS.RED }]} />
 //         </View>
 //         <View style={{ flex: 1 }}>
 //           <Text style={styles.itemName}>{item.name}</Text>
@@ -135,7 +163,7 @@
 //       {/* --- Header --- */}
 //       <View style={styles.header}>
 //         <TouchableOpacity>
-//           <Ionicons name="arrow-back" size={24} color="black" />
+//           <Ionicons name="arrow-back" size={24} color={COLORS.black} />
 //         </TouchableOpacity>
 //         <Text style={styles.headerTitle}>2 restaurants</Text>
 //       </View>
@@ -143,7 +171,7 @@
 //       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
 //         {/* --- Savings Banner --- */}
 //         <View style={styles.savingsBanner}>
-//           <MaterialCommunityIcons name="party-popper" size={20} color={COLORS.blueText} />
+//           <MaterialCommunityIcons name="party-popper" size={20} color={COLORS.primary} />
 //           <Text style={styles.savingsText}>You saved ₹13 on this order</Text>
 //         </View>
 
@@ -193,9 +221,10 @@
 //             <Text style={styles.addMoreText}>+ Add more items</Text>
 //           </TouchableOpacity>
 //           <View style={styles.noteContainer}>
-//             <MaterialCommunityIcons name="file-document-outline" size={20} color="#888" />
+//             <MaterialCommunityIcons name="file-document-outline" size={20} color={COLORS.muted} />
 //             <TextInput
 //               placeholder="Add a note for the restaurant"
+//               placeholderTextColor={COLORS.muted}
 //               style={styles.noteInput}
 //             />
 //           </View>
@@ -213,9 +242,10 @@
 //             <Text style={styles.addMoreText}>+ Add more items</Text>
 //           </TouchableOpacity>
 //           <View style={styles.noteContainer}>
-//             <MaterialCommunityIcons name="file-document-outline" size={20} color="#888" />
+//             <MaterialCommunityIcons name="file-document-outline" size={20} color={COLORS.muted} />
 //             <TextInput
 //               placeholder="Add a note for the restaurant"
+//               placeholderTextColor={COLORS.muted}
 //               style={styles.noteInput}
 //             />
 //           </View>
@@ -235,23 +265,23 @@
 //           </TouchableOpacity>
 
 //           <View style={styles.billRow}>
-//             <MaterialCommunityIcons name="moped" size={20} color="#888" />
+//             <MaterialCommunityIcons name="moped" size={20} color={COLORS.muted} />
 //             <Text style={styles.billLabel}>2 separate deliveries</Text>
-//             <Ionicons name="chevron-forward" size={20} color="#888" />
+//             <Ionicons name="chevron-forward" size={20} color={COLORS.muted} />
 //           </View>
 
 //           <View style={styles.billRow}>
-//             <MaterialCommunityIcons name="receipt" size={20} color="#888" />
+//             <MaterialCommunityIcons name="receipt" size={20} color={COLORS.muted} />
 //             <Text style={styles.billLabel}>Total Bill</Text>
 //             <Text style={styles.billValue}>
-//               <Text style={{ textDecorationLine: 'line-through', color: '#888' }}>₹680.30</Text> ₹667.80
+//               <Text style={{ textDecorationLine: 'line-through', color: COLORS.muted }}>₹680.30</Text> ₹667.80
 //             </Text>
 //           </View>
 //           <Text style={styles.totalSaved}>You saved ₹13</Text>
 //           <Text style={styles.inclTaxes}>Incl. taxes and charges</Text>
 //         </View>
 
-//         {/* --- Donate to Feeding India (MATCHED TO IMAGE) --- */}
+//         {/* --- Donate to Feeding India --- */}
 //         <View style={styles.donationSection}>
 //           <View style={styles.donationHeader}>
 //              <View style={{flex: 1}}>
@@ -272,7 +302,7 @@
 //                       keyboardType="numeric"
 //                    />
 //                    <TouchableOpacity>
-//                       <MaterialCommunityIcons name="pencil-outline" size={12} color="#333" />
+//                       <MaterialCommunityIcons name="pencil-outline" size={12} color={COLORS.textPrimary} />
 //                    </TouchableOpacity>
 //                 </View>
 //                 <TouchableOpacity style={styles.feedingAddBtn}>
@@ -297,10 +327,11 @@
 //       {/* --- Bottom Button --- */}
 //       <View style={styles.bottomContainer}>
 //         <View style={styles.walletBalance}>
-//             <Text style={styles.walletText}>Zomato Money Balance: ₹0 • </Text>
+//             <Text style={styles.walletText}>Restro Money Balance: ₹0 • </Text>
 //             <TouchableOpacity><Text style={styles.addMoneyText}>Add money</Text></TouchableOpacity>
 //         </View>
-//         <TouchableOpacity style={styles.placeOrderBtn}>
+//         <TouchableOpacity style={styles.placeOrderBtn}
+//         onPress={() => navigation.navigate('LocationScreen')}>
 //           <Text style={styles.placeOrderBtnText}>Select address at next step ›</Text>
 //         </TouchableOpacity>
 //       </View>
@@ -308,7 +339,7 @@
 //   );
 // };
 
-// // --- Styles ---
+// // --- Styles with New Theme ---
 // const styles = StyleSheet.create({
 //   container: {
 //     flex: 1,
@@ -320,7 +351,7 @@
 //     padding: 16,
 //     backgroundColor: COLORS.white,
 //     borderBottomWidth: 1,
-//     borderBottomColor: COLORS.border,
+//     borderBottomColor: '#e0e0e0',
 //   },
 //   headerTitle: {
 //     fontSize: 18,
@@ -334,25 +365,25 @@
 //   savingsBanner: {
 //     flexDirection: 'row',
 //     alignItems: 'center',
-//     backgroundColor: COLORS.blueBanner,
+//     backgroundColor: COLORS.SOFT_BLUE,
 //     padding: 12,
 //   },
 //   savingsText: {
-//     color: COLORS.blueText,
+//     color: COLORS.primary,
 //     fontWeight: 'bold',
 //     marginLeft: 8,
 //   },
 //   deliveryNoteBanner: {
-//     backgroundColor: COLORS.greenBanner,
+//     backgroundColor: COLORS.SOFT_GREEN,
 //     padding: 12,
 //     alignItems: 'center',
 //   },
 //   deliveryNoteText: {
-//     color: COLORS.greenText,
+//     color: COLORS.highlight,
 //     fontWeight: 'bold',
 //   },
 //   specialOfferBanner: {
-//     backgroundColor: COLORS.pinkBanner,
+//     backgroundColor: COLORS.SOFT_RED,
 //     padding: 16,
 //     margin: 16,
 //     borderRadius: 12,
@@ -382,7 +413,7 @@
 //   },
 //   offerLink: {
 //     fontSize: 12,
-//     color: COLORS.blueText,
+//     color: COLORS.primary,
 //     marginTop: 4,
 //   },
 //   offerStatus: {
@@ -391,8 +422,8 @@
 //   offerAdded: {
 //     fontSize: 12,
 //     fontWeight: 'bold',
-//     color: COLORS.pinkText,
-//     backgroundColor: '#FAD4D8',
+//     color: COLORS.primary,
+//     backgroundColor: COLORS.white,
 //     paddingHorizontal: 6,
 //     paddingVertical: 2,
 //     borderRadius: 4,
@@ -470,7 +501,7 @@
 //   },
 //   editText: {
 //     fontSize: 12,
-//     color: COLORS.blueText,
+//     color: COLORS.primary,
 //     marginTop: 4,
 //     fontWeight: 'bold',
 //   },
@@ -481,8 +512,8 @@
 //     flexDirection: 'row',
 //     alignItems: 'center',
 //     borderWidth: 1,
-//     borderColor: '#e23744', // Pink/Red border
-//     backgroundColor: '#fff5f6', // Light pink background
+//     borderColor: COLORS.primary,
+//     backgroundColor: COLORS.background,
 //     borderRadius: 6,
 //     paddingVertical: 4,
 //     paddingHorizontal: 8,
@@ -493,12 +524,12 @@
 //   },
 //   qtyBtnText: {
 //     fontSize: 16,
-//     color: COLORS.pinkText,
+//     color: COLORS.primary,
 //     fontWeight: 'bold',
 //   },
 //   qtyText: {
 //     fontSize: 14,
-//     color: COLORS.pinkText,
+//     color: COLORS.primary,
 //     fontWeight: 'bold',
 //     marginHorizontal: 8,
 //   },
@@ -512,14 +543,14 @@
 //   },
 //   addMoreText: {
 //     fontSize: 14,
-//     color: COLORS.pinkText,
+//     color: COLORS.primary,
 //     fontWeight: 'bold',
 //   },
 //   noteContainer: {
 //     flexDirection: 'row',
 //     alignItems: 'center',
 //     borderWidth: 1,
-//     borderColor: COLORS.border,
+//     borderColor: COLORS.LITE_GRAY,
 //     borderRadius: 8,
 //     paddingHorizontal: 12,
 //   },
@@ -528,6 +559,7 @@
 //     marginLeft: 8,
 //     fontSize: 14,
 //     paddingVertical: 10,
+//     color: COLORS.textPrimary
 //   },
 //   billDetailsSection: {
 //     backgroundColor: COLORS.white,
@@ -538,7 +570,7 @@
 //     flexDirection: 'row',
 //     alignItems: 'center',
 //     borderWidth: 1,
-//     borderColor: COLORS.border,
+//     borderColor: COLORS.LITE_GRAY,
 //     borderRadius: 8,
 //     padding: 12,
 //     marginBottom: 16,
@@ -559,7 +591,7 @@
 //   },
 //   applyBtnText: {
 //     fontSize: 14,
-//     color: COLORS.pinkText,
+//     color: COLORS.primary,
 //     fontWeight: 'bold',
 //   },
 //   billRow: {
@@ -580,8 +612,8 @@
 //   },
 //   totalSaved: {
 //     fontSize: 12,
-//     color: COLORS.blueText,
-//     backgroundColor: COLORS.blueBanner,
+//     color: COLORS.primary,
+//     backgroundColor: COLORS.SOFT_BLUE,
 //     alignSelf: 'flex-start',
 //     paddingHorizontal: 6,
 //     paddingVertical: 2,
@@ -595,7 +627,7 @@
 //     marginLeft: 32,
 //   },
   
-//   // --- DONATION STYLES (MATCHING IMAGE) ---
+//   // --- DONATION STYLES ---
 //   donationSection: {
 //     backgroundColor: COLORS.white,
 //     padding: 16,
@@ -622,7 +654,7 @@
 //     flexDirection: 'row',
 //     alignItems: 'center',
 //     borderWidth: 1,
-//     borderColor: '#e0e0e0',
+//     borderColor: COLORS.LITE_GRAY,
 //     borderRadius: 8,
 //     height: 36,
 //     overflow: 'hidden',
@@ -632,19 +664,19 @@
 //     alignItems: 'center',
 //     paddingHorizontal: 8,
 //     borderRightWidth: 1,
-//     borderRightColor: '#e0e0e0',
+//     borderRightColor: COLORS.LITE_GRAY,
 //     backgroundColor: '#fff',
 //     height: '100%',
 //   },
 //   feedingCurrency: {
 //     fontSize: 14,
 //     fontWeight: 'bold',
-//     color: '#333',
+//     color: COLORS.textPrimary,
 //   },
 //   feedingInput: {
 //     fontSize: 14,
 //     fontWeight: 'bold',
-//     color: '#333',
+//     color: COLORS.textPrimary,
 //     width: 20,
 //     textAlign: 'center',
 //     padding: 0, 
@@ -685,7 +717,7 @@
 //     backgroundColor: COLORS.white,
 //     padding: 16,
 //     borderTopWidth: 1,
-//     borderTopColor: COLORS.border,
+//     borderTopColor: '#e0e0e0',
 //   },
 //     walletBalance: {
 //     flexDirection: 'row',
@@ -719,13 +751,13 @@
 
 import React, { useState } from 'react';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -773,7 +805,8 @@ interface SectionHeaderProps {
   onRemove: () => void;
 }
 
-const CheckoutScreen = () => {
+// FIX: Added { navigation }: any to props to resolve "Cannot find name 'navigation'"
+const CheckoutScreen = ({ navigation }: any) => {
   // --- State for Items ---
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
@@ -880,7 +913,8 @@ const CheckoutScreen = () => {
     <View style={styles.container}>
       {/* --- Header --- */}
       <View style={styles.header}>
-        <TouchableOpacity>
+        {/* FIX: Added navigation.goBack() to make the back button work */}
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={COLORS.black} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>2 restaurants</Text>
@@ -1045,10 +1079,11 @@ const CheckoutScreen = () => {
       {/* --- Bottom Button --- */}
       <View style={styles.bottomContainer}>
         <View style={styles.walletBalance}>
-            <Text style={styles.walletText}>Zomato Money Balance: ₹0 • </Text>
+            <Text style={styles.walletText}>Restro Money Balance: ₹0 • </Text>
             <TouchableOpacity><Text style={styles.addMoneyText}>Add money</Text></TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.placeOrderBtn}>
+        <TouchableOpacity style={styles.placeOrderBtn}
+        onPress={() => navigation.navigate('LocationScreen')}>
           <Text style={styles.placeOrderBtnText}>Select address at next step ›</Text>
         </TouchableOpacity>
       </View>

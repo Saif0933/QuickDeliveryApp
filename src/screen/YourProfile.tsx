@@ -10,9 +10,8 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  ToastAndroid,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -52,12 +51,10 @@ const YourProfile: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    const payload: { name?: string; email?: string } = {};
-    
-    if (name.trim()) payload.name = name.trim();
-    if (email.trim()) payload.email = email.trim();
-
-    updateUser(payload, {
+    updateUser({
+      name: name.trim(),
+      email: email.trim(),
+    }, {
       onSuccess: () => {
         SuccessMessage("Profile updated successfully!");
         setIsEditing(false);
@@ -68,9 +65,20 @@ const YourProfile: React.FC<Props> = ({ navigation }) => {
     });
   };
 
+  const toggleEdit = () => {
+    if (isEditing) {
+      // Revert changes on cancel
+      setName(userProfile?.name || "");
+      setEmail(userProfile?.email || "");
+      setIsEditing(false);
+    } else {
+      setIsEditing(true);
+    }
+  };
+
   const handleBack = () => {
     if (isEditing) {
-      Alert.alert("Discard changes?", "", [
+      Alert.alert("Discard changes?", "You have unsaved changes.", [
         { text: "No", style: "cancel" },
         { text: "Yes", onPress: () => navigation?.goBack() },
       ]);
@@ -91,7 +99,7 @@ const YourProfile: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.headerTitle}>Edit Profile</Text>
         <TouchableOpacity 
           style={styles.textBtn} 
-          onPress={() => setIsEditing(!isEditing)}
+          onPress={toggleEdit}
         >
           <Text style={[styles.editText, isEditing && { color: COLORS.primary }]}>
             {isEditing ? "Cancel" : "Edit"}

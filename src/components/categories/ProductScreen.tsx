@@ -1710,6 +1710,9 @@ export default function PizzaProjectScreen({ navigation, route }: { navigation: 
                         <Text style={styles.resTitleMain}>{vendorName}</Text>
                         <View style={styles.resTitleSubRow}>
                             <Text style={styles.resTitleSub}>By Oven Story</Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('RestaurantInfoScreen')}>
+                                <Ionicons name="information-circle-outline" size={18} color={COLORS.textPrimary} style={{ marginLeft: 6 }} />
+                            </TouchableOpacity>
                         </View>
                     </View>
                     <View style={styles.ratingContainer}>

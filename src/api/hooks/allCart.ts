@@ -77,3 +77,16 @@ export const useGetUserCart = () => {
     queryFn: getUserCart,
   });
 };
+
+
+export const GetCartByVendorId = async (vendorId: number) => {
+  const res = await api.get(`/user/cart/vendor/${vendorId}`);
+  return res.data.data;
+};
+
+export const useGetCartByVendorId = (vendorId: number) => {
+  return useQuery({
+    queryKey: ["cart-by-vendor", vendorId],
+    queryFn: () => GetCartByVendorId(vendorId),
+  });
+};

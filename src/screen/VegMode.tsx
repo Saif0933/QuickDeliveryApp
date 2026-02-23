@@ -1,15 +1,31 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  ScrollView,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const VegMode = ({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
+const VegMode = ({ 
+  visible = true, 
+  onClose, 
+  navigation 
+}: { 
+  visible?: boolean; 
+  onClose?: () => void; 
+  navigation?: any 
+}) => {
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else if (navigation) {
+      navigation.goBack();
+    }
+  };
+
   const [dishOption, setDishOption] = useState("all"); // all | pure
   const [dayOption, setDayOption] = useState("all"); // all | custom
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -25,7 +41,7 @@ const VegMode = ({ visible, onClose }: { visible: boolean; onClose: () => void }
       <View style={styles.overlay}>
         <View style={styles.modal}>
           {/* Close Button */}
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <Icon name="close" size={22} color="#000" />
         </TouchableOpacity>
 

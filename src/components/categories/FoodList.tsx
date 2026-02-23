@@ -22,8 +22,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useGetAllCategory } from "../../api/hooks/getAllCategory";
-import { COLORS } from "../../theme/color";
+import { useGetInventoryByCategory, VendorProduct } from "../../api/hooks/inventory";
 import { useGetAllVendors } from "../../api/hooks/useVender";
+import { COLORS } from "../../theme/color";
 
 const { width } = Dimensions.get("window");
 
@@ -57,12 +58,41 @@ interface FilterContentMap {
   [key: string]: FilterContentItem[];
 }
 
+// --- Helper for Robust Image Resolution ---
+const resolveImageUrl = (imageSource: any): string => {
+  if (!imageSource) return "https://via.placeholder.com/200";
+  
+  // 1. If it's a direct string
+  if (typeof imageSource === 'string') return imageSource;
+  
+  // 2. If it's an object with .url
+  if (imageSource.url) return imageSource.url;
+  
+  // 3. If it's an object with .image.url
+  if (imageSource.image?.url) return imageSource.image.url;
+  
+  // 4. If it's an array, try the first element
+  if (Array.isArray(imageSource) && imageSource.length > 0) {
+    const first = imageSource[0];
+    if (typeof first === 'string') return first;
+    return first.url || first.image?.url || "https://via.placeholder.com/200";
+  }
+  
+  // 5. Check deeply for any .url property if it's an object
+  if (typeof imageSource === 'object') {
+     // Common pattern in some APIs: { images: { url: '...' } }
+     if (imageSource.images?.url) return imageSource.images.url;
+     if (imageSource.images?.[0]?.url) return imageSource.images[0].url;
+     if (imageSource.images?.[0]?.image?.url) return imageSource.images[0].image.url;
+  }
+
+  return "https://via.placeholder.com/200";
+};
+
 interface Category {
   id: string;
   name: string;
-  image?: {
-    url: string;
-  };
+  image?: any;
 }
 
 interface VendorAPI {
@@ -453,18 +483,11 @@ const VegIcon = ({ isVeg }: { isVeg: boolean }) => (
 
 interface FilterSectionProps {
   categories: Category[];
+  selectedCategory: string | null;
+  onSelectCategory: (id: string) => void;
 }
 
-const FilterSection = ({ categories }: FilterSectionProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  // Set default selection when data loads
-  useEffect(() => {
-    if (categories && categories.length > 0 && !selectedCategory) {
-      setSelectedCategory(categories[0].id);
-    }
-  }, [categories]);
-
+const FilterSection = ({ categories, selectedCategory, onSelectCategory }: FilterSectionProps) => {
   return (
     <View style={styles.filterContainer}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16 }}>
@@ -474,10 +497,10 @@ const FilterSection = ({ categories }: FilterSectionProps) => {
             <TouchableOpacity 
               key={item.id} 
               style={styles.filterItem}
-              onPress={() => setSelectedCategory(item.id)}
+              onPress={() => onSelectCategory(item.id)}
             >
-              {/* Image without border container, matching Home Screen */}
-              <Image source={{ uri: item.image?.url }} style={styles.filterImage} />
+              {/* Robust Image Resolution for Categories */}
+              <Image source={{ uri: resolveImageUrl(item.image) }} style={styles.filterImage} />
               
               <Text style={[styles.filterText, isSelected && styles.activeFilterText]}>
                 {item.name}
@@ -499,6 +522,7 @@ interface RestaurantCardProps {
 }
 
 const RestaurantCard = ({ item, index }: RestaurantCardProps) => {
+  const navigation = useNavigation<any>();
   const scaleValue = useRef(new Animated.Value(1)).current;
 
   const onPressIn = () => {
@@ -522,6 +546,11 @@ const RestaurantCard = ({ item, index }: RestaurantCardProps) => {
         activeOpacity={0.9}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
+        onPress={() => navigation.navigate('ProductScreen', { 
+          vendorId: item.id, 
+          vendorName: item.restaurantName,
+          vendorImage: item.logo 
+        })}
       >
         <View style={styles.restaurantHeader}>
           <View style={styles.logoContainer}>
@@ -570,8 +599,14 @@ const RestaurantCard = ({ item, index }: RestaurantCardProps) => {
           <View style={styles.foodImageContainer}>
             <Image source={{ uri: item.foodImage }} style={styles.foodImage} />
             <View style={styles.addButton}>
-              <TouchableOpacity>
-                <Text style={styles.addText}>ADD</Text>
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('ProductScreen', { 
+                  vendorId: item.id, 
+                  vendorName: item.restaurantName,
+                  vendorImage: item.logo 
+                })}
+              >
+                <Text style={styles.addText}>view</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -583,35 +618,83 @@ const RestaurantCard = ({ item, index }: RestaurantCardProps) => {
 
 export default function FoodList() {
   const navigation = useNavigation();
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // 2. Fetch Category Data
   const { data: categoryData, isLoading: categoryLoading } = useGetAllCategory({});
   
   // --- API INTEGRATION ---
-  const { data: restaurantData, isLoading } = useGetAllVendors({ limit: 20 });
+  const { data: restaurantData, isLoading: vendorsLoading } = useGetAllVendors({ limit: 20 });
+  
+  // Dynamic Inventory Hook (Search + Category)
+  const { 
+    data: inventoryData, 
+    isLoading: inventoryLoading,
+    fetchNextPage: fetchNextInventoryPage,
+    hasNextPage: hasNextInventoryPage
+  } = useGetInventoryByCategory({ 
+    categoryId: selectedCategory || "", 
+    search,
+    limit: 10
+  });
+
+  const isLoading = vendorsLoading || inventoryLoading || categoryLoading;
 
   // Flatten the pages into a single array
   const allVendors: VendorAPI[] = restaurantData?.pages.flatMap((page: any) => page.vendors).slice(0, 20) || [];
+  
+  const allProducts: VendorProduct[] = inventoryData?.pages.flatMap(page => page.products) || [];
 
   // --- RENDER ITEM FOR FLATLIST ---
-  const renderVendorItem = ({ item, index }: { item: VendorAPI; index: number }) => {
-    // Transform API Data to Match Component Props
-    const mappedItem: MappedVendor = {
-        id: item.id,
-        restaurantName: item.shopName || item.companyName || 'Unknown Store',
-        location: item.city || 'Ranchi',
-        time: "30-40 mins", // Placeholder
-        rating: "4.2", // Placeholder
-        logo: item.images?.url || "https://via.placeholder.com/150",
-        offerText: "FLAT", // Placeholder
-        offerSub: "20% OFF", // Placeholder
-        foodName: "Special Item", // Placeholder
-        price: "150", // Placeholder
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
+    // If it's a product from inventory
+    if (item.product) {
+        const productItem = item as VendorProduct;
+        // Check for both camelCase and PascalCase vendor relation
+        const vInfo = productItem.vendor || (productItem as any).Vendor;
+        
+        const mappedItem: MappedVendor = {
+            id: productItem.id,
+            // Broaden name matching
+            restaurantName: vInfo?.shopName || vInfo?.companyName || vInfo?.ownerName || vInfo?.name || vInfo?.title || 'Delicious Restaurant',
+            location: vInfo?.city || vInfo?.mainAddress || 'Ranchi',
+            time: "30-40 mins",
+            rating: "4.2",
+            // Robust image mapping for vendor logo
+            logo: resolveImageUrl(vInfo?.images || vInfo?.image || vInfo?.logo),
+            offerText: "FLAT",
+            offerSub: "20% OFF",
+            foodName: productItem.product.name,
+            price: productItem.product.sellingPrice?.d?.[0]?.toString() || "0",
+            isVeg: productItem.product.isVeg,
+            // Robust image mapping for product image
+            foodImage: resolveImageUrl(productItem.product.images || []),
+        };
+        return <RestaurantCard item={mappedItem} index={index} />;
+    }
+
+    // Default Vendor rendering (fallback)
+    const vendorItem = item as any;
+    const mappedVendor: MappedVendor = {
+        id: vendorItem.id,
+        // Broaden name matching
+        restaurantName: vendorItem.shopName || vendorItem.companyName || vendorItem.ownerName || vendorItem.name || vendorItem.title || 'Delicious Restaurant',
+        location: vendorItem.city || vendorItem.mainAddress || 'Ranchi',
+        time: "30-40 mins",
+        rating: vendorItem.rating || "4.2",
+        // Robust image mapping for vendor logo
+        logo: resolveImageUrl(vendorItem.images || vendorItem.image || vendorItem.logo),
+        offerText: "FLAT",
+        offerSub: "20% OFF",
+        foodName: "Chef's Special",
+        price: "199",
         isVeg: true,
-        foodImage: item.images?.url || "https://via.placeholder.com/150",
+        // Using vendor image as fallback food image for vendor cards
+        foodImage: resolveImageUrl(vendorItem.images || vendorItem.image || vendorItem.logo),
     };
 
-    return <RestaurantCard item={mappedItem} index={index} />;
+    return <RestaurantCard item={mappedVendor} index={index} />;
   };
 
   // --- HEADER COMPONENT ---
@@ -625,7 +708,11 @@ export default function FoodList() {
              <ActivityIndicator size="small" color={COLORS.primary} />
           </View>
        ) : (
-          <FilterSection categories={categoryData || []} />
+          <FilterSection 
+            categories={categoryData || []} 
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
        )}
 
        <QuickFilters />
@@ -657,9 +744,15 @@ export default function FoodList() {
                     placeholder="Search dish or Res..."
                     placeholderTextColor={COLORS.muted}
                     style={styles.searchInput}
+                    value={search}
+                    onChangeText={setSearch}
                 />
-                <TouchableOpacity>
-                    <Ionicons name="mic-outline" size={18} color={COLORS.primary} />
+                <TouchableOpacity onPress={() => setSearch('')}>
+                    <Ionicons 
+                        name={search ? "close-circle-outline" : "mic-outline"} 
+                        size={18} 
+                        color={COLORS.primary} 
+                    />
                 </TouchableOpacity>
             </View>
         </View>
@@ -672,12 +765,23 @@ export default function FoodList() {
          </View>
       ) : (
         <FlatList
-            data={allVendors}
+            data={search || selectedCategory ? allProducts : allVendors}
             keyExtractor={(item) => item.id.toString()}
-            renderItem={renderVendorItem}
+            renderItem={renderItem}
             ListHeaderComponent={ListHeader}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
+            onEndReached={() => {
+              if (hasNextInventoryPage) fetchNextInventoryPage();
+            }}
+            onEndReachedThreshold={0.5}
+            ListEmptyComponent={() => (
+              !isLoading && (
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                  <Text style={{ color: COLORS.muted }}>No items found</Text>
+                </View>
+              )
+            )}
         />
       )}
 
