@@ -1562,6 +1562,7 @@ const AddItemModal = ({ visible, onClose, productData }: AddItemModalProps) => {
 // --- MAIN SCREEN ---
 // Define route params type
 type ProductScreenRouteParams = {
+  category: string;
   vendorId: string;
   vendorName: string;
   vendorImage: string;

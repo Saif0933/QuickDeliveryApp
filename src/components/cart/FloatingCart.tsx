@@ -20,7 +20,7 @@ import { COLORS } from '../../theme/color';
 type RootStackParamList = {
   CheckoutScreen: undefined;
   AllRestaurantCart: undefined;
-  ProductScreen: { vendorId: string; vendorName: string; vendorImage: string };
+  ProductScreen: { category: string; vendorId: string; vendorName: string; vendorImage: string };
 };
 
 // Vendor Cart Interface
@@ -136,6 +136,7 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ onMenuPress }) => {
   const handleVendorPress = (vendorCart: VendorCart) => {
     setShowAllCarts(false);
     navigation.navigate('ProductScreen', {
+      category: 'Cart',
       vendorId: vendorCart.vendorId.toString(),
       vendorName: vendorCart.vendorName,
       vendorImage: vendorCart.vendorLogo,

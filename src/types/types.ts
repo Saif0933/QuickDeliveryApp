@@ -5,7 +5,7 @@ export type RootStack = {
     Otp: undefined
     Home: undefined
     Category: undefined
-    ProductScreen: { vendorId: string; vendorName: string; vendorImage: string }
+    ProductScreen: { category: string; vendorId: string; vendorName: string; vendorImage: string }
     FoodList: undefined 
 }
 

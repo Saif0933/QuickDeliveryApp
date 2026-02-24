@@ -2,21 +2,21 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Animated,
-  Dimensions,
-  FlatList,
-  Image,
-  Modal,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Animated,
+    Dimensions,
+    FlatList,
+    Image,
+    Modal,
+    NativeScrollEvent,
+    NativeSyntheticEvent,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -519,9 +519,10 @@ const FilterSection = ({ categories, selectedCategory, onSelectCategory }: Filte
 interface RestaurantCardProps {
   item: MappedVendor;
   index: number;
+  category: string | null;
 }
 
-const RestaurantCard = ({ item, index }: RestaurantCardProps) => {
+const RestaurantCard = ({ item, index, category }: RestaurantCardProps) => {
   const navigation = useNavigation<any>();
   const scaleValue = useRef(new Animated.Value(1)).current;
 
@@ -547,6 +548,7 @@ const RestaurantCard = ({ item, index }: RestaurantCardProps) => {
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         onPress={() => navigation.navigate('ProductScreen', { 
+          category: category || "All",
           vendorId: item.id, 
           vendorName: item.restaurantName,
           vendorImage: item.logo 
@@ -601,6 +603,7 @@ const RestaurantCard = ({ item, index }: RestaurantCardProps) => {
             <View style={styles.addButton}>
               <TouchableOpacity 
                 onPress={() => navigation.navigate('ProductScreen', { 
+                  category: category || "All",
                   vendorId: item.id, 
                   vendorName: item.restaurantName,
                   vendorImage: item.logo 
@@ -671,7 +674,7 @@ export default function FoodList() {
             // Robust image mapping for product image
             foodImage: resolveImageUrl(productItem.product.images || []),
         };
-        return <RestaurantCard item={mappedItem} index={index} />;
+        return <RestaurantCard item={mappedItem} index={index} category={selectedCategory} />;
     }
 
     // Default Vendor rendering (fallback)
@@ -694,7 +697,7 @@ export default function FoodList() {
         foodImage: resolveImageUrl(vendorItem.images || vendorItem.image || vendorItem.logo),
     };
 
-    return <RestaurantCard item={mappedVendor} index={index} />;
+    return <RestaurantCard item={mappedVendor} index={index} category={selectedCategory} />;
   };
 
   // --- HEADER COMPONENT ---

@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Animated,
-  FlatList,
-  ImageSourcePropType,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Animated,
+    FlatList,
+    ImageSourcePropType,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
@@ -105,6 +105,7 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
       style={styles.card}
       activeOpacity={0.95}
       onPress={() => navigation.navigate("ProductScreen", {
+        category: "Recommended",
         vendorId: item.id,
         vendorName: item.name,
         vendorImage: (typeof item.images[0] === 'object' && 'uri' in item.images[0] 

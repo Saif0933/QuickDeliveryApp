@@ -1,10 +1,10 @@
 import React from 'react';
 import {
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View,
-  ScrollView,
-  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -65,7 +65,50 @@ const TermsAndConditions = () => {
         <Text style={styles.paragraph}>All orders are subject to restaurant acceptance and availability.</Text>
         <Text style={styles.subSectionTitle}>4.2 Pricing</Text>
         <Text style={styles.paragraph}>Prices displayed are determined by the restaurants and include applicable taxes and delivery fees.</Text>
+        <Text style={styles.subSectionTitle}>4.3 Payments</Text>
+        <Text style={styles.paragraph}>Payments may be processed via:</Text>
+        <Text style={styles.bulletItem}>• Credit/Debit Cards</Text>
+        <Text style={styles.bulletItem}>• Digital Wallets</Text>
+        <Text style={styles.bulletItem}>• UPI or other supported payment methods</Text>
+        <Text style={styles.paragraph}>
+          We use secure third-party payment processors. We do not store full payment card details.
+        </Text>
 
+        {/* Section 5: Cancellations and Refunds */}
+        <Text style={styles.sectionTitle}>5. Cancellations and Refunds</Text>
+        <Text style={styles.bulletItem}>• Orders may be cancelled before restaurant confirmation.</Text>
+        <Text style={styles.bulletItem}>• Refund eligibility depends on cancellation timing and reason.</Text>
+        <Text style={styles.bulletItem}>• Refund timelines may vary based on payment method.</Text>
+        <Text style={styles.paragraph}>
+          We reserve the right to refuse refunds in cases of abuse or fraudulent activity.
+        </Text>
+
+        {/* Section 6: User Conduct */}
+        <Text style={styles.sectionTitle}>6. User Conduct</Text>
+        <Text style={styles.paragraph}>You agree not to:</Text>
+        <Text style={styles.bulletItem}>• Post false, defamatory, or abusive reviews</Text>
+        <Text style={styles.bulletItem}>• Use the Platform for unlawful purposes</Text>
+        <Text style={styles.bulletItem}>• Attempt to disrupt the Platform’s functionality</Text>
+        <Text style={styles.bulletItem}>• Engage in fraudulent payment activities</Text>
+        <Text style={styles.paragraph}>
+          Violation may result in account suspension or legal action.
+        </Text>
+
+        {/* Section 7: User Content */}
+        <Text style={styles.sectionTitle}>7. User Content</Text>
+        <Text style={styles.paragraph}>
+          You retain ownership of content you submit (reviews, photos, comments), but grant Minta Restro a non-exclusive, royalty-free, worldwide license to use, modify, and display such content.
+        </Text>
+        <Text style={styles.paragraph}>
+          We reserve the right to remove content that violates laws or our policies.
+        </Text>
+
+        {/* Section 8: Google Play Compliance */}
+        <Text style={styles.sectionTitle}>8. Google Play Compliance</Text>
+        <Text style={styles.paragraph}>If you download the app from Google Play:</Text>
+        <Text style={styles.bulletItem}>• You acknowledge that Google is not responsible for the Platform.</Text>
+        <Text style={styles.bulletItem}>• Your use must comply with Google Play’s applicable policies.</Text>
+        <Text style={styles.bulletItem}>• Google Play and its affiliates are third-party beneficiaries of these Terms.</Text>
         {/* Section 9: Intellectual Property */}
         <Text style={styles.sectionTitle}>9. Intellectual Property</Text>
         <Text style={styles.paragraph}>
