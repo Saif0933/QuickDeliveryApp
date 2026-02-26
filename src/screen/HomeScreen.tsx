@@ -932,7 +932,6 @@
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import LottieView from 'lottie-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -942,6 +941,7 @@ import {
   Image,
   Modal,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Switch,
@@ -959,6 +959,7 @@ import { useGetAllCategory } from '../api/hooks/getAllCategory';
 import { useGetAllVendors } from '../api/hooks/useVender';
 import FoodList from '../components/FoodCard';
 import FloatingCart from '../components/cart/FloatingCart';
+import BottomNavBar from '../navigation/BottomNavBar';
 import { COLORS } from '../theme/color';
 
 const { width, height } = Dimensions.get('window');
@@ -970,7 +971,7 @@ type RootStackParamList = {
   GoldScreen: undefined;
   ZomatoMoneyPage: undefined;
   ProfileScreen: undefined;
-  FoodList: { category: string };
+  FoodList: { categoryId?: string; category?: string };
   ProductScreen: { category: string; vendorId: string; vendorName: string; vendorImage: string };
   CheckoutScreen: undefined;
   DiningScreen: undefined;
@@ -1002,7 +1003,7 @@ const BANNER_HEIGHT = 220;
 const HERO_HEIGHT = HEADER_HEIGHT + SEARCH_HEIGHT + BANNER_HEIGHT;
 
 const banners = [
-  { id: '1', img: require('../assets/restro.jpeg') },
+  { id: '1', img: require('../assets/logo.jpeg') },
   { id: '2', img: 'https://media.edinburgh.org/wp-content/uploads/2023/04/26161552/thumb_40653_point_of_interest_bigger.jpeg' },
 ];
 
@@ -1015,6 +1016,15 @@ const HomeScreen: React.FC = () => {
   const [activeFilterTab, setActiveFilterTab] = useState('Sort by');
   const [selectedSort, setSelectedSort] = useState('Popularity');
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Simulate a network request
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   const toggleFilter = (filter: string) => {
     setSelectedFilters(prev => 
@@ -1024,6 +1034,9 @@ const HomeScreen: React.FC = () => {
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const scrollY = useRef(new Animated.Value(0)).current;
+  const lastOffsetY = useRef(0);
+  const scrollDirection = useRef('');
+  const navBarTranslateY = useRef(new Animated.Value(0)).current;
 
   useFocusEffect(
     useCallback(() => {
@@ -1112,15 +1125,51 @@ const HomeScreen: React.FC = () => {
     extrapolate: 'clamp',
   });
 
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { 
+      useNativeDriver: false,
+      listener: (event: any) => {
+        const currentOffsetY = event.nativeEvent.contentOffset.y;
+        const diff = currentOffsetY - lastOffsetY.current;
+
+        if (currentOffsetY < 0) return; // Ignore bounce at top
+        
+        if (diff > 5 && scrollDirection.current !== 'down') {
+          scrollDirection.current = 'down';
+          Animated.timing(navBarTranslateY, {
+            toValue: 200, // Move nav bar down (hide)
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        } else if (diff < -5 && scrollDirection.current !== 'up') {
+          scrollDirection.current = 'up';
+          Animated.timing(navBarTranslateY, {
+            toValue: 0, // Move nav bar up (show)
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }
+
+        lastOffsetY.current = currentOffsetY;
+      }
+    }
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
+        onScroll={handleScroll}
         scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.primary]}
+            tintColor={COLORS.primary}
+          />
+        }
       >
         {/* Hero Section */}
         <View style={styles.heroContainer}>
@@ -1208,7 +1257,9 @@ const HomeScreen: React.FC = () => {
                   onPress={() => {
                     if (!c.isSpecial) {
                       setSelectedCategory(c.name);
-                      navigation.navigate('FoodList', { category: c.name });
+                      if (c.id !== 'static_all') {
+                        navigation.navigate('FoodList', { categoryId: c.id, category: c.name });
+                      }
                     }
                   }}
                 >
@@ -1258,6 +1309,11 @@ const HomeScreen: React.FC = () => {
                 onPress={() => f.id === 'filter' && setFilterModalVisible(true)}
               >
                 {f.icon === 'star' && <Ionicons name="star" size={12} color="#FFB300" style={{ marginRight: 4 }} />}
+                {f.id === 'filter' && <Ionicons name="options-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
+                {f.id === 'near_fast' && <Ionicons name="timer-outline" size={14} color={COLORS.primary} style={{ marginRight: 4 }} />}
+                {f.id === 'new_to_you' && <Ionicons name="sparkles-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
+                {f.id === 'great_offers' && <Ionicons name="pricetag-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
+                {f.id === 'under_200' && <Ionicons name="cash-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
                 <Text style={[styles.filterText, f.id === 'near_fast' && { color: COLORS.primary }]}>{f.name}</Text>
                 {f.id === 'filter' && <Ionicons name="chevron-down" size={14} color="#333" style={{ marginLeft: 4 }} />}
                 {f.icon === 'leaf' && <MaterialCommunityIcons name="leaf" size={14} color="#007E33" style={{ marginLeft: 4 }} />}
@@ -1556,27 +1612,7 @@ const HomeScreen: React.FC = () => {
       <FloatingCart />
 
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialCommunityIcons name="moped" size={26} color={COLORS.primary} />
-          <Text style={styles.navTextActive}>Delivery</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => navigation.navigate('DiningScreen')}
-          style={{ position: "absolute", top: -20, left: "50%", transform: [{ translateX: -35 }], zIndex: 99, alignItems: 'center' }}
-        >
-          <View style={styles.lottieBtn}>
-            <LottieView source={require('../assets/PaymentFailed.json')} style={{ width: 60, height: 60 }} autoPlay loop />
-          </View>
-          <Text style={styles.navTextActive}>Under 50%</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialCommunityIcons name="wallet-membership" size={26} color={COLORS.primary} />
-          <Text style={styles.navText}>Money</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomNavBar hideAnim={navBarTranslateY} />
     </SafeAreaView>
   );
 };
@@ -1595,7 +1631,10 @@ const RestaurantCard = ({ data }: { data: any }) => (
           <Text style={styles.ratingTextSmall}>{data.rating}★</Text>
         </View>
       </View>
-      <Text style={styles.recommendedTime}>{data.time}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Ionicons name="time-outline" size={12} color="#52b957ff" style={{ marginRight: 4 }} />
+        <Text style={styles.recommendedTime}>{data.time}</Text>
+      </View>
     </View>
   </View>
 );
@@ -1654,18 +1693,18 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 13, fontWeight: '800', color: COLORS.muted, marginLeft: 12, marginBottom: 12, letterSpacing: 1 },
   recommendedContainer: { paddingLeft: 12, marginBottom: 10 },
   recommendedRow: { flexDirection: 'row', marginBottom: 12 },
-  recommendedCard: { width: 120, height: 130, marginRight: 12, borderRadius: 12, backgroundColor: '#fff', elevation: 3 },
+  recommendedCard: { width: 120, height: 130, marginRight: 12, borderRadius: 12 },
   recommendedImg: { width: '100%', height: 80, borderTopLeftRadius: 12, borderTopRightRadius: 12 },
-  discountBadge: { position: 'absolute', top: 10, left: -4, backgroundColor: COLORS.primary, paddingHorizontal: 8, paddingVertical: 4, borderTopRightRadius: 4, borderBottomRightRadius: 4, marginLeft: 4 },
-  discountBadgeYellow: { backgroundColor: '#FFC107' },
+  discountBadge: { position: 'absolute', top: 10, left: -4, backgroundColor: '#000', paddingHorizontal: 4, paddingVertical: 4, borderTopRightRadius: 4, borderBottomRightRadius: 4, marginLeft: 4 },
+  discountBadgeYellow: { backgroundColor: '#000' },
   discountText: { fontSize: 8, color: '#fff', fontWeight: 'bold' },
-  discountTextDark: { color: '#000' },
+  discountTextDark: { color: '#fff' },
   cardContent: { padding: 10 },
   nameRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   recommendedName: { fontSize: 13, fontWeight: '800', color: '#1C1C1C', flex: 1 },
   ratingBadgeSmall: { backgroundColor: COLORS.highlight, borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, marginLeft: 4 },
   ratingTextSmall: { color: '#fff', fontSize: 9, fontWeight: 'bold' },
-  recommendedTime: { fontSize: 11, color: '#888', marginTop: 0 },
+  recommendedTime: { fontSize: 11, color: '#52b957ff', marginTop: 0 },
 
   // --- FILTER MODAL STYLES ---
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
@@ -1706,12 +1745,6 @@ const styles = StyleSheet.create({
     shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 8
   },
   applyBtnText: { color: '#fff', fontSize: 16, fontWeight: '900' },
-
-  bottomNav: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#fff', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#eee', height: 85, position: "relative", zIndex: 40 },
-  navItem: { alignItems: 'center' },
-  navText: { fontSize: 10, color: COLORS.primary, marginTop: 4, fontWeight: '600' },
-  navTextActive: { fontSize: 10, color: COLORS.primary, marginTop: 0, fontWeight: '800' },
-  lottieBtn: { width: 60, height: 60, borderRadius: 70, overflow: "hidden", backgroundColor: "#fff", elevation: 8, justifyContent: "center", alignItems: "center" },
 });
 
 export default HomeScreen;

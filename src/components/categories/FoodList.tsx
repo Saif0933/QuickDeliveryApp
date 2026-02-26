@@ -1,22 +1,22 @@
 
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Animated,
-    Dimensions,
-    FlatList,
-    Image,
-    Modal,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  FlatList,
+  Image,
+  Modal,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -621,8 +621,9 @@ const RestaurantCard = ({ item, index, category }: RestaurantCardProps) => {
 
 export default function FoodList() {
   const navigation = useNavigation();
+  const route = useRoute<any>();
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(route.params?.categoryId || null);
 
   // 2. Fetch Category Data
   const { data: categoryData, isLoading: categoryLoading } = useGetAllCategory({});
@@ -712,9 +713,18 @@ export default function FoodList() {
           </View>
        ) : (
           <FilterSection 
-            categories={categoryData || []} 
+            categories={[
+              { id: 'static_all', name: 'All', image: { url: 'https://tse1.mm.bing.net/th/id/OIP.y9WHqmBEubDgxpHWqRN9sAHaEO?pid=Api&P=0&h=180' } },
+              ...(categoryData || [])
+            ]} 
             selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
+            onSelectCategory={(id) => {
+              if (id === 'static_all') {
+                navigation.navigate('Home' as never);
+              } else {
+                setSelectedCategory(id);
+              }
+            }}
           />
        )}
 

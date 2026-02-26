@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Animated,
-    FlatList,
-    ImageSourcePropType,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Animated,
+  FlatList,
+  ImageSourcePropType,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
@@ -314,9 +314,9 @@ const styles = StyleSheet.create({
   },
   glassTag: {
     position: "absolute",
-    bottom: 10,
+    top: 10,
     left: 10,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.black,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 6,
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#555',
+    color: '#52b957ff',
   },
   metaDot: {
     fontSize: 10,

@@ -1,15 +1,15 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-    Animated,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Animated,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useGetUserCart } from '../../api/hooks/allCart';
@@ -42,7 +42,10 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ onMenuPress }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const swipeAnim = useRef(new Animated.Value(0)).current;
+  const cartOpacity = useRef(new Animated.Value(1)).current;
+  const cartTranslateY = useRef(new Animated.Value(0)).current;
   const [isSwiped, setIsSwiped] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const { mutate: clearCartMutate } = useClearCart();
 
   const toggleSwipe = () => {
@@ -62,9 +65,24 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ onMenuPress }) => {
   };
 
   const handleClearCart = () => {
-    clearCartMutate();
-    swipeAnim.setValue(0);
-    setIsSwiped(false);
+    setIsClearing(true);
+    Animated.parallel([
+      Animated.timing(cartOpacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(cartTranslateY, {
+        toValue: 50,
+        duration: 250,
+        useNativeDriver: true,
+      })
+    ]).start(() => {
+      clearCartMutate();
+      setIsSwiped(false);
+      swipeAnim.setValue(0);
+      setIsClearing(false);
+    });
   };
 
   // --- FETCH CART DATA FROM API ---
@@ -143,6 +161,14 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ onMenuPress }) => {
     });
   };
 
+  useEffect(() => {
+    if (!hasCartItems) {
+      cartOpacity.setValue(1);
+      cartTranslateY.setValue(0);
+      swipeAnim.setValue(0);
+    }
+  }, [hasCartItems]);
+
   // Don't render if cart is empty or loading
   if (cartLoading) {
     return null; 
@@ -155,7 +181,10 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ onMenuPress }) => {
   return (
     <>
       {/* --- FLOATING CART WRAPPER --- */}
-      <View style={styles.floatingWrapper}>
+      <Animated.View 
+        pointerEvents={isClearing ? 'none' : 'auto'}
+        style={[styles.floatingWrapper, { opacity: cartOpacity, transform: [{ translateY: cartTranslateY }] }]}
+      >
         
         {/* LOGIC: All Carts Badge - Shows vendor count when > 1 */}
         {hasMultipleCarts && (
@@ -223,7 +252,7 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ onMenuPress }) => {
             </View>
           </Animated.View>
         </View>
-      </View>
+      </Animated.View>
 
       {/* --- YOUR CARTS MODAL --- */}
       <Modal

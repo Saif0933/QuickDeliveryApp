@@ -502,7 +502,7 @@
 // ProfileScreen.tsx
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -515,6 +515,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useGetUserProfile } from '../api/hooks/user';
@@ -559,6 +560,47 @@ const ProfileScreen = () => {
   const scrollY = useRef(new Animated.Value(0)).current;
   const { logout } = useAuth();
   const { data: userProfile } = useGetUserProfile();
+
+  const shineAnim = useRef(new Animated.Value(-width)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Shimmer/Shine Animation
+    const shineAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shineAnim, {
+          toValue: width * 1.5,
+          duration: 2500,
+          useNativeDriver: true,
+        }),
+        Animated.delay(2000),
+      ])
+    );
+
+    // Breathing Pulse Animation for the border
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.03,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    shineAnimation.start();
+    pulseAnimation.start();
+
+    return () => {
+      shineAnimation.stop();
+      pulseAnimation.stop();
+    };
+  }, [shineAnim, pulseAnim]);
 
   // --- Share Function ---
   const onShare = async () => {
@@ -627,17 +669,65 @@ const ProfileScreen = () => {
       <View style={styles.headerMask} />
 
       {/* --- STICKY USER PROFILE CARD --- */}
-      <View style={styles.userCardSticky}>
-        <View style={styles.userCardMain}>
-        <View style={styles.userAvatarContainer}>
-          {userProfile?.name ? (
-            <Text style={styles.avatarLetter}>
-              {userProfile.name.charAt(0).toUpperCase()}
-            </Text>
-          ) : (
-            <MaterialCommunityIcons name="account" size={40} color={COLORS.secondary} />
-          )}
-        </View>
+      <Animated.View
+        style={[
+          styles.userCardWrapper,
+          { transform: [{ scale: pulseAnim }] }
+        ]}
+      >
+        <LinearGradient
+          colors={['#0f0f0f', '#262626', '#0f0f0f']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.userCardSticky}
+        >
+          {/* Main Shine Beam */}
+          <Animated.View
+            style={[
+              styles.shineEffect,
+              {
+                transform: [{ translateX: shineAnim }, { rotate: '30deg' }],
+              },
+            ]}
+          >
+            <LinearGradient
+              colors={['transparent', 'rgba(255, 215, 0, 0.05)', 'rgba(255, 215, 0, 0.2)', 'rgba(255, 215, 0, 0.05)', 'transparent']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ flex: 1 }}
+            />
+          </Animated.View>
+
+          {/* Sharp Secondary Flare */}
+          <Animated.View
+            style={[
+              styles.flareEffect,
+              {
+                transform: [{ translateX: shineAnim }, { rotate: '30deg' }],
+              },
+            ]}
+          >
+            <LinearGradient
+              colors={['transparent', 'rgba(255, 255, 255, 0.4)', 'transparent']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={{ flex: 1 }}
+            />
+          </Animated.View>
+
+          <View style={styles.userCardMain}>
+          <LinearGradient
+            colors={[COLORS.primary, '#8e44ad']}
+            style={styles.userAvatarContainer}
+          >
+            {userProfile?.name ? (
+              <Text style={styles.avatarLetter}>
+                {userProfile.name.charAt(0).toUpperCase()}
+              </Text>
+            ) : (
+              <MaterialCommunityIcons name="account" size={35} color="#fff" />
+            )}
+          </LinearGradient>
           <View style={styles.userInfoText}>
             <Text style={styles.userName}>{userProfile?.name || 'User Name'}</Text>
             <Text style={styles.userPhone}>+91 {userProfile?.mobile || '0000000000'}</Text>
@@ -651,14 +741,20 @@ const ProfileScreen = () => {
 
         <View style={styles.eliteRow}>
           <View style={styles.eliteLeft}>
-             <MaterialCommunityIcons name="crown" size={18} color={COLORS.secondary} />
-             <Text style={styles.eliteLabel}>Elite</Text>
+            <LinearGradient
+              colors={['#FFD700', '#FDB931', '#FFD700']}
+              style={styles.crownIconBg}
+            >
+              <MaterialCommunityIcons name="crown" size={14} color="#000" />
+            </LinearGradient>
+            <Text style={styles.eliteLabel}>Elite Member</Text>
           </View>
           <TouchableOpacity style={styles.joinEliteBtn} onPress={() => navigation.navigate('GoldScreen')}>
             <Text style={styles.joinEliteText}>Join Elite ❯</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </LinearGradient>
+      </Animated.View>
 
       <Animated.ScrollView
         style={styles.scrollView}
@@ -703,7 +799,7 @@ const ProfileScreen = () => {
           {/* --- Gold Banner --- */}
           <TouchableOpacity style={styles.bannerRow} onPress={() => navigation.navigate('GoldScreen')}>
             <View style={styles.bannerLeft}>
-              <MaterialCommunityIcons name="crown" size={22} color={COLORS.secondary} />
+              <MaterialCommunityIcons name="crown" size={22} color={COLORS.primary} />
               <View style={{ marginLeft: 12 }}>
                 <Text style={styles.bannerTitle}>Join Restro Elite</Text>
                 <Text style={styles.bannerSubtitle}>Get free delivery & offers</Text>
@@ -811,26 +907,45 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0, left: 0, right: 0,
     height: HEADER_HEIGHT,
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.primary,
     zIndex: 0,
   },
 
   // --- STICKY USER PROFILE CARD ---
+  userCardWrapper: {
+    position: 'absolute',
+    top: 90,
+    left: 12, right: 12,
+    zIndex: 95,
+  },
   userCardSticky: {
-    backgroundColor: '#fff',
     borderRadius: 20,
     padding: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.2)', // Subtle Gold Border
     // Shadow for iOS
-    shadowColor: "#000",
+    shadowColor: "#FFD700",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
     // Shadow for Android
-    elevation: 8,
+    elevation: 15,
+  },
+  shineEffect: {
     position: 'absolute',
-    top: 90, // Adjusted for better alignment
-    left: 12, right: 12,
-    zIndex: 95, 
+    top: -100,
+    bottom: -100,
+    width: 150, // Wide soft beam
+    zIndex: 1,
+  },
+  flareEffect: {
+    position: 'absolute',
+    top: -100,
+    bottom: -100,
+    width: 20, // Sharp center flare
+    zIndex: 2,
+    marginLeft: 65, // Offset to stay inside the wide beam
   },
   avatarLetter: {
     fontSize: 26,
@@ -841,7 +956,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0, left: 0, right: 0,
     height: 100,
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.primary,
     zIndex: 94,
   },
   userCardMain: {
@@ -849,25 +964,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userInfoText: { flex: 1 },
-  userName: { fontSize: 24, fontWeight: '800', color: '#000' },
-  userPhone: { fontSize: 14, color: '#666', marginTop: 2 },
-  viewProfileBtn: { fontSize: 13, color: COLORS.secondary, fontWeight: '700', marginTop: 8 },
+  userName: { fontSize: 24, fontWeight: '800', color: '#fff' },
+  userPhone: { fontSize: 14, color: '#ccc', marginTop: 2 },
+  viewProfileBtn: { fontSize: 13, color: '#eaeaea', fontWeight: '700', marginTop: 8 },
   userAvatarContainer: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: COLORS.secondary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
-    shadowColor: COLORS.secondary,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
+    elevation: 5,
+  },
+  crownIconBg: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
   },
   divider: {
     height: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#333',
     marginVertical: 15,
   },
   eliteRow: {
@@ -882,7 +1007,7 @@ const styles = StyleSheet.create({
   eliteLabel: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#000',
+    color: '#FFD700',
     marginLeft: 6,
   },
   joinEliteBtn: {
@@ -891,7 +1016,7 @@ const styles = StyleSheet.create({
   },
   joinEliteText: {
     fontSize: 13,
-    color: COLORS.secondary,
+    color: '#FFD700',
     fontWeight: '700',
   },
 
