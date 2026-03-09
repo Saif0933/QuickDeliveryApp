@@ -43,6 +43,9 @@ export const useAddToCart = () => {
       queryClient.invalidateQueries({
         queryKey: ["user-cart"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["cart-by-vendor"],
+      });
     },
   });
 };
@@ -62,6 +65,9 @@ export const useClearCart = () => {
       // 🔄 Refresh cart data after clearing
       queryClient.invalidateQueries({
         queryKey: ["user-cart"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["cart-by-vendor"],
       });
     },
   });

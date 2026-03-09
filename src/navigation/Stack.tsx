@@ -39,6 +39,7 @@ import ZomatoMoneyPage from '../screen/ZomatoMoneyPage';
 import PrivacyPolicy from '../screen/legal/PrivacyPolicy';
 import RefundPolicy from '../screen/legal/RefundPolicy';
 import TermsAndConditions from '../screen/legal/TermsAndConditions';
+import { SingleResturantCart } from '../screen/cart/SingleResturantCart';
 
 const Stack = createNativeStackNavigator();
 
@@ -104,6 +105,7 @@ const MyStack = () => {
           component={ReportEmergencyScreen}
         />
         <Stack.Screen name="cart" component={CartScreen} />
+        <Stack.Screen name="SingleResturantCart" component={SingleResturantCart} />
         <Stack.Screen name="AllRestaurantCart" component={AllRestaurantCart} />
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
         <Stack.Screen name="RefundPolicy" component={RefundPolicy} />

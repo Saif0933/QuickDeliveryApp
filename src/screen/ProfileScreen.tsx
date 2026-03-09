@@ -649,7 +649,7 @@ const ProfileScreen = () => {
         style={styles.floatingBackButton}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back" size={24} color="#000" />
+        <Ionicons name="arrow-back" size={24} color="#f3efefff" />
       </TouchableOpacity>
 
       {/* --- STICKY HEADER BAR --- */}
@@ -747,10 +747,10 @@ const ProfileScreen = () => {
             >
               <MaterialCommunityIcons name="crown" size={14} color="#000" />
             </LinearGradient>
-            <Text style={styles.eliteLabel}>Elite Member</Text>
+            <Text style={styles.eliteLabel}>Exprience Free Delivery</Text>
           </View>
           <TouchableOpacity style={styles.joinEliteBtn} onPress={() => navigation.navigate('GoldScreen')}>
-            <Text style={styles.joinEliteText}>Join Elite ❯</Text>
+            <Text style={styles.joinEliteText}> ❯ </Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -797,7 +797,7 @@ const ProfileScreen = () => {
           </View>
 
           {/* --- Gold Banner --- */}
-          <TouchableOpacity style={styles.bannerRow} onPress={() => navigation.navigate('GoldScreen')}>
+          {/* <TouchableOpacity style={styles.bannerRow} onPress={() => navigation.navigate('GoldScreen')}>
             <View style={styles.bannerLeft}>
               <MaterialCommunityIcons name="crown" size={22} color={COLORS.primary} />
               <View style={{ marginLeft: 12 }}>
@@ -809,7 +809,7 @@ const ProfileScreen = () => {
               <Text style={styles.tagText}>NEW</Text>
             </View>
             <MaterialCommunityIcons name="chevron-right" size={20} color="#ccc" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           {/* --- Veg Mode --- */}
           <View style={styles.toggleCard}>
@@ -1039,7 +1039,7 @@ const styles = StyleSheet.create({
     left: 16,
     zIndex: 100,
     width: 40, height: 40,
-    backgroundColor: '#fff',
+    backgroundColor: '#090808ff',
     borderRadius: 20,
     justifyContent: 'center', alignItems: 'center',
     elevation: 5,

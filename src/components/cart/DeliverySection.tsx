@@ -7,7 +7,7 @@ import { useGetUserCart } from '../../api/hooks/allCart';
 import { useGetUserProfile } from '../../api/hooks/user';
 import { COLORS } from '../../theme/color';
 
-const DeliverySection: React.FC = () => {
+const DeliverySection: React.FC<{ cartData?: any }> = ({ cartData: customCartData }) => {
   const navigation = useNavigation<any>();
   
   // 1. Fetch User Profile (for Name & Phone)
@@ -17,7 +17,8 @@ const DeliverySection: React.FC = () => {
   const { data: addresses, isLoading: addressLoading } = useAddresses();
   
   // 3. Fetch Cart Details (for Bill Summary)
-  const { data: cartData, isLoading: cartLoading } = useGetUserCart();
+  const { data: globalCartData, isLoading: cartLoading } = useGetUserCart();
+  const cartData = customCartData || globalCartData;
 
   // --- Logic: Find Default Address ---
   const defaultAddress = useMemo(() => {
@@ -25,7 +26,41 @@ const DeliverySection: React.FC = () => {
     return addresses.find(addr => addr.isDefault) || addresses[0];
   }, [addresses]);
 
-  const totalAmount = cartData?.totalAmount || 0;
+  let calculatedTotal = 0;
+  if (cartData) {
+    if (cartData.vendors && Array.isArray(cartData.vendors)) {
+      cartData.vendors.forEach((v: any) => {
+        v.items?.forEach((item: any) => {
+          const priceObj = item.unitPrice || item.price;
+          let priceValue = 0;
+          if (priceObj && typeof priceObj === 'object' && 'd' in priceObj && priceObj.d) {
+              priceValue = priceObj.d[0];
+          } else if (typeof item.unitPrice === 'string' || typeof item.unitPrice === 'number') {
+              priceValue = parseFloat(item.unitPrice as string);
+          } else if (typeof item.price === 'string' || typeof item.price === 'number') {
+              priceValue = parseFloat(item.price as string);
+          }
+          calculatedTotal += (priceValue * (item.quantity || 1));
+        });
+      });
+    } else if (cartData.items && Array.isArray(cartData.items)) {
+      cartData.items.forEach((item: any) => {
+          const priceObj = item.unitPrice || item.price;
+          let priceValue = 0;
+          if (priceObj && typeof priceObj === 'object' && 'd' in priceObj && priceObj.d) {
+              priceValue = priceObj.d[0];
+          } else if (typeof item.unitPrice === 'string' || typeof item.unitPrice === 'number') {
+              priceValue = parseFloat(item.unitPrice as string);
+          } else if (typeof item.price === 'string' || typeof item.price === 'number') {
+              priceValue = parseFloat(item.price as string);
+          }
+          calculatedTotal += (priceValue * (item.quantity || 1));
+      });
+    }
+  }
+
+  const totalAmountStr = cartData?.total || cartData?.totalAmount || calculatedTotal || 0;
+  const totalAmount = Number(totalAmountStr).toFixed(2);
 
   return (
     <View style={styles.deliverySection}>
@@ -86,7 +121,7 @@ const DeliverySection: React.FC = () => {
           ) : (
             <>
               <Text style={styles.totalBillText}>Total Bill ₹{totalAmount}</Text>
-              {totalAmount > 0 ? (
+              {Number(totalAmount) > 0 ? (
                 <Text style={styles.savedText}>Ready to checkout</Text>
               ) : (
                 <Text style={styles.savedText}>Your cart is empty</Text>
@@ -116,7 +151,7 @@ const styles = StyleSheet.create({
   },
   deliveryTimeText: {
     fontSize: 14,
-    color: COLORS.textPrimary,
+    color: COLORS.highlight,
     marginLeft: 8,
     fontWeight: '500',
   },

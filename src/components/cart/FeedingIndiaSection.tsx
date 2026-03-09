@@ -14,8 +14,9 @@ import {
   View
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useGetUserCart } from '../../api/hooks/allCart';
 import { useAddToCart } from '../../api/hooks/cart';
-import { useGetVendorInventory, VendorProduct } from '../../api/hooks/vendorInventory.ts';
+import { useGetVendorInventory } from '../../api/hooks/vendorInventory.ts';
 import { COLORS } from "../../theme/color";
 
 // Props interface to accept vendorId
@@ -23,9 +24,14 @@ interface FeedingIndiaSectionProps {
   vendorId?: string;
 }
 
-const FeedingIndiaSection: React.FC<FeedingIndiaSectionProps> = ({ vendorId = "1" }) => {
+const FeedingIndiaSection: React.FC<FeedingIndiaSectionProps> = ({ vendorId }) => {
+  // Get active cart vendor dynamically if not provided
+  const { data: cartData } = useGetUserCart();
+  // @ts-ignore
+  let activeVendorId = vendorId || cartData?.vendors?.[0]?.vendorId || cartData?.vendors?.[0]?.vendor?.id || cartData?.items?.[0]?.vendorId || "1";
+
   // Fetch products from vendor inventory
-  const { data: vendorData, isLoading } = useGetVendorInventory({ vendorId, limit: 10 });
+  const { data: vendorData, isLoading } = useGetVendorInventory({ vendorId: activeVendorId.toString(), limit: 10 });
   
   // Add to cart mutation
   const { mutate: addToCart, isPending } = useAddToCart();
@@ -33,13 +39,13 @@ const FeedingIndiaSection: React.FC<FeedingIndiaSectionProps> = ({ vendorId = "1
   // Flatten paginated data
   const products = useMemo(() => {
     if (!vendorData) return [];
-    return vendorData.pages.flatMap(page => page.products).slice(0, 8); // Limit to 8 items
+    return vendorData.pages.flatMap((page: any) => page.products).slice(0, 8); // Limit to 8 items
   }, [vendorData]);
 
   // Handle add to cart
-  const handleAddToCart = (item: VendorProduct) => {
+  const handleAddToCart = (item: any) => {
     // Get default variant if available
-    const defaultVariant = item.productVariants?.find(v => v.isDefault) || item.productVariants?.[0];
+    const defaultVariant = item.productVariants?.find((v: any) => v.isDefault) || item.productVariants?.[0];
     
     const payload = {
       vendorProductId: Number(item.id),
@@ -98,9 +104,27 @@ const FeedingIndiaSection: React.FC<FeedingIndiaSectionProps> = ({ vendorId = "1
           // Get image URL
           const imageUrl = item.product.images?.[0]?.image?.url || 'https://via.placeholder.com/150';
           
-          // Get price
-          const price = item.price?.d?.[0] || 0;
-          const originalPrice = item.product.marketPrice?.d?.[0] || price;
+          // Get price safely regardless of string or object
+          let price = 0;
+          let originalPrice = 0;
+
+          if (item.price?.d?.[0]) {
+            price = item.price.d[0];
+          } else if (item.price && typeof item.price === 'string') {
+            price = parseFloat(item.price);
+          } else if (item.product?.sellingPrice) {
+            price = parseFloat(item.product.sellingPrice);
+          } else if (item.product?.marketPrice) {
+            price = parseFloat(item.product.marketPrice);
+          }
+
+          if (item.product?.marketPrice?.d?.[0]) {
+            originalPrice = item.product.marketPrice.d[0];
+          } else if (item.product?.marketPrice && typeof item.product.marketPrice === 'string') {
+            originalPrice = parseFloat(item.product.marketPrice);
+          } else {
+            originalPrice = price;
+          }
           
           // Check if veg
           const isVeg = item.product.isVeg;

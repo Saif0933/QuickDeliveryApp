@@ -1,17 +1,16 @@
 
-import React, { useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  Dimensions,
-  TouchableOpacity,
-  ImageBackground,
-} from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  Dimensions,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  View
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const { width } = Dimensions.get("window");
 
@@ -53,7 +52,15 @@ const OrderPlacedScreen: React.FC = () => {
             useNativeDriver: true,
         }),
       ]).start(); 
-  }, []);
+
+      // --- NEW: Auto-navigation after 2 seconds ---
+      const timer = setTimeout(() => {
+        navigation.replace('OrderTrackingScreen');
+      }, 2000);
+
+      // Cleanup timer on unmount
+      return () => clearTimeout(timer);
+  }, [navigation]);
 
   return (
     <ImageBackground 
@@ -86,31 +93,7 @@ const OrderPlacedScreen: React.FC = () => {
         </View>
       </Animated.View>
 
-      {/* --- Action Buttons --- */}
-      <Animated.View
-        style={{
-            opacity: buttonsOpacity,
-            transform: [{ translateY: buttonsTranslate }],
-            marginTop: 40,
-            width: '100%',
-            alignItems: 'center',
-        }}
-      >
-        {/* --- FIXED: Using replace instead of reset --- */}
-        {/* Since OrderTrackingScreen handles the Back button logic, replace prevents the crash */}
-        <TouchableOpacity 
-            style={styles.primaryButton} 
-            onPress={() => {
-                navigation.replace('OrderTrackingScreen');
-            }}
-        >
-            <Text style={styles.primaryButtonText}>Track My Order</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('OrderDetailsScreen')}>
-            <Text style={styles.secondaryButtonText}>Order Details</Text>
-        </TouchableOpacity>
-      </Animated.View>
+      {/* --- Action Buttons Removed --- */}
 
     </ImageBackground>
   );

@@ -1202,9 +1202,9 @@ const HomeScreen: React.FC = () => {
             </View>
 
             <View style={styles.headerRight}>
-              <TouchableOpacity style={styles.goldBadge} onPress={() => navigation.navigate('GoldScreen')}>
+              {/* <TouchableOpacity style={styles.goldBadge} onPress={() => navigation.navigate('GoldScreen')}>
                 <Text style={styles.goldText}>Elite</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('ZomatoMoneyPage')}>
                 <MaterialCommunityIcons name="wallet-outline" size={24} color="#333" />
               </TouchableOpacity>

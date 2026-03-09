@@ -97,19 +97,19 @@
 // export default Header;
 
 
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Share,
   ActivityIndicator,
+  Share,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
-import { COLORS } from '../../theme/color';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { COLORS } from '../../theme/color';
 // Import your existing Cart Hook
 import { useGetUserCart } from '../../api/hooks/allCart';
 
@@ -120,9 +120,35 @@ const Header: React.FC = () => {
   const { data: cartData, isLoading } = useGetUserCart();
 
   // 2. Extract Shop Name Safely
-  // We check if 'vendors' exists and has at least one vendor with a shopName.
-  // Otherwise, we default to "Aroma Quest" or a placeholder.
-  const shopName = cartData?.vendors?.[0]?.vendor?.shopName || "Aroma Quest";
+  // We check if 'vendors' exists and calculate distinct vendor counts.
+  let shopName = "Restaurant";
+  let uniqueVendorCount = 0;
+
+  if (cartData) {
+    const parentVendorIds = new Set<number>();
+    
+    if (cartData.vendors && Array.isArray(cartData.vendors)) {
+      cartData.vendors.forEach((v: any) => {
+        const parentVendorId = v.id || v.vendorId || v.vendor?.id || 1;
+        v.items?.forEach((item: any) => {
+           if (item.quantity > 0) parentVendorIds.add(parentVendorId);
+        });
+      });
+      uniqueVendorCount = parentVendorIds.size;
+      shopName = uniqueVendorCount > 1 
+        ? `${uniqueVendorCount} Restaurants` 
+        : (cartData.vendors[0]?.shopName || cartData.vendors[0]?.vendor?.shopName || cartData.vendors[0]?.companyName || "Restaurant");
+    } else if (cartData.items && Array.isArray(cartData.items)) {
+      cartData.items.forEach((item: any) => {
+         const parentVendorId = item.vendorId || item.vendor?.id || 1;
+         if (item.quantity > 0) parentVendorIds.add(parentVendorId);
+      });
+      uniqueVendorCount = parentVendorIds.size;
+      shopName = uniqueVendorCount > 1 
+        ? `${uniqueVendorCount} Restaurants` 
+        : (cartData.items[0]?.vendor?.shopName || cartData.items[0]?.vendor?.companyName || "Restaurant");
+    }
+  }
 
   // Function to handle sharing
   const onShare = async () => {
@@ -205,7 +231,7 @@ const styles = StyleSheet.create({
 
   deliveryTime: {
     fontSize: 10,
-    color: COLORS.textSecondary,
+    color: COLORS.highlight,
     marginTop: 2,
   },
 

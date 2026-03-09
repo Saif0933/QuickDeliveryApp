@@ -277,17 +277,18 @@
 
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  Animated,
-  Dimensions,
-  Easing,
+    Animated,
+    Dimensions,
+    Easing,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
+import { useGetUserCart } from '../../api/hooks/allCart';
 import { COLORS } from '../../theme/color';
 
 // --- TYPES ---
@@ -387,9 +388,47 @@ const OrderProcessingModal: React.FC<OrderProcessingModalProps> = ({
 };
 
 // --- BOTTOM SECTION ---
-const BottomSection: React.FC = () => {
+const BottomSection: React.FC<{cartData?: any}> = ({ cartData: customCartData }) => {
   const navigation = useNavigation<NavigationProp>();
   const [isModalVisible, setModalVisible] = useState(false);
+  const { data: globalCartData } = useGetUserCart();
+  
+  const cartData = customCartData || globalCartData;
+
+  let calculatedTotal = 0;
+  if (cartData) {
+    if (cartData.vendors && Array.isArray(cartData.vendors)) {
+      cartData.vendors.forEach((v: any) => {
+        v.items?.forEach((item: any) => {
+          const priceObj = item.unitPrice || item.price;
+          let priceValue = 0;
+          if (priceObj && typeof priceObj === 'object' && 'd' in priceObj && priceObj.d) {
+              priceValue = priceObj.d[0];
+          } else if (typeof item.unitPrice === 'string' || typeof item.unitPrice === 'number') {
+              priceValue = parseFloat(item.unitPrice as string);
+          } else if (typeof item.price === 'string' || typeof item.price === 'number') {
+              priceValue = parseFloat(item.price as string);
+          }
+          calculatedTotal += (priceValue * (item.quantity || 1));
+        });
+      });
+    } else if (cartData.items && Array.isArray(cartData.items)) {
+      cartData.items.forEach((item: any) => {
+          const priceObj = item.unitPrice || item.price;
+          let priceValue = 0;
+          if (priceObj && typeof priceObj === 'object' && 'd' in priceObj && priceObj.d) {
+              priceValue = priceObj.d[0];
+          } else if (typeof item.unitPrice === 'string' || typeof item.unitPrice === 'number') {
+              priceValue = parseFloat(item.unitPrice as string);
+          } else if (typeof item.price === 'string' || typeof item.price === 'number') {
+              priceValue = parseFloat(item.price as string);
+          }
+          calculatedTotal += (priceValue * (item.quantity || 1));
+      });
+    }
+  }
+
+  const finalTotalDisplay = cartData?.totalAmount || calculatedTotal || 0;
 
   // 1. Opens the modal
   const handlePlaceOrder = () => setModalVisible(true);
@@ -412,7 +451,7 @@ const BottomSection: React.FC = () => {
         {/* Updated onPress to call handlePlaceOrder instead of navigating directly */}
         <TouchableOpacity style={styles.placeOrderButton} onPress={handlePlaceOrder}>
           <View style={styles.placeOrderContent}>
-            <Text style={styles.totalAmount}>₹409.86</Text>
+            <Text style={styles.totalAmount}>₹{Number(finalTotalDisplay).toFixed(2)}</Text>
             <Text style={styles.totalText}>TOTAL</Text>
           </View>
           <Text style={styles.placeOrderText}>Place Order ▸</Text>
