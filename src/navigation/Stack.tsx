@@ -36,10 +36,10 @@ import VegMode from '../screen/VegMode';
 import YourOrder from '../screen/YourOrder';
 import YourProfile from '../screen/YourProfile';
 import ZomatoMoneyPage from '../screen/ZomatoMoneyPage';
+import { SingleResturantCart } from '../screen/cart/SingleResturantCart';
 import PrivacyPolicy from '../screen/legal/PrivacyPolicy';
 import RefundPolicy from '../screen/legal/RefundPolicy';
 import TermsAndConditions from '../screen/legal/TermsAndConditions';
-import { SingleResturantCart } from '../screen/cart/SingleResturantCart';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,7 +49,7 @@ const MyStack = () => {
     // ✅ Added return
     <NavigationContainer>
       <Stack.Navigator
-        // initialRouteName="AllRestaurantCart"
+        // initialRouteName="MapScreen"
         screenOptions={{ headerShown: false }}
       >
         {/* <Stack.Screen name="FoodList" component={FoodList} /> */}

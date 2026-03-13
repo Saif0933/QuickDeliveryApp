@@ -727,6 +727,134 @@ const MENU_CATEGORIES = [
     { name: "Drinks", count: 1, hasPlus: false },
 ];
 
+// --- DEFAULT PRODUCTS FALLBACK ---
+const DEFAULT_PRODUCTS: VendorProduct[] = [
+    {
+      id: "def-1",
+      vendorId: "1",
+      productId: "p1",
+      price: { s: 0, e: 0, d: [299] },
+      isAvailable: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      productVariants: [],
+      product: {
+        id: "p1",
+        name: "Margherita Pizza",
+        description: "Classic hand-tossed pizza with fresh mozzarella and tomato sauce.",
+        marketPrice: { s: 0, e: 0, d: [399] },
+        sellingPrice: { s: 0, e: 0, d: [299] },
+        vendorPrice: null,
+        weight: "500g",
+        pieces: "8",
+        isActive: true,
+        isMandatory: false,
+        isVeg: true,
+        ingredient: [],
+        tags: [],
+        categoryId: "cat1",
+        subCategoryId: "sub1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        images: [{ image: { url: "https://images.unsplash.com/photo-1574129624542-466020c6a5a8?w=500", public_id: "" } }],
+        category: { id: "cat1", name: "Pizza" }
+      }
+    },
+    {
+      id: "def-2",
+      vendorId: "1",
+      productId: "p2",
+      price: { s: 0, e: 0, d: [149] },
+      isAvailable: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      productVariants: [],
+      product: {
+        id: "p2",
+        name: "Veggie Burger Supreme",
+        description: "Crispy veg patty with fresh lettuce, tomato, and creamy mayo.",
+        marketPrice: { s: 0, e: 0, d: [199] },
+        sellingPrice: { s: 0, e: 0, d: [149] },
+        vendorPrice: null,
+        weight: "250g",
+        pieces: "1",
+        isActive: true,
+        isMandatory: false,
+        isVeg: true,
+        ingredient: [],
+        tags: [],
+        categoryId: "cat2",
+        subCategoryId: "sub2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        images: [{ image: { url: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=500", public_id: "" } }],
+        category: { id: "cat2", name: "Burgers" }
+      }
+    },
+    {
+      id: "def-3",
+      vendorId: "1",
+      productId: "p3",
+      price: { s: 0, e: 0, d: [199] },
+      isAvailable: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      productVariants: [],
+      product: {
+        id: "p3",
+        name: "Paneer Tikka Sandwich",
+        description: "Grilled sandwich stuffed with spicy paneer tikka and mint chutney.",
+        marketPrice: { s: 0, e: 0, d: [249] },
+        sellingPrice: { s: 0, e: 0, d: [199] },
+        vendorPrice: null,
+        weight: "300g",
+        pieces: "2",
+        isActive: true,
+        isMandatory: false,
+        isVeg: true,
+        ingredient: [],
+        tags: [],
+        categoryId: "cat3",
+        subCategoryId: "sub3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        images: [{ image: { url: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500", public_id: "" } }],
+        category: { id: "cat3", name: "Sandwiches" }
+      }
+    },
+    {
+      id: "def-4",
+      vendorId: "1",
+      productId: "p4",
+      price: { s: 0, e: 0, d: [349] },
+      isAvailable: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      productVariants: [],
+      product: {
+        id: "p4",
+        name: "Chocolate Truffle Cake",
+        description: "Rich and decadent chocolate cake for all your sweet cravings.",
+        marketPrice: { s: 0, e: 0, d: [450] },
+        sellingPrice: { s: 0, e: 0, d: [349] },
+        vendorPrice: null,
+        weight: "500g",
+        pieces: "1",
+        isActive: true,
+        isMandatory: false,
+        isVeg: true,
+        ingredient: [],
+        tags: [],
+        categoryId: "cat4",
+        subCategoryId: "sub4",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        images: [{ image: { url: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500", public_id: "" } }],
+        category: { id: "cat4", name: "Desserts" }
+      }
+    }
+];
+
 // --- Helper Components ---
 
 const VegIcon = ({ isVeg }: { isVeg: boolean }) => (
@@ -856,8 +984,11 @@ const FilterPopup = ({ visible, onClose, activeFilter, onApply }: { visible: boo
 
 // --- COMPONENT: Menu Item Card ---
 const MenuItem = ({ item, onAddPress }: { item: VendorProduct, onAddPress: () => void }) => {
-  const imageUrl = item.product.images?.[0]?.image?.url 
-    ? item.product.images[0].image.url 
+  if (!item?.product) return null;
+
+  const product = item.product;
+  const imageUrl = product.images?.[0]?.image?.url 
+    ? product.images[0].image.url 
     : "https://via.placeholder.com/150";
 
   const displayPrice = item.price?.d?.[0] || 0;
@@ -866,11 +997,11 @@ const MenuItem = ({ item, onAddPress }: { item: VendorProduct, onAddPress: () =>
     <View style={styles.cardContainer}>
       <View style={styles.cardContent}>
         <View style={styles.cardTopRow}>
-          <VegIcon isVeg={item.product.isVeg} />
+          <VegIcon isVeg={product.isVeg} />
         </View>
-        <Text style={styles.itemName}>{item.product.name}</Text>
+        <Text style={styles.itemName}>{product.name}</Text>
         <Text style={styles.itemPrice}>₹{displayPrice}</Text>
-        <Text style={styles.itemDesc} numberOfLines={2}>{item.product.description}</Text>
+        <Text style={styles.itemDesc} numberOfLines={2}>{product.description}</Text>
         <View style={styles.iconRow}>
             <TouchableOpacity hitSlop={10}>
                 <Ionicons name="heart-outline" size={20} color={COLORS.textSecondary} />
@@ -917,14 +1048,15 @@ const AddItemModal = ({ visible, onClose, productData }: AddItemModalProps) => {
     }
   }, [productData, visible]);
 
-  if (!productData) return null;
+  if (!productData || !productData.product) return null;
 
+  const product = productData.product;
   const basePrice = selectedVariant 
     ? (selectedVariant.price?.d?.[0] || 0)
     : (productData.price?.d?.[0] || 0);
 
   const totalPrice = basePrice * itemCount;
-  const imageUrl = productData.product.images?.[0]?.image?.url || "https://via.placeholder.com/150";
+  const imageUrl = product.images?.[0]?.image?.url || "https://via.placeholder.com/150";
 
   const handleIncrement = () => setItemCount(prev => prev + 1);
   const handleDecrement = () => setItemCount(prev => (prev > 1 ? prev - 1 : 1));
@@ -970,12 +1102,12 @@ const AddItemModal = ({ visible, onClose, productData }: AddItemModalProps) => {
                     <View style={styles.popupHeaderImgWrapper}>
                         <Image source={{ uri: imageUrl }} style={styles.popupHeaderImg} />
                         <View style={styles.popupVegBadge}>
-                            <View style={[styles.vegIconDot, {backgroundColor: productData.product.isVeg ? COLORS.highlight : 'red'}]} />
+                            <View style={[styles.vegIconDot, {backgroundColor: product.isVeg ? COLORS.highlight : 'red'}]} />
                         </View>
                     </View>
                     <View style={styles.popupHeaderInfo}>
-                        <Text style={styles.popupTitle}>{productData.product.name}</Text>
-                        <Text style={{fontSize: 12, color: COLORS.textSecondary}} numberOfLines={1}>{productData.product.description}</Text>
+                        <Text style={styles.popupTitle}>{product.name}</Text>
+                        <Text style={{fontSize: 12, color: COLORS.textSecondary}} numberOfLines={1}>{product.description}</Text>
                     </View>
                 </View>
                 <View style={styles.dividerLight} />
@@ -1048,21 +1180,28 @@ export default function PizzaProjectScreen({ navigation, route }: { navigation: 
   const { data: vendorData, isLoading: vendorLoading } = useGetVendorInventory({ vendorId });
 
   const flatProducts = useMemo(() => {
-    if (!vendorData) return [];
-    return vendorData.pages.flatMap(page => page.products);
-  }, [vendorData]);
+    let products = vendorData?.pages.flatMap(page => page.products) || [];
+    // Filter out any items where product is null
+    products = products.filter(item => item && item.product);
+    
+    // If not loading and no products fetched, use fallback
+    if (!vendorLoading && products.length === 0) {
+      return DEFAULT_PRODUCTS;
+    }
+    return products;
+  }, [vendorData, vendorLoading]);
 
   const filteredProducts = useMemo(() => {
     if (!flatProducts) return [];
     let result = flatProducts;
     if (searchText) {
         const lowerSearch = searchText.toLowerCase();
-        result = result.filter(item => item.product.name.toLowerCase().includes(lowerSearch));
+        result = result.filter(item => item?.product?.name?.toLowerCase().includes(lowerSearch));
     }
     switch (activeFilter) {
-        case "Veg": return result.filter((item) => item.product.isVeg === true);
-        case "Egg": return result.filter((item) => item.product.isVeg === false); // fallback logic, depends on API struct
-        case "Non-veg": return result.filter((item) => item.product.isVeg === false);
+        case "Veg": return result.filter((item) => item?.product?.isVeg === true);
+        case "Egg": return result.filter((item) => item?.product?.isVeg === false); // fallback logic, depends on API struct
+        case "Non-veg": return result.filter((item) => item?.product?.isVeg === false);
         case "Price - Low to High": return [...result].sort((a, b) => (a.price?.d?.[0] || 0) - (b.price?.d?.[0] || 0));
         case "Price - High to Low": return [...result].sort((a, b) => (b.price?.d?.[0] || 0) - (a.price?.d?.[0] || 0));
         case "Highly Reordered": return result; // API has no highly rated param yet

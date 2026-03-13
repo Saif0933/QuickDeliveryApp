@@ -1,14 +1,14 @@
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { useGetCartByVendorId } from "../../api/hooks/allCart";
@@ -112,7 +112,7 @@ export const SingleResturantCart = ({ route }: { route: any }) => {
         <View style={styles.vendorBox}>
           <View style={styles.vendorHeader}>
             <Image 
-              source={{ uri: vendor?.images?.url || "https://via.placeholder.com/50" }} 
+              source={{ uri: vendor?.images?.url || vendor?.logo || "https://via.placeholder.com/150" }} 
               style={styles.vendorLogo} 
             />
             <View>
@@ -136,7 +136,7 @@ export const SingleResturantCart = ({ route }: { route: any }) => {
 
                 {/* Info Text */}
                 <View style={styles.itemInfo}>
-                  <Text style={styles.itemName}>{item.product?.name || "Item"}</Text>
+                <Text style={styles.itemName}>{item.product?.name || item.name || "Item"}</Text>
                   <Text style={styles.itemPrice}>₹{price}</Text>
                 </View>
 

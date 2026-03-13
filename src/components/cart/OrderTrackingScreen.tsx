@@ -1055,28 +1055,28 @@
 // export default BlinkitFinalClone;
 
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
   Animated,
-  StatusBar,
-  TouchableOpacity,
+  Dimensions,
   FlatList,
-  SafeAreaView,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-  ScrollView,
+  Image,
   Linking,
   Modal,
-  TouchableWithoutFeedback
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 // --- TYPES ---

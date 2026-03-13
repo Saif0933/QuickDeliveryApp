@@ -2,16 +2,16 @@
 
 import React, { useMemo } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    Image,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    ToastAndroid,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useGetUserCart } from '../../api/hooks/allCart';
@@ -101,6 +101,8 @@ const FeedingIndiaSection: React.FC<FeedingIndiaSectionProps> = ({ vendorId }) =
         contentContainerStyle={styles.scrollContent}
       >
         {products.map((item) => {
+          if (!item || !item.product) return null;
+
           // Get image URL
           const imageUrl = item.product.images?.[0]?.image?.url || 'https://via.placeholder.com/150';
           
@@ -127,7 +129,7 @@ const FeedingIndiaSection: React.FC<FeedingIndiaSectionProps> = ({ vendorId }) =
           }
           
           // Check if veg
-          const isVeg = item.product.isVeg;
+          const isVeg = !!item.product.isVeg;
 
           return (
             <View key={item.id} style={styles.card}>
@@ -161,7 +163,7 @@ const FeedingIndiaSection: React.FC<FeedingIndiaSectionProps> = ({ vendorId }) =
               {/* Info Section */}
               <View style={styles.infoContainer}>
                 <Text style={styles.itemName} numberOfLines={2}>
-                  {item.product.name}
+                  {item.product.name || "Item"}
                 </Text>
                 <View style={styles.priceRow}>
                   <Text style={styles.price}>₹{price}</Text>

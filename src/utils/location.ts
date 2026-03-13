@@ -1,3 +1,4 @@
+import Geolocation from '@react-native-community/geolocation';
 import {
   Alert,
   Linking,
@@ -9,7 +10,6 @@ import {
   isLocationEnabled,
   promptForEnableLocationIfNeeded,
 } from 'react-native-android-location-enabler';
-import Geolocation from '@react-native-community/geolocation';
 
 /**
  * Check location permission
