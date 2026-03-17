@@ -617,37 +617,45 @@ const FloatingCart: React.FC<FloatingCartProps> = ({ onMenuPress }) => {
     }
 
     if (rawItems.length === 0) return [];
-    const vendorMap = new Map<number, VendorCart>();
+    const vendorMap = new Map<string, VendorCart>();
 
     rawItems.forEach((item: any) => {
-      const vendorId = item.vendorId || item.vendor?.id || 1; 
+      const vId = (item.vendorId || item.vendor?.id || 1).toString(); 
 
-      if (!vendorMap.has(vendorId)) {
-        const productImage = 
-          item.productVariant?.images?.[0]?.image?.url ||
-          item.product?.images?.[0]?.image?.url || 
-          item.product?.image || 
-          item.image?.url || 
-          'https://via.placeholder.com/100';
-
-        const vendorLogo = 
-          item.vendor?.logo?.url || 
-          item.vendor?.logo || 
-          item.vendor?.images?.url || 
-          'https://via.placeholder.com/100';
+      if (!vendorMap.has(vId)) {
+        // Robust vendor image extraction
+        const vendorData = item.vendor || {};
+        const vImages = vendorData.images || vendorData.logo;
+        let vLogo = 'https://via.placeholder.com/100';
         
-        vendorMap.set(vendorId, {
-          vendorId,
-          vendorName: item.vendor?.shopName || item.vendor?.companyName || `Restaurant`,
-          vendorLogo: vendorLogo,
-          productImage: productImage,
+        if (vImages) {
+          if (typeof vImages === 'string') vLogo = vImages;
+          else if (Array.isArray(vImages) && vImages.length > 0) vLogo = vImages[0].url || vImages[0].image?.url || vImages[0].image || vLogo;
+          else if (typeof vImages === 'object') vLogo = vImages.url || vImages.image?.url || vImages.image || vLogo;
+        }
+
+        // Robust product image extraction
+        const pImages = item.productVariant?.images || item.product?.images || item.product?.image || item.image;
+        let pLogo = vLogo; // Fallback to vendor logo
+
+        if (pImages) {
+          if (typeof pImages === 'string') pLogo = pImages;
+          else if (Array.isArray(pImages) && pImages.length > 0) pLogo = pImages[0].url || pImages[0].image?.url || pImages[0].image || pLogo;
+          else if (typeof pImages === 'object') pLogo = pImages.url || pImages.image?.url || pImages.image || pLogo;
+        }
+        
+        vendorMap.set(vId, {
+          vendorId: parseInt(vId),
+          vendorName: vendorData.shopName || vendorData.companyName || `Restaurant`,
+          vendorLogo: vLogo,
+          productImage: pLogo,
           items: [],
           totalQuantity: 0,
           totalAmount: 0,
         });
       }
 
-      const vendor = vendorMap.get(vendorId)!;
+      const vendor = vendorMap.get(vId)!;
       const displayPrice = item.price?.d?.[0] || item.unitPrice?.d?.[0] || parseFloat(item.unitPrice) || parseFloat(item.price) || 0;
       
       vendor.items.push(item);

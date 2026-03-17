@@ -4,10 +4,11 @@ import {
   Animated,
   FlatList,
   ImageSourcePropType,
+  RefreshControlProps,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
@@ -177,8 +178,8 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
           </View>
           <View style={styles.dotSeparator} />
           <View style={styles.offerItem}>
-             <Ionicons name="trending-up" size={15} color="#28A745" />
-             <Text style={styles.discountText}>{item.discount}</Text>
+              <Ionicons name="trending-up" size={15} color="#28A745" />
+              <Text style={styles.discountText}>{item.discount}</Text>
           </View>
         </View>
       </View>
@@ -187,7 +188,21 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
 };
 
 // --- MAIN COMPONENT: FoodList (Infinite Scroll) ---
-const FoodList: React.FC = () => {
+interface FoodListProps {
+  ListHeaderComponent?: React.ReactElement;
+  onScroll?: (event: any) => void;
+  scrollEventThrottle?: number;
+  refreshControl?: React.ReactElement<RefreshControlProps>;
+  contentContainerStyle?: any;
+}
+
+const FoodList: React.FC<FoodListProps> = ({ 
+  ListHeaderComponent, 
+  onScroll, 
+  scrollEventThrottle,
+  refreshControl,
+  contentContainerStyle
+}) => {
   // 1. Fetch Data with Infinite Query
   const {
     data,
@@ -236,17 +251,23 @@ const FoodList: React.FC = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      <Text style={styles.sectionHeader}>
-        {foodItems.length > 0 
-          ? `${foodItems.length}+ Restaurants near by you` 
-          : "No Restaurants found"}
-      </Text>
-
       <FlatList
         data={foodItems}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <FoodCard item={item} />}
         
+        // Header
+        ListHeaderComponent={
+          <>
+            {ListHeaderComponent}
+            <Text style={styles.sectionHeader}>
+              {foodItems.length > 0 
+                ? `${foodItems.length}+ Restaurants near by you` 
+                : "No Restaurants found"}
+            </Text>
+          </>
+        }
+
         // Infinite Scroll Props
         onEndReached={() => {
           if (hasNextPage && !isFetchingNextPage) {
@@ -257,7 +278,12 @@ const FoodList: React.FC = () => {
         
         ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={[{ paddingBottom: 100 }, contentContainerStyle]}
+
+        // Scroll Props passed from parent
+        onScroll={onScroll}
+        scrollEventThrottle={scrollEventThrottle}
+        refreshControl={refreshControl}
       />
     </View>
   );
@@ -354,6 +380,12 @@ const styles = StyleSheet.create({
     color: "#666",
     fontWeight: "500",
     marginBottom: 6,
+  },
+  borderSide: {
+    borderRightWidth: 1,
+    borderRightColor: '#eee',
+    paddingRight: 10,
+    marginRight: 10,
   },
   metaRow: {
     flexDirection: 'row',

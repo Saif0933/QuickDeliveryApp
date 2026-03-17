@@ -15,6 +15,7 @@ export interface VendorListParams {
   limit: number;
   search?: string;
   status?: string;
+  categoryId?: string;
 }
 
 export const getVendors = async ({
@@ -22,6 +23,7 @@ export const getVendors = async ({
   limit,
   search = "",
   status = "APPROVED",
+  categoryId,
 }: VendorListParams) => {
   const res = await api.get("/vendor/all", {
     params: {
@@ -29,6 +31,7 @@ export const getVendors = async ({
       limit,
       search,
       status,
+      categoryId,
     },
   });
 

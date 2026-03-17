@@ -22,7 +22,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useGetAllCategory } from "../../api/hooks/getAllCategory";
-import { useGetInventoryByCategory, VendorProduct } from "../../api/hooks/inventory";
 import { useGetAllVendors } from "../../api/hooks/useVender";
 import { COLORS } from "../../theme/color";
 
@@ -629,77 +628,45 @@ export default function FoodList() {
   const { data: categoryData, isLoading: categoryLoading } = useGetAllCategory({});
   
   // --- API INTEGRATION ---
-  const { data: restaurantData, isLoading: vendorsLoading } = useGetAllVendors({ limit: 20 });
-  
-  // Dynamic Inventory Hook (Search + Category)
   const { 
-    data: inventoryData, 
-    isLoading: inventoryLoading,
-    fetchNextPage: fetchNextInventoryPage,
-    hasNextPage: hasNextInventoryPage
-  } = useGetInventoryByCategory({ 
-    categoryId: selectedCategory || "", 
-    search,
-    limit: 10
+    data: restaurantData, 
+    isLoading: vendorsLoading,
+    fetchNextPage,
+    hasNextPage 
+  } = useGetAllVendors({ 
+    limit: 20,
+    search: search || undefined,
+    categoryId: (selectedCategory && selectedCategory !== 'static_all') ? selectedCategory : undefined
   });
-
-  const isLoading = vendorsLoading || inventoryLoading || categoryLoading;
+  
+  const isLoading = vendorsLoading || categoryLoading;
 
   // Flatten the pages into a single array
-  const allVendors: VendorAPI[] = restaurantData?.pages.flatMap((page: any) => page.vendors).slice(0, 20) || [];
-  
-  const allProducts: VendorProduct[] = inventoryData?.pages.flatMap(page => page.products) || [];
+  const allVendors = restaurantData?.pages.flatMap((page: any) => page.vendors) || [];
+
 
   // --- RENDER ITEM FOR FLATLIST ---
   const renderItem = ({ item, index }: { item: any; index: number }) => {
-    // If it's a product from inventory
-    if (item.product) {
-        const productItem = item as VendorProduct;
-        // Check for both camelCase and PascalCase vendor relation
-        const vInfo = productItem.vendor || (productItem as any).Vendor;
-        
-        const mappedItem: MappedVendor = {
-            id: productItem.id,
-            // Broaden name matching
-            restaurantName: vInfo?.shopName || vInfo?.companyName || vInfo?.ownerName || vInfo?.name || vInfo?.title || 'Delicious Restaurant',
-            location: vInfo?.city || vInfo?.mainAddress || 'Ranchi',
-            time: "30-40 mins",
-            rating: "4.2",
-            // Robust image mapping for vendor logo
-            logo: resolveImageUrl(vInfo?.images || vInfo?.image || vInfo?.logo),
-            offerText: "FLAT",
-            offerSub: "20% OFF",
-            foodName: productItem.product.name,
-            price: productItem.product.sellingPrice?.d?.[0]?.toString() || "0",
-            isVeg: productItem.product.isVeg,
-            // Robust image mapping for product image
-            foodImage: resolveImageUrl(productItem.product.images || []),
-        };
-        return <RestaurantCard item={mappedItem} index={index} category={selectedCategory} />;
-    }
-
-    // Default Vendor rendering (fallback)
     const vendorItem = item as any;
+    const firstProduct = vendorItem.VendorProduct?.[0];
     const mappedVendor: MappedVendor = {
         id: vendorItem.id,
-        // Broaden name matching
         restaurantName: vendorItem.shopName || vendorItem.companyName || vendorItem.ownerName || vendorItem.name || vendorItem.title || 'Delicious Restaurant',
         location: vendorItem.city || vendorItem.mainAddress || 'Ranchi',
         time: "30-40 mins",
         rating: vendorItem.rating || "4.2",
-        // Robust image mapping for vendor logo
         logo: resolveImageUrl(vendorItem.images || vendorItem.image || vendorItem.logo),
         offerText: "FLAT",
         offerSub: "20% OFF",
-        foodName: "Chef's Special",
-        price: "199",
-        isVeg: true,
-        // Using vendor image as fallback food image for vendor cards
-        foodImage: resolveImageUrl(vendorItem.images || vendorItem.image || vendorItem.logo),
+        foodName: firstProduct?.name || firstProduct?.product?.name || "Chef's Special",
+        price: firstProduct?.price?.toString() || "199",
+        isVeg: firstProduct?.isVeg ?? true,
+        foodImage: resolveImageUrl(firstProduct?.image || firstProduct?.product?.images || vendorItem.images || vendorItem.image || vendorItem.logo),
     };
 
     return <RestaurantCard item={mappedVendor} index={index} category={selectedCategory} />;
   };
+
 
   // --- HEADER COMPONENT ---
   const ListHeader = () => (
@@ -728,7 +695,7 @@ export default function FoodList() {
           />
        )}
 
-       <QuickFilters />
+       {/* <QuickFilters /> */}
        
        <Text style={styles.sectionTitle}>All Restaurants</Text>
     </View>
@@ -778,16 +745,17 @@ export default function FoodList() {
          </View>
       ) : (
         <FlatList
-            data={search || selectedCategory ? allProducts : allVendors}
+            data={allVendors}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
             ListHeaderComponent={ListHeader}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
             onEndReached={() => {
-              if (hasNextInventoryPage) fetchNextInventoryPage();
+              if (hasNextPage) fetchNextPage();
             }}
             onEndReachedThreshold={0.5}
+
             ListEmptyComponent={() => (
               !isLoading && (
                 <View style={{ padding: 20, alignItems: 'center' }}>
@@ -950,16 +918,14 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
-    marginRight: 5,
-    width: width * 0.85,
+    marginHorizontal: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
     overflow: "hidden", 
-    marginLeft: 20,
-    marginBottom: 20, // Adjusted for vertical list
+    marginBottom: 20, 
   },
   
   restaurantHeader: {

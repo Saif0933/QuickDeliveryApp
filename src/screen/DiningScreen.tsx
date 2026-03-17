@@ -17,65 +17,27 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS } from "../theme/color"; // Assumed import path
+import { COLORS } from "../theme/color";
 
 const { width, height } = Dimensions.get('window');
 
+// --- Types ---
+interface Product {
+  id: number;
+  title: string;
+  subtitle: string;
+  weight: string;
+  price: number;
+  mrp: number;
+  discount: string;
+  deliveryTime: string;
+  image: string;
+  isNew: boolean;
+  tag: string | null;
+}
+
 // --- Fixed Mock Data ---
-const PRODUCTS = [
-  {
-    id: 1,
-    title: "Classic Chicken Breakfast Sausage",
-    subtitle: "Juicy, meaty Classic Chicken Sausages",
-    weight: "4 pieces | 4 pieces",
-    price: 199,
-    mrp: 249,
-    discount: "20% off",
-    deliveryTime: "Today in 45 mins",
-    image: "https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500", 
-    isNew: false,
-    tag: "Juicy"
-  },
-  {
-    id: 2,
-    title: "Crispy Chicken Nuggets",
-    subtitle: "Premium cuts of chicken minced & coated in breadcrumbs",
-    weight: "250 g | 12 pieces | serves 3-4",
-    price: 180,
-    mrp: 189,
-    discount: "5% off",
-    deliveryTime: "Today in 45 mins",
-    image: "https://images.unsplash.com/photo-1562967914-608f82629710?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    isNew: true,
-    tag: null
-  },
-  {
-    id: 3,
-    title: "Chunky Continental Chicken Spread",
-    subtitle: "Creamy spread with chunks of roasted chicken",
-    weight: "200 g | 1 pack",
-    price: 149,
-    mrp: 199,
-    discount: "25% off",
-    deliveryTime: "Tomorrow 8 AM - 11 AM",
-    image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    isNew: false,
-    tag: null
-  },
-  {
-    id: 4,
-    title: "Spicy Chicken Wings",
-    subtitle: "Hot and spicy wings, ready to fry",
-    weight: "300 g | 10 pieces",
-    price: 220,
-    mrp: 260,
-    discount: "15% off",
-    deliveryTime: "Today in 30 mins",
-    image: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-    isNew: true,
-    tag: "Spicy"
-  }
-];
+const PRODUCTS: Product[] = [];
 
 const MeatDeliveryScreen = () => {
   const navigation = useNavigation();
@@ -85,7 +47,7 @@ const MeatDeliveryScreen = () => {
   // Search State
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const searchInputRef = useRef(null);
+  const searchInputRef = useRef<TextInput>(null);
   
   // --- Animations ---
   const slideAnim = useRef(new Animated.Value(height)).current; 
@@ -193,7 +155,7 @@ const MeatDeliveryScreen = () => {
         ) : (
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerTitle}>Chicken & Sausages</Text>
-            <Text style={styles.headerSubtitle}>40 Items</Text>
+            <Text style={styles.headerSubtitle}>{PRODUCTS.length} Items</Text>
           </View>
         )}
 
@@ -241,81 +203,81 @@ const MeatDeliveryScreen = () => {
            </Animated.View>
         </View>
 
-        {/* --- 2. FILTER STRIP --- */}
-        <View style={styles.filterStrip}>
-          <TouchableOpacity style={styles.filterBtn}>
-            <Ionicons name="options-outline" size={16} color={COLORS.textPrimary} />
-            <Text style={styles.filterBtnText}>Filters</Text>
-          </TouchableOpacity>
-          <View style={{flex:1}}/>
-          <Text style={styles.itemCount}>{PRODUCTS.length} items</Text>
-        </View>
-
         {/* --- 3. PRODUCT LIST --- */}
-        {PRODUCTS.map((item) => (
-          <View key={item.id} style={styles.card}>
-            {/* Image Area */}
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: item.image }} style={styles.productImage} />
-              
-              <View style={styles.paginationDots}>
-                <View style={[styles.dot, styles.activeDot]} />
-                <View style={styles.dot} />
-                <View style={styles.dot} />
-              </View>
-
-              {item.isNew && (
-                <View style={styles.newTag}>
-                  <Text style={styles.newTagText}>NEW</Text>
+        {PRODUCTS.length > 0 ? (
+          PRODUCTS.map((item) => (
+            <View key={item.id} style={styles.card}>
+              {/* Image Area */}
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: item.image }} style={styles.productImage} />
+                
+                <View style={styles.paginationDots}>
+                  <View style={[styles.dot, styles.activeDot]} />
+                  <View style={styles.dot} />
+                  <View style={styles.dot} />
                 </View>
-              )}
-              {!item.isNew && item.tag && (
-                 <View style={[styles.newTag, { backgroundColor: COLORS.accent }]}>
-                    <Ionicons name="water-outline" size={10} color={COLORS.white} style={{marginRight:2}}/>
-                    <Text style={styles.newTagText}>{item.tag}</Text>
-                 </View>
-              )}
-              
-              <View style={styles.vegIconContainer}>
-                 <View style={styles.nonVegBox}>
-                   <View style={styles.nonVegDot} />
-                 </View>
+
+                {item.isNew && (
+                  <View style={styles.newTag}>
+                    <Text style={styles.newTagText}>NEW</Text>
+                  </View>
+                )}
+                {!item.isNew && item.tag && (
+                  <View style={[styles.newTag, { backgroundColor: COLORS.accent }]}>
+                      <Ionicons name="water-outline" size={10} color={COLORS.white} style={{marginRight:2}}/>
+                      <Text style={styles.newTagText}>{item.tag}</Text>
+                  </View>
+                )}
+                
+                <View style={styles.vegIconContainer}>
+                  <View style={styles.nonVegBox}>
+                    <View style={styles.nonVegDot} />
+                  </View>
+                </View>
+              </View>
+
+              {/* Content Area */}
+              <View style={styles.cardContent}>
+                <Text style={styles.productTitle}>{item.title}</Text>
+                <Text style={styles.productSubtitle} numberOfLines={1}>{item.subtitle}</Text>
+                
+                <View style={styles.weightBadge}>
+                  <Text style={styles.weightText}>{item.weight}</Text>
+                </View>
+
+                <View style={styles.deliveryRow}>
+                  <Ionicons name="flash" size={14} color={COLORS.yelow} />
+                  <Text style={styles.deliveryText}>{item.deliveryTime}</Text>
+                </View>
+
+                <View style={styles.priceRow}>
+                  <View>
+                      <View style={styles.priceContainer}>
+                        <Text style={styles.currentPrice}>₹{item.price}</Text>
+                        <Text style={styles.mrpPrice}>₹{item.mrp}</Text>
+                        <Text style={styles.discountText}>{item.discount}</Text>
+                      </View>
+                  </View>
+
+                  <View style={styles.addBtnWrapper}>
+                      <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
+                        <Text style={styles.addBtnText}>Add +</Text>
+                      </TouchableOpacity>
+                      <Text style={styles.chooseMoreText}>Choose more</Text>
+                  </View>
+                </View>
               </View>
             </View>
-
-            {/* Content Area */}
-            <View style={styles.cardContent}>
-              <Text style={styles.productTitle}>{item.title}</Text>
-              <Text style={styles.productSubtitle} numberOfLines={1}>{item.subtitle}</Text>
-              
-              <View style={styles.weightBadge}>
-                 <Text style={styles.weightText}>{item.weight}</Text>
-              </View>
-
-              <View style={styles.deliveryRow}>
-                 <Ionicons name="flash" size={14} color={COLORS.yelow} />
-                 <Text style={styles.deliveryText}>{item.deliveryTime}</Text>
-              </View>
-
-              <View style={styles.priceRow}>
-                 <View>
-                    <View style={styles.priceContainer}>
-                       <Text style={styles.currentPrice}>₹{item.price}</Text>
-                       <Text style={styles.mrpPrice}>₹{item.mrp}</Text>
-                       <Text style={styles.discountText}>{item.discount}</Text>
-                    </View>
-                 </View>
-
-                 <View style={styles.addBtnWrapper}>
-                    <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
-                       <Text style={styles.addBtnText}>Add +</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.chooseMoreText}>Choose more</Text>
-                 </View>
-              </View>
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconContainer}>
+              <MaterialCommunityIcons name="tag-off-outline" size={80} color={COLORS.primary} />
             </View>
+            <Text style={styles.emptyText}>no discount product available</Text>
+            <Text style={styles.emptySubText}>Check back later for exciting offers and fresh discounts.</Text>
           </View>
-        ))}
+        )}
       </ScrollView>
 
       {/* --- 4. SHEET ANIMATION --- */}
@@ -348,7 +310,7 @@ const MeatDeliveryScreen = () => {
             <View style={styles.cartSummary}>
               <View style={styles.cartRow}>
                  <Text style={styles.cartLabel}>Subtotal</Text>
-                 <Text style={styles.cartValue}>₹{PRODUCTS[0].price * cartCount}</Text>
+                 <Text style={styles.cartValue}>₹{(PRODUCTS[0]?.price || 0) * cartCount}</Text>
               </View>
               <View style={styles.cartRow}>
                  <Text style={styles.cartLabel}>Delivery Fee</Text>
@@ -357,7 +319,7 @@ const MeatDeliveryScreen = () => {
               <View style={styles.divider} />
               <View style={styles.cartRow}>
                  <Text style={styles.cartTotalLabel}>To Pay</Text>
-                 <Text style={styles.cartTotalValue}>₹{PRODUCTS[0].price * cartCount}</Text>
+                 <Text style={styles.cartTotalValue}>₹{(PRODUCTS[0]?.price || 0) * cartCount}</Text>
               </View>
             </View>
 
@@ -620,6 +582,34 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   checkoutText: { color: COLORS.white, fontSize: 15, fontWeight: '700' },
+  
+  // --- Empty State ---
+  emptyContainer: {
+    flex: 1,
+    height: height * 0.6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyIconContainer: {
+    backgroundColor: COLORS.SOFT_BLUE,
+    padding: 24,
+    borderRadius: 60,
+    marginBottom: 20,
+  },
+  emptyText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+  },
+  emptySubText: {
+    fontSize: 14,
+    color: COLORS.muted,
+    textAlign: 'center',
+    marginTop: 10,
+    lineHeight: 20,
+  },
 });
 
 export default MeatDeliveryScreen;

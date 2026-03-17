@@ -1158,8 +1158,7 @@ const HomeScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
+      <FoodList 
         onScroll={handleScroll}
         scrollEventThrottle={16}
         refreshControl={
@@ -1170,218 +1169,218 @@ const HomeScreen: React.FC = () => {
             tintColor={COLORS.primary}
           />
         }
-      >
-        {/* Hero Section */}
-        <View style={styles.heroContainer}>
-          <View style={styles.bannerOuterContainer}>
-            <Animated.View
-              style={[
-                styles.bannerMovingTrack,
-                { transform: [{ translateX: slideAnim }] },
-              ]}
-            >
-              {renderBannerContent(banners[0], 0)}
-              {renderBannerContent(banners[1], 1)}
-              {renderBannerContent(banners[0], 2)}
-            </Animated.View>
-          </View>
-
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
-              <Ionicons name="location-sharp" size={26} color={COLORS.primary} />
-              <View style={styles.locationContainer}>
-                <TouchableOpacity
-                  style={styles.locationRow}
-                  onPress={() => navigation.navigate('LocationScreen')}
+        ListHeaderComponent={
+          <>
+            {/* Hero Section */}
+            <View style={styles.heroContainer}>
+              <View style={styles.bannerOuterContainer}>
+                <Animated.View
+                  style={[
+                    styles.bannerMovingTrack,
+                    { transform: [{ translateX: slideAnim }] },
+                  ]}
                 >
-                  <Text style={styles.locationTitle}>Home</Text>
-                  <Ionicons name="chevron-down" size={16} color="#333" style={{ marginLeft: 4 }} />
-                </TouchableOpacity>
-                <Text style={styles.locationSub} numberOfLines={1}>Harmu Housing Colony, Delatoli...</Text>
+                  {renderBannerContent(banners[0], 0)}
+                  {renderBannerContent(banners[1], 1)}
+                  {renderBannerContent(banners[0], 2)}
+                </Animated.View>
               </View>
-            </View>
 
-            <View style={styles.headerRight}>
-              {/* <TouchableOpacity style={styles.goldBadge} onPress={() => navigation.navigate('GoldScreen')}>
-                <Text style={styles.goldText}>Elite</Text>
-              </TouchableOpacity> */}
-              <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('ZomatoMoneyPage')}>
-                <MaterialCommunityIcons name="wallet-outline" size={24} color="#333" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.profileBtn} onPress={() => navigation.navigate('ProfileScreen')}>
-                <Text style={styles.profileText}>S</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          
-          <View style={styles.searchWrapper}>
-            <View style={styles.searchRow}>
-              <View style={styles.searchBar}>
-                <Ionicons name="search" size={20} color={COLORS.primary} />
-                <TextInput
-                  placeholder='Search "momos"'
-                  style={styles.searchInput}
-                  placeholderTextColor="#888"
-                  onPressIn={() => navigation.navigate('SearchScreen')}
-                />
-                <View style={styles.verticalLine} />
-                <Ionicons name="mic-outline" size={22} color={COLORS.primary} style={{ marginLeft: 8 }} />
+              <View style={styles.header}>
+                <View style={styles.headerLeft}>
+                  <Ionicons name="location-sharp" size={26} color={COLORS.primary} />
+                  <View style={styles.locationContainer}>
+                    <TouchableOpacity
+                      style={styles.locationRow}
+                      onPress={() => navigation.navigate('LocationScreen')}
+                    >
+                      <Text style={styles.locationTitle}>Home</Text>
+                      <Ionicons name="chevron-down" size={16} color="#333" style={{ marginLeft: 4 }} />
+                    </TouchableOpacity>
+                    <Text style={styles.locationSub} numberOfLines={1}>Harmu Housing Colony, Delatoli...</Text>
+                  </View>
+                </View>
+
+                <View style={styles.headerRight}>
+                  {/* <TouchableOpacity style={styles.goldBadge} onPress={() => navigation.navigate('GoldScreen')}>
+                    <Text style={styles.goldText}>Elite</Text>
+                  </TouchableOpacity> */}
+                  <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('ZomatoMoneyPage')}>
+                    <MaterialCommunityIcons name="wallet-outline" size={24} color="#333" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.profileBtn} onPress={() => navigation.navigate('ProfileScreen')}>
+                    <Text style={styles.profileText}>S</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={styles.vegModeContainer}>
-                <Switch
-                  value={vegMode}
-                  onValueChange={handleVegToggle}
-                  trackColor={{ false: '#E0E0E0', true: '#007E33' }}
-                  thumbColor="#fff"
-                  style={styles.vegSwitch}
-                />
-                <View style={styles.vegTextColumn}>
-                  <Text style={[styles.vegModeLabel, vegMode && { color: '#007E33' }]}>VEG</Text>
-                  <Text style={[styles.vegModeSubLabel, vegMode && { color: '#007E33' }]}>MODE</Text>
+              
+              <View style={styles.searchWrapper}>
+                <View style={styles.searchRow}>
+                  <View style={styles.searchBar}>
+                    <Ionicons name="search" size={20} color={COLORS.primary} />
+                    <TextInput
+                      placeholder='Search "momos"'
+                      style={styles.searchInput}
+                      placeholderTextColor="#888"
+                      onPressIn={() => navigation.navigate('SearchScreen')}
+                    />
+                    <View style={styles.verticalLine} />
+                    <Ionicons name="mic-outline" size={22} color={COLORS.primary} style={{ marginLeft: 8 }} />
+                  </View>
+                  <View style={styles.vegModeContainer}>
+                    <Switch
+                      value={vegMode}
+                      onValueChange={handleVegToggle}
+                      trackColor={{ false: '#E0E0E0', true: '#007E33' }}
+                      thumbColor="#fff"
+                      style={styles.vegSwitch}
+                    />
+                    <View style={styles.vegTextColumn}>
+                      <Text style={[styles.vegModeLabel, vegMode && { color: '#007E33' }]}>VEG</Text>
+                      <Text style={[styles.vegModeSubLabel, vegMode && { color: '#007E33' }]}>MODE</Text>
+                    </View>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        </View>
 
-        {/* Categories Section */}
-        <View style={styles.categoriesContainer}>
-          {categoryLoading ? (
-            <ActivityIndicator size="small" color={COLORS.primary} style={{ marginLeft: 20 }} />
-          ) : (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {displayCategories.map((c: any, index: number) => (
-                <TouchableOpacity
-                  key={c.id || index}
-                  style={styles.categoryItem}
-                  onPress={() => {
-                    if (!c.isSpecial) {
-                      setSelectedCategory(c.name);
-                      if (c.id !== 'static_all') {
-                        navigation.navigate('FoodList', { categoryId: c.id, category: c.name });
-                      }
-                    }
-                  }}
-                >
-                  {c.isSpecial ? (
-                    <TouchableOpacity onPress={() => navigation.navigate('MealsUnderScreen')}>
-                      <View style={styles.specialCategory}>
-                        <Image source={{ uri: c.image?.url }} style={styles.specialCategoryImg} />
-                        <View style={styles.specialCategoryOverlay}>
-                          <Text style={styles.specialCategoryText}>MEALS UNDER</Text>
-                          <Text style={styles.specialCategoryPrice}>₹250</Text>
-                          <View style={styles.exploreSmallBtn}>
-                            <Text style={styles.exploreSmallText}>Explore ›</Text>
+            {/* Categories Section */}
+            <View style={styles.categoriesContainer}>
+              {categoryLoading ? (
+                <ActivityIndicator size="small" color={COLORS.primary} style={{ marginLeft: 20 }} />
+              ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {displayCategories.map((c: any, index: number) => (
+                    <TouchableOpacity
+                      key={c.id || index}
+                      style={styles.categoryItem}
+                      onPress={() => {
+                        if (!c.isSpecial) {
+                          setSelectedCategory(c.name);
+                          if (c.id !== 'static_all') {
+                            navigation.navigate('FoodList', { categoryId: c.id, category: c.name });
+                          }
+                        }
+                      }}
+                    >
+                      {c.isSpecial ? (
+                        <TouchableOpacity onPress={() => navigation.navigate('MealsUnderScreen')}>
+                          <View style={styles.specialCategory}>
+                            <Image source={{ uri: c.image?.url }} style={styles.specialCategoryImg} />
+                            <View style={styles.specialCategoryOverlay}>
+                              <Text style={styles.specialCategoryText}>MEALS UNDER</Text>
+                              <Text style={styles.specialCategoryPrice}>₹250</Text>
+                              <View style={styles.exploreSmallBtn}>
+                                <Text style={styles.exploreSmallText}>Explore ›</Text>
+                              </View>
+                            </View>
                           </View>
-                        </View>
-                      </View>
+                        </TouchableOpacity>
+                      ) : (
+                        <>
+                          <Image source={{ uri: c.image?.url }} style={styles.categoryImg} />
+                          <Text style={[styles.categoryText, selectedCategory === c.name && styles.categoryTextSelected]}>
+                            {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
+                          </Text>
+                          {selectedCategory === c.name && <View style={styles.categoryUnderline} />}
+                        </>
+                      )}
                     </TouchableOpacity>
-                  ) : (
-                    <>
-                      <Image source={{ uri: c.image?.url }} style={styles.categoryImg} />
-                      <Text style={[styles.categoryText, selectedCategory === c.name && styles.categoryTextSelected]}>
-                        {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
-                      </Text>
-                      {selectedCategory === c.name && <View style={styles.categoryUnderline} />}
-                    </>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          )}
-        </View>
-
-        {/* Filters Section */}
-        <View style={styles.filtersContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersScrollContent}>
-            {[
-              { id: 'filter', name: 'Filter', icon: 'chevron-down' },
-              { id: 'near_fast', name: 'Near & Fast' },
-              { id: 'new_to_you', name: 'New to You' },
-              { id: 'great_offers', name: 'Great Offers' },
-              { id: 'under_200', name: 'Under 200' },
-              { id: 'rating_4', name: 'Rating 4.0+', icon: 'star' },
-              { id: 'pure_veg', name: 'Pure Veg', icon: 'leaf' },
-            ].map((f) => (
-              <TouchableOpacity 
-                key={f.id} 
-                style={styles.filterChip}
-                onPress={() => f.id === 'filter' && setFilterModalVisible(true)}
-              >
-                {f.icon === 'star' && <Ionicons name="star" size={12} color="#FFB300" style={{ marginRight: 4 }} />}
-                {f.id === 'filter' && <Ionicons name="options-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
-                {f.id === 'near_fast' && <Ionicons name="timer-outline" size={14} color={COLORS.primary} style={{ marginRight: 4 }} />}
-                {f.id === 'new_to_you' && <Ionicons name="sparkles-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
-                {f.id === 'great_offers' && <Ionicons name="pricetag-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
-                {f.id === 'under_200' && <Ionicons name="cash-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
-                <Text style={[styles.filterText, f.id === 'near_fast' && { color: COLORS.primary }]}>{f.name}</Text>
-                {f.id === 'filter' && <Ionicons name="chevron-down" size={14} color="#333" style={{ marginLeft: 4 }} />}
-                {f.icon === 'leaf' && <MaterialCommunityIcons name="leaf" size={14} color="#007E33" style={{ marginLeft: 4 }} />}
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Dynamic Recommended */}
-        <Text style={styles.sectionTitle}>RECOMMENDED FOR YOU</Text>
-        {isLoading ? (
-          <View style={{ height: 200, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-          </View>
-        ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recommendedContainer}>
-            <View style={{ flexDirection: 'column' }}>
-              <View style={styles.recommendedRow}>
-                {firstRowVendors.map((vendor) => (
-                  <TouchableOpacity
-                    key={vendor.id.toString()}
-                    onPress={() => navigation.navigate('ProductScreen', { 
-                      category: selectedCategory,
-                      vendorId: vendor.id.toString(),
-                      vendorName: vendor.shopName || 'Store',
-                      vendorImage: (vendor.images?.url || '') as string
-                    })}
-                  >
-                    <RestaurantCard data={{
-                      name: vendor.shopName || vendor.companyName || 'Unknown Store',
-                      img: vendor.images?.url || 'https://via.placeholder.com/150',
-                      discount: 'FLAT 20% OFF',
-                      rating: '4.2',
-                      time: '30-40 mins',
-                      isYellow: false
-                    }} />
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <View style={styles.recommendedRow}>
-                {secondRowVendors.map((vendor) => (
-                  <TouchableOpacity
-                    key={vendor.id.toString()}
-                    onPress={() => navigation.navigate('ProductScreen', { 
-                      category: selectedCategory,
-                      vendorId: vendor.id.toString(),
-                      vendorName: vendor.shopName || 'Store',
-                      vendorImage: (vendor.images?.url || '') as string
-                    })}
-                  >
-                    <RestaurantCard data={{
-                      name: vendor.shopName || vendor.companyName || 'Unknown Store',
-                      img: vendor.images?.url || 'https://via.placeholder.com/150',
-                      discount: 'FLAT 15% OFF',
-                      rating: '4.0',
-                      time: '25-30 mins',
-                      isYellow: true
-                    }} />
-                  </TouchableOpacity>
-                ))}
-              </View>
+                  ))}
+                </ScrollView>
+              )}
             </View>
-          </ScrollView>
-        )}
 
-        <FoodList />
-        <View style={{ height: 80 }} />
-      </ScrollView>
+            {/* Filters Section */}
+            {/* <View style={styles.filtersContainer}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersScrollContent}>
+                {[
+                  { id: 'filter', name: 'Filter', icon: 'chevron-down' },
+                  { id: 'near_fast', name: 'Near & Fast' },
+                  { id: 'new_to_you', name: 'New to You' },
+                  { id: 'great_offers', name: 'Great Offers' },
+                  { id: 'under_200', name: 'Under 200' },
+                  { id: 'rating_4', name: 'Rating 4.0+', icon: 'star' },
+                  { id: 'pure_veg', name: 'Pure Veg', icon: 'leaf' },
+                ].map((f) => (
+                  <TouchableOpacity 
+                    key={f.id} 
+                    style={styles.filterChip}
+                    onPress={() => f.id === 'filter' && setFilterModalVisible(true)}
+                  >
+                    {f.icon === 'star' && <Ionicons name="star" size={12} color="#FFB300" style={{ marginRight: 4 }} />}
+                    {f.id === 'filter' && <Ionicons name="options-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
+                    {f.id === 'near_fast' && <Ionicons name="timer-outline" size={14} color={COLORS.primary} style={{ marginRight: 4 }} />}
+                    {f.id === 'new_to_you' && <Ionicons name="sparkles-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
+                    {f.id === 'great_offers' && <Ionicons name="pricetag-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
+                    {f.id === 'under_200' && <Ionicons name="cash-outline" size={14} color="#333" style={{ marginRight: 4 }} />}
+                    <Text style={[styles.filterText, f.id === 'near_fast' && { color: COLORS.primary }]}>{f.name}</Text>
+                    {f.id === 'filter' && <Ionicons name="chevron-down" size={14} color="#333" style={{ marginLeft: 4 }} />}
+                    {f.icon === 'leaf' && <MaterialCommunityIcons name="leaf" size={14} color="#007E33" style={{ marginLeft: 4 }} />}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View> */}
+
+            {/* Dynamic Recommended */}
+            <Text style={styles.sectionTitle}>RECOMMENDED FOR YOU</Text>
+            {isLoading ? (
+              <View style={{ height: 200, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+              </View>
+            ) : (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recommendedContainer}>
+                <View style={{ flexDirection: 'column' }}>
+                  <View style={styles.recommendedRow}>
+                    {firstRowVendors.map((vendor) => (
+                      <TouchableOpacity
+                        key={vendor.id.toString()}
+                        onPress={() => navigation.navigate('ProductScreen', { 
+                          category: selectedCategory,
+                          vendorId: vendor.id.toString(),
+                          vendorName: vendor.shopName || 'Store',
+                          vendorImage: (vendor.images?.url || '') as string
+                        })}
+                      >
+                        <RestaurantCard data={{
+                          name: vendor.shopName || vendor.companyName || 'Unknown Store',
+                          img: vendor.images?.url || 'https://via.placeholder.com/150',
+                          discount: 'FLAT 20% OFF',
+                          rating: '4.2',
+                          time: '30-40 mins',
+                          isYellow: false
+                        }} />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <View style={styles.recommendedRow}>
+                    {secondRowVendors.map((vendor) => (
+                      <TouchableOpacity
+                        key={vendor.id.toString()}
+                        onPress={() => navigation.navigate('ProductScreen', { 
+                          category: selectedCategory,
+                          vendorId: vendor.id.toString(),
+                          vendorName: vendor.shopName || 'Store',
+                          vendorImage: (vendor.images?.url || '') as string
+                        })}
+                      >
+                        <RestaurantCard data={{
+                          name: vendor.shopName || vendor.companyName || 'Unknown Store',
+                          img: vendor.images?.url || 'https://via.placeholder.com/150',
+                          discount: 'FLAT 15% OFF',
+                          rating: '4.0',
+                          time: '25-30 mins',
+                          isYellow: true
+                        }} />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </ScrollView>
+            )}
+          </>
+        }
+      />
 
       {/* Sticky Search Bar Overlay */}
       <Animated.View 

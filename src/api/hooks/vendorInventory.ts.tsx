@@ -65,6 +65,14 @@ export interface VendorProduct {
   updatedAt: string;
   productVariants: ProductVariant[];
   product: Product;
+  // Optional flattened properties from API
+  name?: string;
+  description?: string;
+  isVeg?: boolean;
+  image?: {
+    url: string;
+    publicId: string;
+  };
 }
 
 export interface Pagination {
