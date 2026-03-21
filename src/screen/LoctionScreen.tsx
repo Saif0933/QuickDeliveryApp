@@ -21,92 +21,63 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { COLORS } from "../theme/color";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native"; 
+import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocationStore } from "../store/locationStore";
+import { checkLocationPermission, getCurrentLocation, requestLocationPermission, turnOnLocation } from "../utils/location";
+import { OLA_API_KEY } from "../constants/apiKeys";
+import { useAddresses, useDeleteAddress, Address } from '../api/hooks/address';
+
 
 const LocationScreen: React.FC = () => {
   // 2. Initialize Navigation
-  const navigation = useNavigation<any>(); 
+  const navigation = useNavigation<any>();
+  const setLocationValues = useLocationStore((state) => state.setLocation);
+  
+  // --- API HOOKS ---
+  const { data: addressesData, isLoading: addressesLoading } = useAddresses();
+  const deleteMutation = useDeleteAddress();
+  const addresses = addressesData || [];
 
   // State for feedback
   const [address, setAddress] = useState(
-    "Harmu Housing Colony, Delatoli, Ranchi"
+    " "
   );
   const [isLoading, setIsLoading] = useState(false);
 
   // --- MODAL STATE ---
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [currentCoords, setCurrentCoords] = useState<{lat: number, lng: number} | null>(null);
 
-  // YOUR OLA MAPS API KEY
-  const OLA_MAPS_API_KEY = "AbLgb9uuCk5EsknyN9nd1hol4dk85ehUH7izgU1e";
 
-  // Function to handle the entire permission -> turn on location -> fetch flow
   const handleCurrentLocation = async () => {
     setIsLoading(true);
 
     try {
-      if (Platform.OS === "android") {
-        // Step 1: Request Permission
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-        );
-
-        if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-          Alert.alert(
-            "Permission Required",
-            "Location permission is blocked. Please go to Settings and enable it.",
-            [
-              {
-                text: "Cancel",
-                style: "cancel",
-                onPress: () => setIsLoading(false),
-              },
-              {
-                text: "Open Settings",
-                onPress: () => Linking.openSettings(),
-              },
-            ]
-          );
-          return;
-        }
-
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          Alert.alert(
-            "Permission Denied",
-            "Location permission is needed to find you."
-          );
+      // Step 1: Check/Request Permission
+      const hasPermission = await checkLocationPermission();
+      if (!hasPermission) {
+        const requested = await requestLocationPermission();
+        if (!requested) {
           setIsLoading(false);
           return;
         }
       }
 
-      const success = true; // Change this logic if you integrate a real Geolocation library
+      // Step 2: Ensure location is turned on (Android)
+      await turnOnLocation();
 
-      if (success) {
-        const lat = 23.3441;
-        const lng = 85.3096;
-        await fetchOlaAddress(lat, lng);
+      // Step 3: Get location
+      const location = await getCurrentLocation();
+      if (location) {
+        await fetchOlaAddress(location.latitude, location.longitude);
       }
-    } catch (error) {
-      // Step 3: Handle "Turn On Location" if fetch fails
+    } catch (error: any) {
+      console.error("Location error:", error);
       Alert.alert(
-        "Turn on Location",
-        "Your location services (GPS) seem to be off. Please turn them on.",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Turn On",
-            onPress: () => {
-              if (Platform.OS === "android") {
-                Linking.sendIntent(
-                  "android.settings.LOCATION_SOURCE_SETTINGS"
-                );
-              } else {
-                Linking.openSettings();
-              }
-            },
-          },
-        ]
+        "Location Error",
+        error.message || "Failed to get your location. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -116,12 +87,23 @@ const LocationScreen: React.FC = () => {
   const fetchOlaAddress = async (lat: number, lng: number) => {
     try {
       // Make sure this URL is correct per latest Ola Docs
-      const url = `https://api.olamaps.io/places/v1/reverse-geocode?latlng=${lat},${lng}&api_key=${OLA_MAPS_API_KEY}`;
+      const url = `https://api.olamaps.io/places/v1/reverse-geocode?latlng=${lat},${lng}&api_key=${OLA_API_KEY}`;
       const response = await fetch(url);
       const data = await response.json();
 
       if (data?.status === "ok" && data?.results?.[0]) {
-        setAddress(data.results[0].formatted_address);
+        const fullAddress = data.results[0].formatted_address;
+        const primary = fullAddress.split(',')[0] || 'Unknown';
+        const secondary = fullAddress.split(',').slice(1).join(', ').trim() || '';
+
+        setAddress(fullAddress);
+        setLocationValues(lat, lng, primary, secondary);
+
+        // Navigate back or show success? The user said "when I click on use current location it's not being set"
+        // Usually, after setting location, we might want to go back to home.
+        Alert.alert("Success", "Location updated successfully", [
+          { text: "OK", onPress: () => navigation.goBack() }
+        ]);
       } else {
         setAddress("Location detected (Check API Key)");
       }
@@ -142,29 +124,51 @@ const LocationScreen: React.FC = () => {
   };
 
   // --- MODAL HANDLERS ---
-  const openOptions = () => {
+  const openOptions = (addr: Address) => {
+    setSelectedAddress(addr);
     setModalVisible(true);
   };
 
   const closeOptions = () => {
     setModalVisible(false);
+    setSelectedAddress(null);
   };
 
   const handleEditOption = () => {
-    Alert.alert("Edit", "Edit Address functionality");
-    closeOptions();
+    if (selectedAddress) {
+      closeOptions();
+      navigation.navigate('SelectAddressScreen', { address: selectedAddress });
+    }
   };
 
   const handleDeleteOption = () => {
-    Alert.alert("Delete", "Are you sure you want to remove this address?", [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: closeOptions }
-    ]);
+    if (selectedAddress) {
+      Alert.alert("Delete Address", "Are you sure you want to remove this address?", [
+        { text: "Cancel", style: "cancel", onPress: closeOptions },
+        { 
+          text: "Delete", 
+          style: "destructive", 
+          onPress: async () => {
+            try {
+              await deleteMutation.mutateAsync(selectedAddress.id);
+              closeOptions();
+            } catch (error: any) {
+              Alert.alert("Error", "Failed to delete address");
+            }
+          }
+        }
+      ]);
+    }
   };
 
-  const handleUpdateInstructions = () => {
-    Alert.alert("Update", "Update Delivery Instructions");
-    closeOptions();
+  const handleSelectSavedAddress = (addr: Address) => {
+    if (addr.latitude && addr.longitude) {
+      const primary = addr.type.charAt(0).toUpperCase() + addr.type.slice(1);
+      setLocationValues(addr.latitude, addr.longitude, primary, addr.completeAddress);
+      navigation.goBack();
+    } else {
+      Alert.alert("Error", "This address does not have valid coordinates.");
+    }
   };
 
   return (
@@ -175,8 +179,8 @@ const LocationScreen: React.FC = () => {
       <View style={styles.headerContainer}>
         <View style={styles.headerTop}>
           {/* Back Button Added Here */}
-          <TouchableOpacity 
-            onPress={() => navigation.goBack()} 
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
             style={{ marginRight: 12 }}
             activeOpacity={0.7}
           >
@@ -228,10 +232,10 @@ const LocationScreen: React.FC = () => {
         <View style={styles.divider} />
 
         {/* Add Address */}
-        <TouchableOpacity 
-            style={styles.actionRow} 
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('SelectAddressScreen')}
+        <TouchableOpacity
+          style={styles.actionRow}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate('SelectAddressScreen')}
         >
           <View style={[styles.iconCircle, { backgroundColor: "#E3F2FD" }]}>
             <Icon name="add" size={24} color={COLORS.primary} />
@@ -245,7 +249,7 @@ const LocationScreen: React.FC = () => {
         <View style={styles.divider} />
 
         {/* Import Address */}
-        <TouchableOpacity style={styles.actionRow} activeOpacity={0.7}>
+        {/* <TouchableOpacity style={styles.actionRow} activeOpacity={0.7}>
           <View style={[styles.iconCircle, { backgroundColor: "#F3E5F5" }]}>
             <MaterialCommunityIcons
               name="file-import"
@@ -257,7 +261,7 @@ const LocationScreen: React.FC = () => {
             <Text style={styles.rowTitle}>Import from Minta</Text>
           </View>
           <Icon name="chevron-right" size={20} color={COLORS.muted} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* Info Banner */}
         <View style={styles.infoBanner}>
@@ -270,128 +274,69 @@ const LocationScreen: React.FC = () => {
         {/* Saved Addresses */}
         <Text style={styles.sectionHeader}>SAVED ADDRESSES</Text>
 
-        {/* Card 1: Home */}
-        <View style={styles.card}>
-          <View style={styles.cardHeaderRow}>
-            <View style={styles.cardIconBg}>
-              <MaterialCommunityIcons
-                name="home-outline"
-                size={22}
-                color={COLORS.textPrimary}
-              />
-            </View>
-            <View style={styles.cardText}>
-              <Text style={styles.cardTitle}>Home</Text>
-              <Text style={styles.cardSub} numberOfLines={2}>
-                1 floor, Tarulia, Krishnapur, Kestopur, Kolkata
-              </Text>
-            </View>
-            <View style={styles.distanceBadge}>
-              <Text style={styles.distanceText}>332 km</Text>
-            </View>
-          </View>
+        {addressesLoading ? (
+          <ActivityIndicator size="small" color={COLORS.primary} style={{ marginBottom: 20 }} />
+        ) : (
+          addresses.map((addr) => {
+            const type = (addr.type || "other").toLowerCase();
+            const isHome = type === "home";
+            const iconName = isHome ? "home-outline" : "map-marker-outline";
 
-          {/* Card Actions Line */}
-          <View style={styles.cardActions}>
-            {/* Connected Share Function */}
-            <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={() => handleShare("Home", "1 floor, Tarulia, Krishnapur, Kestopur, Kolkata")}
-            >
-              <Icon name="share" size={16} color={COLORS.primary} />
-              <Text style={styles.actionButtonText}>Share</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.actionButtonIcon} onPress={openOptions}>
-              <MaterialCommunityIcons
-                name="dots-horizontal"
-                size={20}
-                color={COLORS.muted}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
+            return (
+              <TouchableOpacity 
+                key={addr.id} 
+                style={styles.card}
+                activeOpacity={0.8}
+                onPress={() => handleSelectSavedAddress(addr)}
+              >
+                <View style={styles.cardHeaderRow}>
+                  <View style={styles.cardIconBg}>
+                    <MaterialCommunityIcons
+                      name={iconName}
+                      size={22}
+                      color={COLORS.textPrimary}
+                    />
+                  </View>
+                  <View style={styles.cardText}>
+                    <Text style={styles.cardTitle}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
+                    <Text style={styles.cardSub} numberOfLines={2}>
+                      {addr.completeAddress}
+                    </Text>
+                  </View>
+                  <View style={styles.distanceBadge}>
+                    <Text style={styles.distanceText}>{addr.city || "Ranchi"}</Text>
+                  </View>
+                </View>
 
-        {/* Card 2: My Place */}
-        <View style={styles.card}>
-          <View style={styles.cardHeaderRow}>
-            <View style={styles.cardIconBg}>
-              <MaterialCommunityIcons
-                name="map-marker-outline"
-                size={22}
-                color={COLORS.textPrimary}
-              />
-            </View>
-            <View style={styles.cardText}>
-              <Text style={styles.cardTitle}>My Place</Text>
-              <Text style={styles.cardSub} numberOfLines={2}>
-                balpan hospital 4 floor, 4 Floor, Balpan Children Hospital...
-              </Text>
-            </View>
-            <View style={styles.distanceBadge}>
-              <Text style={styles.distanceText}>8 km</Text>
-            </View>
-          </View>
-          <View style={styles.cardActions}>
-            {/* Connected Share Function */}
-            <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={() => handleShare("My Place", "balpan hospital 4 floor, 4 Floor, Balpan Children Hospital...")}
-            >
-              <Icon name="share" size={16} color={COLORS.primary} />
-              <Text style={styles.actionButtonText}>Share</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.actionButtonIcon} onPress={openOptions}>
-              <MaterialCommunityIcons
-                name="dots-horizontal"
-                size={20}
-                color={COLORS.muted}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
+                <View style={styles.cardActions}>
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => handleShare(type, addr.completeAddress)}
+                  >
+                    <Icon name="share" size={16} color={COLORS.primary} />
+                    <Text style={styles.actionButtonText}>Share</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={styles.actionButtonIcon} 
+                    onPress={() => openOptions(addr)}
+                  >
+                    <MaterialCommunityIcons
+                      name="dots-horizontal"
+                      size={20}
+                      color={COLORS.muted}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            );
+          })
+        )}
 
-        {/* Nearby Locations */}
-        <Text style={styles.sectionHeader}>NEARBY LOCATIONS</Text>
-        <TouchableOpacity style={styles.simpleCard} activeOpacity={0.7}>
-          <View style={styles.simpleCardRow}>
-            <View style={[styles.miniIcon, { backgroundColor: "#E0F2F1" }]}>
-              <MaterialCommunityIcons
-                name="map-marker"
-                size={18}
-                color="#00695C"
-              />
-            </View>
-            <View style={styles.cardText}>
-              <Text style={styles.cardTitle}>Itsy Hotels Cradle Regency</Text>
-              <Text style={styles.cardSub} numberOfLines={1}>
-                Beside New AG Colony Road...
-              </Text>
-            </View>
-            <Text style={styles.simpleDistance}>40 m</Text>
-          </View>
-        </TouchableOpacity>
+    
+  
 
-        {/* Recent Locations */}
-        <Text style={styles.sectionHeader}>RECENT LOCATIONS</Text>
-        <TouchableOpacity style={styles.simpleCard} activeOpacity={0.7}>
-          <View style={styles.simpleCardRow}>
-            <View style={[styles.miniIcon, { backgroundColor: "#ECEFF1" }]}>
-              <MaterialCommunityIcons
-                name="clock-time-four-outline"
-                size={18}
-                color="#455A64"
-              />
-            </View>
-            <View style={styles.cardText}>
-              <Text style={styles.cardTitle}>Kadru</Text>
-              <Text style={styles.cardSub}>AG Colony, Ranchi</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-
-        <Text style={styles.footer}>powered by Saif</Text>
+        <Text style={styles.footer}>powered by Minta Club</Text>
         <View style={{ height: 20 }} />
       </ScrollView>
 
@@ -404,14 +349,14 @@ const LocationScreen: React.FC = () => {
       >
         <TouchableWithoutFeedback onPress={closeOptions}>
           <View style={styles.modalOverlay}>
-            
+
             {/* Cross/Close Button Floating Above */}
-            <TouchableOpacity 
-                style={styles.closeButton} 
-                onPress={closeOptions}
-                activeOpacity={0.8}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={closeOptions}
+              activeOpacity={0.8}
             >
-                <Ionicons name="close" size={24} color="#FFFFFF" />
+              <Ionicons name="close" size={24} color="#FFFFFF" />
             </TouchableOpacity>
 
             <TouchableWithoutFeedback>
@@ -420,16 +365,16 @@ const LocationScreen: React.FC = () => {
 
                 {/* Option 1: Edit */}
                 <TouchableOpacity style={styles.optionItem} onPress={handleEditOption}>
-                    <Ionicons name="pencil-outline" size={22} color={COLORS.textPrimary} />
-                    <Text style={styles.optionText}>Edit Address</Text>
-                    <Ionicons name="chevron-forward" size={20} color={COLORS.muted} style={{marginLeft: 'auto'}} />
+                  <Ionicons name="pencil-outline" size={22} color={COLORS.textPrimary} />
+                  <Text style={styles.optionText}>Edit Address</Text>
+                  <Ionicons name="chevron-forward" size={20} color={COLORS.muted} style={{ marginLeft: 'auto' }} />
                 </TouchableOpacity>
 
                 {/* Option 2: Delete */}
                 <TouchableOpacity style={styles.optionItem} onPress={handleDeleteOption}>
-                    <Ionicons name="trash-outline" size={22} color={COLORS.textPrimary} />
-                    <Text style={styles.optionText}>Delete Address</Text>
-                    <Ionicons name="chevron-forward" size={20} color={COLORS.muted} style={{marginLeft: 'auto'}} />
+                  <Ionicons name="trash-outline" size={22} color={COLORS.textPrimary} />
+                  <Text style={styles.optionText}>Delete Address</Text>
+                  <Ionicons name="chevron-forward" size={20} color={COLORS.muted} style={{ marginLeft: 'auto' }} />
                 </TouchableOpacity>
 
               </View>
@@ -702,21 +647,21 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F3F4F6',
   },
   optionText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: COLORS.textPrimary,
-      marginLeft: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginLeft: 16,
   },
   /* Floating Close Button Style */
   closeButton: {
-      width: 45,
-      height: 45,
-      borderRadius: 22.5,
-      backgroundColor: '#1A1D1E',
-      justifyContent: 'center',
-      alignItems: 'center',
-      alignSelf: 'center',
-      marginBottom: 15,
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    backgroundColor: '#1A1D1E',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 15,
   }
 });
 

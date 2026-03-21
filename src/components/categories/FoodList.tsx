@@ -669,21 +669,34 @@ export default function FoodList() {
 
 
   // --- HEADER COMPONENT ---
-  const ListHeader = () => (
-    <View>
-       <BannerCarousel />
+  const ListHeader = () => {
+    const currentCategoryObj = categoryData?.find((c: any) => c.id === selectedCategory);
+    const categoryImageUrl = currentCategoryObj ? resolveImageUrl(currentCategoryObj.image) : null;
 
-       {/* --- DYNAMIC FILTER SECTION IMPLEMENTATION --- */}
-       {categoryLoading ? (
-          <View style={{ height: 100, justifyContent: 'center', alignItems: 'center' }}>
-             <ActivityIndicator size="small" color={COLORS.primary} />
+    return (
+      <View>
+        {categoryImageUrl ? (
+          <View style={styles.heroContainer}>
+            <View style={styles.bannerWrapper}>
+              <Image source={{ uri: categoryImageUrl }} style={styles.heroImage} resizeMode="cover" />
+              <View style={styles.bannerOverlay} />
+            </View>
           </View>
-       ) : (
-          <FilterSection 
+        ) : (
+          <BannerCarousel />
+        )}
+
+        {/* --- DYNAMIC FILTER SECTION IMPLEMENTATION --- */}
+        {categoryLoading ? (
+          <View style={{ height: 100, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          </View>
+        ) : (
+          <FilterSection
             categories={[
               { id: 'static_all', name: 'All', image: { url: 'https://tse1.mm.bing.net/th/id/OIP.y9WHqmBEubDgxpHWqRN9sAHaEO?pid=Api&P=0&h=180' } },
               ...(categoryData || [])
-            ]} 
+            ]}
             selectedCategory={selectedCategory}
             onSelectCategory={(id) => {
               if (id === 'static_all') {
@@ -693,13 +706,12 @@ export default function FoodList() {
               }
             }}
           />
-       )}
+        )}
 
-       {/* <QuickFilters /> */}
-       
-       <Text style={styles.sectionTitle}>All Restaurants</Text>
-    </View>
-  );
+        <Text style={styles.sectionTitle}>All Restaurants</Text>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>

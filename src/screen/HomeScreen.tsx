@@ -961,6 +961,8 @@ import FoodList from '../components/FoodCard';
 import FloatingCart from '../components/cart/FloatingCart';
 import BottomNavBar from '../navigation/BottomNavBar';
 import { COLORS } from '../theme/color';
+import { useLocationStore } from '../store/locationStore';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -1011,6 +1013,11 @@ const HomeScreen: React.FC = () => {
   const [vegMode, setVegMode] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
   
+  const { primaryLocation, secondaryLocation, initializeLocation } = useLocationStore();
+
+  useEffect(() => {
+    initializeLocation();
+  }, [initializeLocation]);
   // --- FILTER MODAL STATES ---
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [activeFilterTab, setActiveFilterTab] = useState('Sort by');
@@ -1194,10 +1201,10 @@ const HomeScreen: React.FC = () => {
                       style={styles.locationRow}
                       onPress={() => navigation.navigate('LocationScreen')}
                     >
-                      <Text style={styles.locationTitle}>Home</Text>
+                      <Text style={styles.locationTitle}>{primaryLocation || "Locating..."}</Text>
                       <Ionicons name="chevron-down" size={16} color="#333" style={{ marginLeft: 4 }} />
                     </TouchableOpacity>
-                    <Text style={styles.locationSub} numberOfLines={1}>Harmu Housing Colony, Delatoli...</Text>
+                    <Text style={styles.locationSub} numberOfLines={1}>{secondaryLocation || "Fetching address..."}</Text>
                   </View>
                 </View>
 
