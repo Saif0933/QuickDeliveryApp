@@ -46,6 +46,17 @@ export interface VendorWallet {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface MenuImage {
+  id: bigint;
+  vendorId: bigint;
+  imageUrl: {
+    url: string;
+    public_id: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
 // ---------------------
 // MAIN VENDOR MODEL
 // ---------------------
@@ -85,6 +96,7 @@ export interface Vendor {
   documents?: VendorDocument | null;
   bankAccounts: VendorBankAccount[];
   VendorWallet?: VendorWallet | null;
+  menuImages: MenuImage[];
 
   createdAt: string;
   updatedAt: string;

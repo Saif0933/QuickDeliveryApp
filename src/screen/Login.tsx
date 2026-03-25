@@ -120,7 +120,7 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
 
           {/* Main content */}
           <View style={styles.content}>
-            <Text style={styles.title}>India’s #1 Food Delivery App</Text>
+            <Text style={styles.title}>Order Now From Multiple Resturant</Text>
 
             <View style={styles.dividerContainer}>
               <View style={styles.line} />

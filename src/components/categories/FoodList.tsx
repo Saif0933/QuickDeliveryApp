@@ -60,29 +60,29 @@ interface FilterContentMap {
 // --- Helper for Robust Image Resolution ---
 const resolveImageUrl = (imageSource: any): string => {
   if (!imageSource) return "https://via.placeholder.com/200";
-  
+
   // 1. If it's a direct string
   if (typeof imageSource === 'string') return imageSource;
-  
+
   // 2. If it's an object with .url
   if (imageSource.url) return imageSource.url;
-  
+
   // 3. If it's an object with .image.url
   if (imageSource.image?.url) return imageSource.image.url;
-  
+
   // 4. If it's an array, try the first element
   if (Array.isArray(imageSource) && imageSource.length > 0) {
     const first = imageSource[0];
     if (typeof first === 'string') return first;
     return first.url || first.image?.url || "https://via.placeholder.com/200";
   }
-  
+
   // 5. Check deeply for any .url property if it's an object
   if (typeof imageSource === 'object') {
-     // Common pattern in some APIs: { images: { url: '...' } }
-     if (imageSource.images?.url) return imageSource.images.url;
-     if (imageSource.images?.[0]?.url) return imageSource.images[0].url;
-     if (imageSource.images?.[0]?.image?.url) return imageSource.images[0].image.url;
+    // Common pattern in some APIs: { images: { url: '...' } }
+    if (imageSource.images?.url) return imageSource.images.url;
+    if (imageSource.images?.[0]?.url) return imageSource.images[0].url;
+    if (imageSource.images?.[0]?.image?.url) return imageSource.images[0].image.url;
   }
 
   return "https://via.placeholder.com/200";
@@ -111,6 +111,7 @@ interface MappedVendor {
   time: string;
   rating: string;
   logo: string;
+  menuImages: string[];
   offerText: string;
   offerSub: string;
   foodName: string;
@@ -252,26 +253,26 @@ interface FilterModalProps {
 const FilterModal = ({ visible, onClose }: FilterModalProps) => {
   const [activeTab, setActiveTab] = useState<string>('sort');
   const [selectedSort, setSelectedSort] = useState<string>('relevance');
-  
+
   // Render the Right Side Content based on Active Tab
   const renderRightContent = () => {
     if (activeTab === 'sort') {
       return (
         <View style={styles.filterContentContainer}>
           {SORT_OPTIONS.map((option, index) => (
-            <TouchableOpacity 
-              key={index} 
-              style={styles.sortOptionRow} 
+            <TouchableOpacity
+              key={index}
+              style={styles.sortOptionRow}
               onPress={() => setSelectedSort(option.value)}
             >
               <Text style={[
-                styles.sortOptionText, 
+                styles.sortOptionText,
                 selectedSort === option.value && { color: COLORS.textPrimary, fontWeight: '700' }
               ]}>
                 {option.label}
               </Text>
               <View style={[styles.radioOuter, selectedSort === option.value && { borderColor: COLORS.primary }]}>
-                 {selectedSort === option.value && <View style={styles.radioInner} />}
+                {selectedSort === option.value && <View style={styles.radioInner} />}
               </View>
             </TouchableOpacity>
           ))}
@@ -287,24 +288,24 @@ const FilterModal = ({ visible, onClose }: FilterModalProps) => {
         {activeTab === 'time' || activeTab === 'rating' ? (
           <View style={styles.boxContainer}>
             {data.map((item, index) => (
-               <TouchableOpacity key={index} style={styles.filterBox}>
-                  <Ionicons 
-                    name={item.icon || 'help-outline'} 
-                    size={24} 
-                    color={item.color === 'green' ? '#2e7d32' : COLORS.textPrimary} 
-                  />
-                  <Text style={styles.boxText}>{item.label}</Text>
-               </TouchableOpacity>
+              <TouchableOpacity key={index} style={styles.filterBox}>
+                <Ionicons
+                  name={item.icon || 'help-outline'}
+                  size={24}
+                  color={item.color === 'green' ? '#2e7d32' : COLORS.textPrimary}
+                />
+                <Text style={styles.boxText}>{item.label}</Text>
+              </TouchableOpacity>
             ))}
           </View>
         ) : activeTab === 'price' ? (
           <View style={styles.priceContainer}>
-             {data.map((item, index) => (
-               <TouchableOpacity key={index} style={styles.priceBox}>
-                  <Text style={styles.priceText}>₹</Text>
-                  <Text style={styles.priceLabel}>{item.label}</Text>
-               </TouchableOpacity>
-             ))}
+            {data.map((item, index) => (
+              <TouchableOpacity key={index} style={styles.priceBox}>
+                <Text style={styles.priceText}>₹</Text>
+                <Text style={styles.priceLabel}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         ) : activeTab === 'trust' ? (
           <View style={styles.gridContainer}>
@@ -331,12 +332,12 @@ const FilterModal = ({ visible, onClose }: FilterModalProps) => {
   return (
     <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
       <View style={styles.modalContainer}>
-        
+
         {/* Close Button Centered above Modal */}
         <TouchableOpacity style={styles.closeButtonContainer} onPress={onClose}>
-           <View style={styles.circleClose}>
-              <Ionicons name="close" size={24} color={COLORS.white} />
-           </View>
+          <View style={styles.circleClose}>
+            <Ionicons name="close" size={24} color={COLORS.white} />
+          </View>
         </TouchableOpacity>
 
         <View style={styles.modalContent}>
@@ -354,7 +355,7 @@ const FilterModal = ({ visible, onClose }: FilterModalProps) => {
           <View style={{ flex: 1, flexDirection: 'row' }}>
             {/* Sidebar */}
             <View style={styles.sidebar}>
-              <ScrollView 
+              <ScrollView
                 showsVerticalScrollIndicator={true} // ENABLED SCROLLBAR
                 persistentScrollbar={true} // For Android
                 indicatorStyle="black" // For iOS
@@ -362,31 +363,31 @@ const FilterModal = ({ visible, onClose }: FilterModalProps) => {
                 {SIDEBAR_ITEMS.map((item) => {
                   const isActive = activeTab === item.id;
                   return (
-                    <TouchableOpacity 
-                      key={item.id} 
+                    <TouchableOpacity
+                      key={item.id}
                       style={[styles.sidebarItem, isActive && styles.activeSidebarItem]}
                       onPress={() => setActiveTab(item.id)}
                     >
-                      <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                          {isActive && <View style={styles.activeIndicator} />}
-                          <View style={{width: 30, alignItems: 'center'}}>
-                             {item.id === 'price' ? (
-                               <Text style={{fontSize: 16, color: isActive ? COLORS.primary : COLORS.textSecondary, fontWeight: '700'}}>₹</Text>
-                             ) : (
-                               <Ionicons 
-                                  name={item.icon} 
-                                  size={20} 
-                                  color={isActive ? COLORS.primary : COLORS.textSecondary} 
-                               />
-                             )}
-                          </View>
-                          <View style={{width: 8}} />
-                          <Text style={[styles.sidebarText, isActive && styles.activeSidebarText]}>
-                            {item.label}
-                          </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        {isActive && <View style={styles.activeIndicator} />}
+                        <View style={{ width: 30, alignItems: 'center' }}>
+                          {item.id === 'price' ? (
+                            <Text style={{ fontSize: 16, color: isActive ? COLORS.primary : COLORS.textSecondary, fontWeight: '700' }}>₹</Text>
+                          ) : (
+                            <Ionicons
+                              name={item.icon}
+                              size={20}
+                              color={isActive ? COLORS.primary : COLORS.textSecondary}
+                            />
+                          )}
+                        </View>
+                        <View style={{ width: 8 }} />
+                        <Text style={[styles.sidebarText, isActive && styles.activeSidebarText]}>
+                          {item.label}
+                        </Text>
                       </View>
                       {activeTab === 'sort' && item.id === 'sort' && (
-                          <View style={styles.dot} />
+                        <View style={styles.dot} />
                       )}
                     </TouchableOpacity>
                   )
@@ -396,17 +397,17 @@ const FilterModal = ({ visible, onClose }: FilterModalProps) => {
 
             {/* Right Content */}
             <View style={styles.rightContent}>
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 20}}>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
                 {renderRightContent()}
               </ScrollView>
             </View>
           </View>
-          
+
           {/* Footer Button */}
           <View style={styles.modalFooter}>
-             <TouchableOpacity style={styles.applyButton} onPress={onClose}>
-                <Text style={styles.applyButtonText}>Apply</Text>
-             </TouchableOpacity>
+            <TouchableOpacity style={styles.applyButton} onPress={onClose}>
+              <Text style={styles.applyButtonText}>Apply</Text>
+            </TouchableOpacity>
           </View>
 
         </View>
@@ -426,40 +427,40 @@ const QuickFilters = () => {
           {QUICK_FILTERS.map((filter, index) => {
             const isActive = activeFilter === filter.label;
             return (
-              <TouchableOpacity 
-                key={index} 
+              <TouchableOpacity
+                key={index}
                 style={[
-                  styles.quickFilterChip, 
+                  styles.quickFilterChip,
                   isActive && { borderColor: COLORS.primary, backgroundColor: COLORS.white }
                 ]}
                 onPress={() => {
-                   if(filter.label === 'Sort') {
-                     setShowFilterModal(true);
-                   } else {
-                     setActiveFilter(filter.label);
-                   }
+                  if (filter.label === 'Sort') {
+                    setShowFilterModal(true);
+                  } else {
+                    setActiveFilter(filter.label);
+                  }
                 }}
               >
                 {filter.icon ? (
-                  <Ionicons 
-                    name={filter.icon} 
-                    size={14} 
-                    color={isActive ? COLORS.primary : COLORS.textPrimary} 
-                    style={{ marginRight: 4 }} 
+                  <Ionicons
+                    name={filter.icon}
+                    size={14}
+                    color={isActive ? COLORS.primary : COLORS.textPrimary}
+                    style={{ marginRight: 4 }}
                   />
                 ) : null}
                 <Text style={[
-                  styles.quickFilterText, 
+                  styles.quickFilterText,
                   isActive && { color: COLORS.primary }
                 ]}>
                   {filter.label}
                 </Text>
                 {filter.label === "Sort" && (
-                  <Ionicons 
-                    name="caret-down" 
-                    size={10} 
-                    color={isActive ? COLORS.primary : COLORS.textPrimary} 
-                    style={{marginLeft: 4}} 
+                  <Ionicons
+                    name="caret-down"
+                    size={10}
+                    color={isActive ? COLORS.primary : COLORS.textPrimary}
+                    style={{ marginLeft: 4 }}
                   />
                 )}
               </TouchableOpacity>
@@ -493,14 +494,14 @@ const FilterSection = ({ categories, selectedCategory, onSelectCategory }: Filte
         {categories && categories.map((item) => {
           const isSelected = selectedCategory === item.id;
           return (
-            <TouchableOpacity 
-              key={item.id} 
+            <TouchableOpacity
+              key={item.id}
               style={styles.filterItem}
               onPress={() => onSelectCategory(item.id)}
             >
               {/* Robust Image Resolution for Categories */}
               <Image source={{ uri: resolveImageUrl(item.image) }} style={styles.filterImage} />
-              
+
               <Text style={[styles.filterText, isSelected && styles.activeFilterText]}>
                 {item.name}
               </Text>
@@ -524,6 +525,28 @@ interface RestaurantCardProps {
 const RestaurantCard = ({ item, index, category }: RestaurantCardProps) => {
   const navigation = useNavigation<any>();
   const scaleValue = useRef(new Animated.Value(1)).current;
+  const [imgIndex, setImgIndex] = useState(0);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  // Carousel logic for Menu Images
+  useEffect(() => {
+    if (!item.menuImages || item.menuImages.length <= 1) return;
+    const interval = setInterval(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {
+        setImgIndex((prev) => (prev + 1) % item.menuImages.length);
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [item.menuImages, fadeAnim]);
 
   const onPressIn = () => {
     Animated.spring(scaleValue, {
@@ -539,23 +562,44 @@ const RestaurantCard = ({ item, index, category }: RestaurantCardProps) => {
     }).start();
   };
 
+  const displayImage = item.menuImages && item.menuImages.length > 0 
+    ? item.menuImages[imgIndex] 
+    : item.logo;
+
   return (
     <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
-      <TouchableOpacity 
-        style={styles.card} 
+      <TouchableOpacity
+        style={styles.card}
         activeOpacity={0.9}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
-        onPress={() => navigation.navigate('ProductScreen', { 
+        onPress={() => navigation.navigate('ProductScreen', {
           category: category || "All",
-          vendorId: item.id, 
+          vendorId: item.id,
           vendorName: item.restaurantName,
-          vendorImage: item.logo 
+          vendorImage: item.logo,
+          menuImages: item.menuImages
         })}
       >
         <View style={styles.restaurantHeader}>
           <View style={styles.logoContainer}>
-            <Image source={{ uri: item.logo }} style={styles.logo} resizeMode="contain" />
+            <View style={styles.logoImageWrapper}>
+              <Animated.Image 
+                source={{ uri: displayImage }} 
+                style={[styles.logo, { opacity: fadeAnim }]} 
+                resizeMode="cover" 
+              />
+              {item.menuImages.length > 1 && (
+                <View style={styles.cardDotContainer}>
+                  {item.menuImages.map((_, i) => (
+                    <View 
+                      key={i} 
+                      style={[styles.cardDot, { backgroundColor: i === imgIndex ? '#fff' : 'rgba(255,255,255,0.5)' }]} 
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
             <View style={styles.ratingBadge}>
               <Text style={styles.ratingText}>{item.rating}</Text>
               <Ionicons name="star" size={10} color={COLORS.white} style={{ marginLeft: 2 }} />
@@ -566,17 +610,17 @@ const RestaurantCard = ({ item, index, category }: RestaurantCardProps) => {
             <Text style={styles.resName}>{item.restaurantName}</Text>
             <Text style={styles.resMeta}>{item.location}</Text>
             <View style={styles.timeRow}>
-                <MaterialCommunityIcons name="clock-time-four-outline" size={14} color={COLORS.textSecondary} />
-                <Text style={styles.resMeta}> {item.time}</Text>
+              <MaterialCommunityIcons name="clock-time-four-outline" size={14} color={COLORS.textSecondary} />
+              <Text style={styles.resMeta}> {item.time}</Text>
             </View>
             <Text style={styles.homeDelivery}>Home delivery</Text>
           </View>
 
           <View style={styles.offerRibbon}>
-             <View style={styles.offerContent}>
-                <Text style={styles.offerTitle}>{item.offerText}</Text>
-                <Text style={styles.offerSub}>{item.offerSub}</Text>
-             </View>
+            <View style={styles.offerContent}>
+              <Text style={styles.offerTitle}>{item.offerText}</Text>
+              <Text style={styles.offerSub}>{item.offerSub}</Text>
+            </View>
           </View>
         </View>
 
@@ -584,14 +628,14 @@ const RestaurantCard = ({ item, index, category }: RestaurantCardProps) => {
 
         <View style={styles.foodItemRow}>
           <View style={styles.foodDetails}>
-            <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 4}}>
-                 <VegIcon isVeg={item.isVeg} />
-                 <View style={{width: 6}} />
-                 {index === 0 && (
-                    <View style={{backgroundColor: COLORS.accent, paddingHorizontal: 4, borderRadius: 4}}>
-                        <Text style={{fontSize: 10, color: COLORS.primary, fontWeight: '600'}}>Best Seller</Text>
-                    </View>
-                 )}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+              <VegIcon isVeg={item.isVeg} />
+              <View style={{ width: 6 }} />
+              {index === 0 && (
+                <View style={{ backgroundColor: COLORS.accent, paddingHorizontal: 4, borderRadius: 4 }}>
+                  <Text style={{ fontSize: 10, color: COLORS.primary, fontWeight: '600' }}>Best Seller</Text>
+                </View>
+              )}
             </View>
             <Text style={styles.foodName}>{item.foodName}</Text>
             <Text style={styles.price}>₹{item.price}</Text>
@@ -600,12 +644,12 @@ const RestaurantCard = ({ item, index, category }: RestaurantCardProps) => {
           <View style={styles.foodImageContainer}>
             <Image source={{ uri: item.foodImage }} style={styles.foodImage} />
             <View style={styles.addButton}>
-              <TouchableOpacity 
-                onPress={() => navigation.navigate('ProductScreen', { 
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ProductScreen', {
                   category: category || "All",
-                  vendorId: item.id, 
+                  vendorId: item.id,
                   vendorName: item.restaurantName,
-                  vendorImage: item.logo 
+                  vendorImage: item.logo
                 })}
               >
                 <Text style={styles.addText}>view</Text>
@@ -626,19 +670,19 @@ export default function FoodList() {
 
   // 2. Fetch Category Data
   const { data: categoryData, isLoading: categoryLoading } = useGetAllCategory({});
-  
+
   // --- API INTEGRATION ---
-  const { 
-    data: restaurantData, 
+  const {
+    data: restaurantData,
     isLoading: vendorsLoading,
     fetchNextPage,
-    hasNextPage 
-  } = useGetAllVendors({ 
+    hasNextPage
+  } = useGetAllVendors({
     limit: 20,
     search: search || undefined,
     categoryId: (selectedCategory && selectedCategory !== 'static_all') ? selectedCategory : undefined
   });
-  
+
   const isLoading = vendorsLoading || categoryLoading;
 
   // Flatten the pages into a single array
@@ -649,19 +693,24 @@ export default function FoodList() {
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     const vendorItem = item as any;
     const firstProduct = vendorItem.VendorProduct?.[0];
+    const menuImages = (vendorItem.menuImages && vendorItem.menuImages.length > 0)
+      ? vendorItem.menuImages.map((mi: any) => (mi.imageUrl as any).url)
+      : [];
+
     const mappedVendor: MappedVendor = {
-        id: vendorItem.id,
-        restaurantName: vendorItem.shopName || vendorItem.companyName || vendorItem.ownerName || vendorItem.name || vendorItem.title || 'Delicious Restaurant',
-        location: vendorItem.city || vendorItem.mainAddress || 'Ranchi',
-        time: "30-40 mins",
-        rating: vendorItem.rating || "4.2",
-        logo: resolveImageUrl(vendorItem.images || vendorItem.image || vendorItem.logo),
-        offerText: "FLAT",
-        offerSub: "20% OFF",
-        foodName: firstProduct?.name || firstProduct?.product?.name || "Chef's Special",
-        price: firstProduct?.price?.toString() || "199",
-        isVeg: firstProduct?.isVeg ?? true,
-        foodImage: resolveImageUrl(firstProduct?.image || firstProduct?.product?.images || vendorItem.images || vendorItem.image || vendorItem.logo),
+      id: vendorItem.id,
+      restaurantName: vendorItem.shopName || vendorItem.companyName || vendorItem.ownerName || vendorItem.name || vendorItem.title || 'Delicious Restaurant',
+      location: vendorItem.city || vendorItem.mainAddress || 'Ranchi',
+      time: "30-40 mins",
+      rating: vendorItem.rating || "4.2",
+      logo: resolveImageUrl(vendorItem.images || vendorItem.image || vendorItem.logo),
+      menuImages: menuImages,
+      offerText: "FLAT",
+      offerSub: "20% OFF",
+      foodName: firstProduct?.name || firstProduct?.product?.name || "Chef's Special",
+      price: firstProduct?.price?.toString() || "199",
+      isVeg: firstProduct?.isVeg ?? true,
+      foodImage: resolveImageUrl(firstProduct?.image || firstProduct?.product?.images || vendorItem.images || vendorItem.image || vendorItem.logo),
     };
 
     return <RestaurantCard item={mappedVendor} index={index} category={selectedCategory} />;
@@ -716,65 +765,65 @@ export default function FoodList() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-      
+
       <View style={{ backgroundColor: COLORS.white }}>
-        
+
         {/* --- MODIFIED HEADER: Back Button and Search Bar combined in one row --- */}
         <View style={styles.header}>
-            {/* Back Button */}
-            <TouchableOpacity 
-                style={styles.backButton} 
-                onPress={() => navigation.goBack()}
-            >
-                <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
-            </TouchableOpacity>
+          {/* Back Button */}
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
 
-            {/* Search Bar */}
-            <View style={styles.searchBar}>
-                <Ionicons name="search-outline" size={20} color={COLORS.primary} />
-                <TextInput
-                    placeholder="Search dish or Res..."
-                    placeholderTextColor={COLORS.muted}
-                    style={styles.searchInput}
-                    value={search}
-                    onChangeText={setSearch}
-                />
-                <TouchableOpacity onPress={() => setSearch('')}>
-                    <Ionicons 
-                        name={search ? "close-circle-outline" : "mic-outline"} 
-                        size={18} 
-                        color={COLORS.primary} 
-                    />
-                </TouchableOpacity>
-            </View>
+          {/* Search Bar */}
+          <View style={styles.searchBar}>
+            <Ionicons name="search-outline" size={20} color={COLORS.primary} />
+            <TextInput
+              placeholder="Search dish or Res..."
+              placeholderTextColor={COLORS.muted}
+              style={styles.searchInput}
+              value={search}
+              onChangeText={setSearch}
+            />
+            <TouchableOpacity onPress={() => setSearch('')}>
+              <Ionicons
+                name={search ? "close-circle-outline" : "mic-outline"}
+                size={18}
+                color={COLORS.primary}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
       {/* --- REPLACED SCROLLVIEW WITH FLATLIST --- */}
       {isLoading ? (
-         <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-         </View>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
       ) : (
         <FlatList
-            data={allVendors}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            ListHeaderComponent={ListHeader}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
-            onEndReached={() => {
-              if (hasNextPage) fetchNextPage();
-            }}
-            onEndReachedThreshold={0.5}
+          data={allVendors}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          ListHeaderComponent={ListHeader}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          onEndReached={() => {
+            if (hasNextPage) fetchNextPage();
+          }}
+          onEndReachedThreshold={0.5}
 
-            ListEmptyComponent={() => (
-              !isLoading && (
-                <View style={{ padding: 20, alignItems: 'center' }}>
-                  <Text style={{ color: COLORS.muted }}>No items found</Text>
-                </View>
-              )
-            )}
+          ListEmptyComponent={() => (
+            !isLoading && (
+              <View style={{ padding: 20, alignItems: 'center' }}>
+                <Text style={{ color: COLORS.muted }}>No items found</Text>
+              </View>
+            )
+          )}
         />
       )}
 
@@ -788,10 +837,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  
+
   // --- MODIFIED HEADER STYLES ---
-  header: { 
-    flexDirection: "row", 
+  header: {
+    flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -804,7 +853,7 @@ const styles = StyleSheet.create({
     flex: 1, // Added flex: 1 to take up remaining space
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: COLORS.background, 
+    backgroundColor: COLORS.background,
     borderRadius: 12,
     paddingHorizontal: 14,
     height: 44,
@@ -936,10 +985,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
-    overflow: "hidden", 
-    marginBottom: 20, 
+    overflow: "hidden",
+    marginBottom: 20,
   },
-  
+
   restaurantHeader: {
     flexDirection: "row",
     padding: 12,
@@ -948,18 +997,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
   },
-  logo: {
+  logoImageWrapper: {
     width: 50,
     height: 50,
     borderRadius: 8,
+    overflow: 'hidden',
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.secondary,
+    position: 'relative'
+  },
+  cardDotContainer: {
+    position: 'absolute',
+    bottom: 3,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  cardDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    marginHorizontal: 1,
+  },
+  logo: {
+    width: '100%',
+    height: '100%',
   },
   ratingBadge: {
     position: 'absolute',
     bottom: -6,
-    backgroundColor: COLORS.highlight, 
+    backgroundColor: COLORS.highlight,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,
@@ -995,18 +1064,18 @@ const styles = StyleSheet.create({
   },
   homeDelivery: {
     fontSize: 10,
-    color: COLORS.primary, 
+    color: COLORS.primary,
     fontWeight: "600",
   },
 
   offerRibbon: {
-    backgroundColor: COLORS.primary, 
+    backgroundColor: COLORS.primary,
     width: 70,
-    marginRight: -12, 
-    marginTop: -12, 
-    marginBottom: -12, 
+    marginRight: -12,
+    marginTop: -12,
+    marginBottom: -12,
     borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 16, 
+    borderBottomLeftRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1030,7 +1099,7 @@ const styles = StyleSheet.create({
     height: 1,
     borderWidth: 1,
     borderColor: COLORS.secondary,
-    borderStyle: 'dashed', 
+    borderStyle: 'dashed',
     marginHorizontal: 12,
     marginVertical: 4,
   },
@@ -1106,20 +1175,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
-  
+
   // Adjusted Close Button Position
   closeButtonContainer: {
-      alignSelf: 'center',
-      marginBottom: 10,
+    alignSelf: 'center',
+    marginBottom: 10,
   },
   circleClose: {
-      backgroundColor: '#333',
-      padding: 8,
-      borderRadius: 30,
-      elevation: 5,
-      shadowColor: '#000',
-      shadowOpacity: 0.3,
-      shadowRadius: 3,
+    backgroundColor: '#333',
+    padding: 8,
+    borderRadius: 30,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
 
   modalContent: {
@@ -1167,11 +1236,11 @@ const styles = StyleSheet.create({
   activeIndicator: {
     position: 'absolute',
     left: -12,
-    top: -20, 
+    top: -20,
     bottom: -20,
     width: 4,
     backgroundColor: COLORS.primary,
-    height: 80, 
+    height: 80,
   },
   sidebarText: {
     fontSize: 12,
@@ -1197,7 +1266,7 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: COLORS.white,
   },
-  
+
   // Specific Filter UI
   filterContentContainer: {
     paddingBottom: 20,
@@ -1227,7 +1296,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: COLORS.primary,
   },
-  
+
   // Box Styles (Time/Rating)
   boxContainer: {
     flexDirection: 'row',
@@ -1253,7 +1322,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.textPrimary,
   },
-  
+
   // Price Styles
   priceContainer: {
     flexDirection: 'row',
@@ -1279,7 +1348,7 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: 'center',
   },
-  
+
   // Trust/Grid Styles
   gridContainer: {
     flexDirection: 'row',
@@ -1304,39 +1373,39 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 16,
   },
-  
+
   // Pill Styles (Offers/Collections)
   pillContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
   },
   pillItem: {
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: '#eee',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   pillText: {
-      fontSize: 14,
-      color: COLORS.textPrimary,
+    fontSize: 14,
+    color: COLORS.textPrimary,
   },
-  
+
   modalFooter: {
-      padding: 16,
-      borderTopWidth: 1,
-      borderTopColor: '#eee',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
   applyButton: {
-      backgroundColor: COLORS.primary,
-      paddingVertical: 14,
-      borderRadius: 12,
-      alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
   },
   applyButtonText: {
-      color: COLORS.white,
-      fontSize: 16,
-      fontWeight: '700',
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '700',
   }
 });

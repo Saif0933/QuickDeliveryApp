@@ -44,10 +44,12 @@ import TermsAndConditions from '../screen/legal/TermsAndConditions';
 const Stack = createNativeStackNavigator();
 
 
+import { navigationRef } from './navigationRef';
+
 const MyStack = () => {
   return (
     // ✅ Added return
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         // initialRouteName="MapScreen"
         screenOptions={{ headerShown: false }}

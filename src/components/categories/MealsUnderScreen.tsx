@@ -570,7 +570,7 @@
 // export default MealsUnderScreen;
 
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -581,141 +581,43 @@ import {
   StatusBar,
   SafeAreaView,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
-import {COLORS} from "../../theme/color"
+import { COLORS } from "../../theme/color";
+import { useGetDiscountedVendors } from "../../api/hooks/useDiscountedVendors";
+import { useGetAllCategory } from "../../api/hooks/getAllCategory";
 
 const { width } = Dimensions.get("window");
 
-// --- MOCK DATA ---
-const CATEGORIES = [
-  { id: 1, name: "All", image: "https://b.zmtcdn.com/data/o2_assets/52eb9796bb9bcf0eba64c643349e97211634401116.png" },
-  { id: 2, name: "North Indian", image: "https://tse1.mm.bing.net/th/id/OIP.y9WHqmBEubDgxpHWqRN9sAHaEO?pid=Api&P=0&h=180" },
-  { id: 3, name: "Dosa", image: "https://media1.tokyodisneyresort.jp/food_menu/image/1000004251_1.3_1_1k7Tlv26.jpg" },
-  { id: 4, name: "South Indian", image: "https://media.edinburgh.org/wp-content/uploads/2023/04/26161552/thumb_40653_point_of_interest_bigger.jpeg" },
-  { id: 5, name: "Pizzas", image: "https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg" },
-];
-
-const RESTAURANTS = [
-  {
-    id: "r1",
-    name: "KFC",
-    rating: "4.3",
-    time: "25-30 mins",
-    reviews: "9.6K+",
-    isAd: true,
-    items: [
-      {
-        id: "f1",
-        name: "1 x Chicken Zinger Burger",
-        price: 249.91,
-        originalPrice: 260,
-        image: "https://b.zmtcdn.com/data/o2_assets/52eb9796bb9bcf0eba64c643349e97211634401116.png",
-        isVeg: false,
-      },
-      {
-        id: "f2",
-        name: "1 x Veg Longer Burger",
-        price: 232.61,
-        originalPrice: 245,
-        image: "https://tse1.mm.bing.net/th/id/OIP.y9WHqmBEubDgxpHWqRN9sAHaEO?pid=Api&P=0&h=180",
-        isVeg: true,
-      },
-      {
-        id: "f3",
-        name: "1 x Hot Wings (4pc)",
-        price: 180.00,
-        originalPrice: 200,
-        image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=500&auto=format&fit=crop&q=60",
-        isVeg: false,
-      }
-    ]
-  },
-  {
-    id: "r2",
-    name: "Burger King",
-    rating: "4.0",
-    time: "30-35 mins",
-    reviews: "New",
-    isAd: false,
-    items: [
-      {
-        id: "b1",
-        name: "1 x BK Chicken Burger",
-        price: 185.55,
-        originalPrice: 199,
-        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=60",
-        isVeg: false,
-      },
-      {
-        id: "b2",
-        name: "1 x Veg Krisper Burger",
-        price: 211.61,
-        originalPrice: 230,
-        image: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500&auto=format&fit=crop&q=60",
-        isVeg: true,
-      },
-    ]
-  },
-  {
-    id: "r3",
-    name: "Hotel Bliss",
-    rating: "4.1",
-    time: "20-25 mins",
-    reviews: "5.1K+",
-    isAd: false,
-    items: [
-      {
-        id: "h1",
-        name: "1 x [Non Veg] Mini Thali",
-        price: 232.95,
-        originalPrice: 300,
-        image: "https://images.unsplash.com/photo-1546833999-b9f581602809?w=500&auto=format&fit=crop&q=60",
-        isVeg: false,
-      },
-      {
-        id: "h2",
-        name: "1 x Onion Uttapam",
-        price: 169.20,
-        originalPrice: 190,
-        image: "https://images.unsplash.com/photo-1630409346824-4f0e7b040deb?w=500&auto=format&fit=crop&q=60",
-        isVeg: true,
-      },
-    ]
-  },
-  {
-    id: "r4",
-    name: "WOW! China",
-    rating: "3.9",
-    time: "30-35 mins",
-    reviews: "1.6K+",
-    isAd: true,
-    items: [
-      {
-        id: "w1",
-        name: "1 x Chilli Garlic Noodles",
-        price: 240.08,
-        originalPrice: 280,
-        image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=500&auto=format&fit=crop&q=60",
-        isVeg: true,
-      },
-      {
-        id: "w2",
-        name: "1 x Chicken Hakka",
-        price: 260.00,
-        originalPrice: 290,
-        image: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=500&auto=format&fit=crop&q=60",
-        isVeg: false,
-      },
-    ]
-  }
-];
 
 const MealsUnderScreen = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const navigation = useNavigation(); 
+  const [selectedCategoryId, setSelectedCategoryId] = useState("all");
+  const navigation = useNavigation();
+  
+  const { data: categoriesData, isLoading: categoriesLoading } = useGetAllCategory({});
+  const categories = [
+    { 
+      id: "all", 
+      name: "All", 
+      image: { url: "https://b.zmtcdn.com/data/o2_assets/52eb9796bb9bcf0eba64c643349e97211634401116.png" } 
+    },
+    ...(categoriesData || []),
+  ];
+
+  const { data, isLoading: loading } = useGetDiscountedVendors({ 
+    limit: 10, 
+    page: 1, 
+    categoryId: selectedCategoryId === "all" ? undefined : selectedCategoryId 
+  });
+  
+  const restaurants = data?.vendors || [];
+  const filteredRestaurants = restaurants; // Filtering now handled server-side
+
+
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -757,22 +659,26 @@ const MealsUnderScreen = () => {
         {/* 2. Horizontal Category Filter */}
         <View style={styles.categoryContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingRight: 16}}>
-            {CATEGORIES.map((cat) => (
+            {categoriesLoading ? (
+              <View style={{ padding: 10 }}>
+                <ActivityIndicator size="small" color={COLORS.primary} />
+              </View>
+            ) : categories.map((cat: any) => (
               <TouchableOpacity 
                 key={cat.id} 
                 style={styles.catItem}
-                onPress={() => setSelectedCategory(cat.name)}
+                onPress={() => setSelectedCategoryId(cat.id.toString())}
                 activeOpacity={0.8}
               >
                 <View style={[
                     styles.catImgContainer,
-                    selectedCategory === cat.name && styles.catImgSelected
+                    selectedCategoryId === cat.id.toString() && styles.catImgSelected
                 ]}>
-                    <Image source={{ uri: cat.image }} style={styles.catImage} />
+                    <Image source={{ uri: cat.image?.url }} style={styles.catImage} />
                 </View>
                 <Text style={[
                     styles.catText,
-                    selectedCategory === cat.name && { color: COLORS.primary, fontWeight: '700' }
+                    selectedCategoryId === cat.id.toString() && { color: COLORS.primary, fontWeight: '700' }
                 ]}>
                     {cat.name}
                 </Text>
@@ -806,77 +712,100 @@ const MealsUnderScreen = () => {
 
         {/* 4. Restaurant Cards List */}
         <View style={styles.restaurantList}>
-            {RESTAURANTS.map((restaurant) => (
-                <View key={restaurant.id} style={styles.restaurantCard}>
-                    {/* Header: Name & Rating */}
-                    <View style={styles.cardHeader}>
-                        <View style={{flex: 1}}>
-                            <Text style={styles.resName}>{restaurant.name}</Text>
-                            <View style={styles.resMetaRow}>
-                                <View style={styles.timeBadge}>
-                                    <Ionicons name="time-outline" size={12} color={COLORS.primary} />
-                                    <Text style={styles.resTime}>{restaurant.time}</Text>
-                                </View>
-                                {restaurant.isAd && <Text style={styles.adTag}>Ad</Text>}
-                            </View>
-                        </View>
-                        
-                        <View style={styles.ratingBox}>
-                            <View style={styles.ratingBadge}>
-                                <Text style={styles.ratingText}>{restaurant.rating}</Text>
-                                <Ionicons name="star" size={10} color={COLORS.white} />
-                            </View>
-                            <Text style={styles.reviewText}>{restaurant.reviews}</Text>
-                        </View>
-                    </View>
-
-                    {/* --- HORIZONTAL FOOD SCROLL --- */}
-                    <ScrollView 
-                        horizontal 
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
-                    >
-                        {restaurant.items.map((item) => (
-                            <View key={item.id} style={styles.foodItemCard}>
-                                {/* Food Image Area */}
-                                <View style={styles.foodImgWrapper}>
-                                    <Image source={{ uri: item.image }} style={styles.foodImage} />
-                                    <View style={styles.vegIconBox}>
-                                        <MaterialCommunityIcons 
-                                            name="checkbox-blank-circle" 
-                                            size={10} 
-                                            color={item.isVeg ? COLORS.highlight : COLORS.RED} 
-                                        />
-                                    </View>
-                                    {/* Discount Tag on Image */}
-                                    <View style={styles.imageOfferTag}>
-                                        <Text style={styles.imageOfferText}>₹{Math.round(item.price)}</Text>
-                                    </View>
-                                </View>
-
-                                {/* Food Details */}
-                                <View style={styles.foodInfo}>
-                                    <Text style={styles.foodName} numberOfLines={2}>{item.name}</Text>
-                                    <Text style={styles.offerText}>Best Price Applied</Text>
-                                </View>
-
-                                {/* Attractive Add Button */}
-                                <TouchableOpacity style={styles.viewCartBtn} activeOpacity={0.7}>
-                                    <Text style={styles.viewCartText}>ADD</Text>
-                                    <Ionicons name="add" size={14} color={COLORS.primary} />
-                                </TouchableOpacity>
-                            </View>
-                        ))}
-                    </ScrollView>
-
-                    {/* Footer: View Full Menu */}
-                    <TouchableOpacity style={styles.cardFooter}>
-                        <Text style={styles.footerText}>Explore Full Menu</Text>
-                        <Ionicons name="chevron-forward-circle" size={16} color={COLORS.primary} />
-                    </TouchableOpacity>
+            {loading ? (
+                <View style={{ padding: 40, alignItems: "center" }}>
+                    <ActivityIndicator size="large" color={COLORS.primary} />
                 </View>
-            ))}
+            ) : filteredRestaurants.length === 0 ? (
+                <View style={{ padding: 40, alignItems: "center" }}>
+                    <Text style={{ color: COLORS.textSecondary }}>No discounted meals found right now.</Text>
+                </View>
+            ) : (
+                filteredRestaurants.map((restaurant: any) => {
+                    // Skip if vendor has no discounted items
+                    if (!restaurant.items || restaurant.items.length === 0) return null;
+
+                    return (
+                        <View key={restaurant.id} style={styles.restaurantCard}>
+                            {/* Header: Name & Rating */}
+                            <View style={styles.cardHeader}>
+                                <View style={{flex: 1}}>
+                                    <Text style={styles.resName}>{restaurant.name}</Text>
+                                    <View style={styles.resMetaRow}>
+                                        <View style={styles.timeBadge}>
+                                            <Ionicons name="time-outline" size={12} color={COLORS.primary} />
+                                            <Text style={styles.resTime}>{restaurant.time}</Text>
+                                        </View>
+                                        {restaurant.isAd && <Text style={styles.adTag}>Ad</Text>}
+                                    </View>
+                                </View>
+                                
+                                <View style={styles.ratingBox}>
+                                    <View style={styles.ratingBadge}>
+                                        <Text style={styles.ratingText}>{restaurant.rating}</Text>
+                                        <Ionicons name="star" size={10} color={COLORS.white} />
+                                    </View>
+                                    <Text style={styles.reviewText}>{restaurant.reviews}</Text>
+                                </View>
+                            </View>
+
+                            {/* --- HORIZONTAL FOOD SCROLL --- */}
+                            <ScrollView 
+                                horizontal 
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
+                            >
+                                {restaurant.items.map((item: any) => (
+                                    <View key={item.id} style={styles.foodItemCard}>
+                                        {/* Food Image Area */}
+                                        <View style={styles.foodImgWrapper}>
+                                            <Image source={{ uri: item.image }} style={styles.foodImage} />
+                                            <View style={styles.vegIconBox}>
+                                                <MaterialCommunityIcons 
+                                                    name="checkbox-blank-circle" 
+                                                    size={10} 
+                                                    color={item.isVeg ? COLORS.highlight : COLORS.RED} 
+                                                />
+                                            </View>
+                                            {/* Discount Tag on Image */}
+                                            <View style={styles.imageOfferTag}>
+                                                <Text style={styles.imageOfferText}>₹{Math.round(item.price)}</Text>
+                                            </View>
+                                        </View>
+
+                                        {/* Food Details */}
+                                        <View style={styles.foodInfo}>
+                                            <Text style={styles.foodName} numberOfLines={2}>{item.name}</Text>
+                                            {item.originalPrice > item.price && (
+                                              <Text style={[styles.offerText, { textDecorationLine: 'line-through', color: COLORS.muted }]}>
+                                                  ₹{Math.round(item.originalPrice)}
+                                              </Text>
+                                            )}
+                                            {item.appliedCoupon && (
+                                                <Text style={styles.offerText}>{item.appliedCoupon.code} Applied</Text>
+                                            )}
+                                        </View>
+
+                                        {/* Attractive Add Button */}
+                                        <TouchableOpacity style={styles.viewCartBtn} activeOpacity={0.7}>
+                                            <Text style={styles.viewCartText}>ADD</Text>
+                                            <Ionicons name="add" size={14} color={COLORS.primary} />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </ScrollView>
+
+                            {/* Footer: View Full Menu */}
+                            <TouchableOpacity style={styles.cardFooter}>
+                                <Text style={styles.footerText}>Explore Full Menu</Text>
+                                <Ionicons name="chevron-forward-circle" size={16} color={COLORS.primary} />
+                            </TouchableOpacity>
+                        </View>
+                    );
+                })
+            )}
         </View>
+
 
       </ScrollView>
     </SafeAreaView>

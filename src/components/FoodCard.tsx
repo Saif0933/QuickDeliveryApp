@@ -15,7 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { Vendor } from "../../Vender.types";
+import { Vendor } from "../types/Vender.types";
 import { useGetAllVendors } from "../api/hooks/useVender";
 import { COLORS } from "../theme/color";
 import { RootStack } from "../types/types";
@@ -30,26 +30,29 @@ interface FoodItem {
   rating: string;
   offer: string;
   discount: string;
-  images: (ImageSourcePropType | { uri: string })[]; 
+  images: (ImageSourcePropType | { uri: string })[];
 }
 
 const mapVendorToFoodItem = (vendor: Vendor): FoodItem => {
   return {
     id: vendor.id.toString(),
     // Fallback to company name if shop name is missing
-    name: vendor.shopName || vendor.companyName || "Unknown Restaurant", 
+    name: vendor.shopName || vendor.companyName || "Unknown Restaurant",
     // Static placeholders since these fields aren't in the backend response yet
-    dish: "North Indian • Chinese", 
-    price: "₹200 for one", 
+    dish: "North Indian • Chinese",
+    price: "₹200 for one",
     time: "30-45 mins",
     distance: "2.5 km",
     rating: "4.2",
     offer: "Extra 20% OFF",
     discount: "FLAT 40% OFF",
-    // Backend returns single image object; UI expects array for carousel
-    images: vendor.images?.url 
-      ? [{ uri: vendor.images.url }] 
-      : [require("../assets/food1.jpg")], // Fallback image if null
+    // Use Menu Images if available (Zomato-style)
+    // Map MenuImage objects to URI objects for the UI carousel
+    images: vendor.menuImages && vendor.menuImages.length > 0
+      ? vendor.menuImages.map(mi => ({ uri: (mi.imageUrl as any).url }))
+      : vendor.images?.url
+        ? [{ uri: vendor.images.url }]
+        : [require("../assets/food1.jpg")], // Fallback image if null
   };
 };
 
@@ -109,8 +112,8 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
         category: "Recommended",
         vendorId: item.id,
         vendorName: item.name,
-        vendorImage: (typeof item.images[0] === 'object' && 'uri' in item.images[0] 
-          ? item.images[0].uri 
+        vendorImage: (typeof item.images[0] === 'object' && 'uri' in item.images[0]
+          ? item.images[0].uri
           : "") || ""
       })}
     >
@@ -123,8 +126,8 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
         />
 
         {/* Favorite Button */}
-        <TouchableOpacity 
-          style={styles.bookmarkWrapper} 
+        <TouchableOpacity
+          style={styles.bookmarkWrapper}
           onPress={handleFavorite}
           activeOpacity={0.8}
         >
@@ -136,6 +139,21 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
             />
           </Animated.View>
         </TouchableOpacity>
+
+        {/* Pagination Dots */}
+        {item.images.length > 1 && (
+          <View style={styles.dotContainer}>
+            {item.images.map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.dot,
+                  { backgroundColor: i === index ? '#fff' : 'rgba(255,255,255,0.5)' }
+                ]}
+              />
+            ))}
+          </View>
+        )}
 
         {/* Floating Tag */}
         <View style={styles.glassTag}>
@@ -155,14 +173,14 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
             </Text>
             <View style={styles.metaRow}>
               <View style={styles.timePill}>
-                 <Ionicons name="time-outline" size={12} color="#555" style={{marginRight: 3}} />
-                 <Text style={styles.metaText}>{item.time}</Text>
+                <Ionicons name="time-outline" size={12} color="#555" style={{ marginRight: 3 }} />
+                <Text style={styles.metaText}>{item.time}</Text>
               </View>
               <Text style={styles.metaDot}>•</Text>
               <Text style={styles.metaText}>{item.distance}</Text>
             </View>
           </View>
-          
+
           <View style={styles.ratingBox}>
             <Text style={styles.ratingText}>{item.rating}</Text>
             <Ionicons name="star" size={10} color="#fff" style={{ marginLeft: 2 }} />
@@ -173,13 +191,13 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
 
         <View style={styles.footerRow}>
           <View style={styles.offerItem}>
-             <MaterialIcons name="local-offer" size={15} color="#1665D8" />
-             <Text style={styles.offerText}>{item.offer}</Text>
+            <MaterialIcons name="local-offer" size={15} color="#1665D8" />
+            <Text style={styles.offerText}>{item.offer}</Text>
           </View>
           <View style={styles.dotSeparator} />
           <View style={styles.offerItem}>
-              <Ionicons name="trending-up" size={15} color="#28A745" />
-              <Text style={styles.discountText}>{item.discount}</Text>
+            <Ionicons name="trending-up" size={15} color="#28A745" />
+            <Text style={styles.discountText}>{item.discount}</Text>
           </View>
         </View>
       </View>
@@ -196,9 +214,9 @@ interface FoodListProps {
   contentContainerStyle?: any;
 }
 
-const FoodList: React.FC<FoodListProps> = ({ 
-  ListHeaderComponent, 
-  onScroll, 
+const FoodList: React.FC<FoodListProps> = ({
+  ListHeaderComponent,
+  onScroll,
   scrollEventThrottle,
   refreshControl,
   contentContainerStyle
@@ -216,7 +234,7 @@ const FoodList: React.FC<FoodListProps> = ({
   // 2. Flatten Pages into a single array & Map to FoodItem
   const foodItems = useMemo(() => {
     if (!data) return [];
-    return data.pages.flatMap((page) => 
+    return data.pages.flatMap((page) =>
       page.vendors.map((vendor) => mapVendorToFoodItem(vendor))
     );
   }, [data]);
@@ -244,7 +262,7 @@ const FoodList: React.FC<FoodListProps> = ({
   if (isError) {
     return (
       <View style={{ padding: 20, alignItems: 'center' }}>
-         <Text style={{ color: 'red' }}>Failed to load restaurants.</Text>
+        <Text style={{ color: 'red' }}>Failed to load restaurants.</Text>
       </View>
     );
   }
@@ -255,14 +273,14 @@ const FoodList: React.FC<FoodListProps> = ({
         data={foodItems}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <FoodCard item={item} />}
-        
+
         // Header
         ListHeaderComponent={
           <>
             {ListHeaderComponent}
             <Text style={styles.sectionHeader}>
-              {foodItems.length > 0 
-                ? `${foodItems.length}+ Restaurants near by you` 
+              {foodItems.length > 0
+                ? `${foodItems.length}+ Restaurants near by you`
                 : "No Restaurants found"}
             </Text>
           </>
@@ -275,7 +293,7 @@ const FoodList: React.FC<FoodListProps> = ({
           }
         }}
         onEndReachedThreshold={0.5} // Trigger when half a screen away from bottom
-        
+
         ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[{ paddingBottom: 100 }, contentContainerStyle]}
@@ -302,7 +320,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
     borderRadius: 16,
-    marginBottom: 20, 
+    marginBottom: 20,
     marginHorizontal: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -314,10 +332,24 @@ const styles = StyleSheet.create({
     borderColor: '#f0f0f0',
   },
   imageContainer: {
-    height: 140, 
+    height: 140,
     width: "100%",
     position: 'relative',
     backgroundColor: '#f8f8f8',
+  },
+  dotContainer: {
+    position: 'absolute',
+    bottom: 10,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 3,
   },
   image: {
     width: "100%",
@@ -328,7 +360,7 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     backgroundColor: "#fff",
-    width: 34, 
+    width: 34,
     height: 34,
     borderRadius: 17,
     justifyContent: "center",
@@ -351,12 +383,12 @@ const styles = StyleSheet.create({
   },
   glassTagText: {
     color: "#fff",
-    fontSize: 10, 
+    fontSize: 10,
     fontWeight: "800",
     letterSpacing: 0.3,
   },
   contentContainer: {
-    padding: 14, 
+    padding: 14,
     backgroundColor: '#fff',
   },
   headerRow: {
@@ -369,7 +401,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   name: {
-    fontSize: 17, 
+    fontSize: 17,
     fontWeight: "800",
     color: "#1C1C1C",
     letterSpacing: -0.3,
@@ -426,10 +458,10 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: "#F0F0F0",
-    marginVertical: 12, 
+    marginVertical: 12,
     borderStyle: 'dashed',
     borderWidth: 1,
-    borderColor: '#eee', 
+    borderColor: '#eee',
     borderRadius: 1,
   },
   footerRow: {
@@ -441,13 +473,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   offerText: {
-    fontSize: 11, 
+    fontSize: 11,
     color: "#1665D8",
     fontWeight: "700",
     marginLeft: 5,
   },
   discountText: {
-    fontSize: 11, 
+    fontSize: 11,
     color: "#28A745",
     fontWeight: "700",
     marginLeft: 5,
