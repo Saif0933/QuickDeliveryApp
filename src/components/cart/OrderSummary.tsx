@@ -88,7 +88,7 @@ const OrderSummary = () => {
     <View style={styles.productContainer}>
       <View style={styles.productTop}>
         <Image 
-          source={{ uri: 'https://i.ibb.co/VDP1j5G/blue-shirt-placeholder.png' }} 
+          source={{ uri: 'https://imgs.search.brave.com/Rc3Gc0awy6vo0KcdhFF2Vm-cin9V0itf7kg_VaHB3ZA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2E4Lzkx/LzllL2E4OTE5ZThj/YWU1NTZhMjQ2NGY2/ODY1NjQ3NTM5OGQz/LmpwZw' }} 
           style={styles.productImage} 
         />
         <View style={styles.productDetails}>
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   deliverToPhone: { fontSize: 14, color: '#333', fontWeight: '500' },
   productContainer: { backgroundColor: '#fff', padding: 16 },
   productTop: { flexDirection: 'row' },
-  productImage: { width: 64, height: 64, marginRight: 16, resizeMode: 'contain' },
+  productImage: { width: 64, height: 64, marginRight: 16, resizeMode: 'cover' },
   productDetails: { flex: 1 },
   productName: { fontSize: 16, color: '#212121', marginBottom: 2 },
   productSize: { fontSize: 12, color: '#878787', marginBottom: 4 },

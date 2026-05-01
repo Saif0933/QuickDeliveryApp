@@ -1,7 +1,7 @@
-import React from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Use basic sizing, feel free to adjust.  
 // Screen dimensions can vary, so percentages can be better, 
@@ -31,7 +31,7 @@ const OrderTrackingScreen = () => {
         {/* --- Product Title & Image --- */}
         <View style={styles.mainProductSection}>
           <Image 
-            source={{ uri: 'https://i.pinimg.com/736x/2c/31/58/2c3158f968600cd956382029788f5f4b.jpg' }} 
+            source={{ uri: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=500&q=80' }} 
             style={styles.mainProductImage} 
             resizeMode="cover"
           />
@@ -90,18 +90,21 @@ const OrderTrackingScreen = () => {
         {/* --- Card Offer --- */}
         <View style={styles.offerCard}>
           <Image
-            source={{ uri: 'https://i.pinimg.com/736x/8f/c9/2e/8fc92e2b9c7b9c766e4e08c8eff6eeda.jpg' }}
+            source={{ uri: 'https://images.unsplash.com/photo-1445205170230-053b830c6050?w=500&q=80' }}
             style={styles.offerImage}
             resizeMode="cover"
           />
           <View style={styles.offerOverlay}>
               <View style={styles.offerTextCol}>
-                  <View style={styles.limitedBadge}><Text style={styles.limitedText}>LIMITED</Text></View>
-                  <Text style={styles.offerLine1}>₹500 ₹0 joining fee</Text>
+                  <View style={styles.limitedBadge}>
+                    <Icon name="access-time" size={10} color="#000" style={{ marginRight: 2 }} />
+                    <Text style={styles.limitedText}>LIMITED PERIOD OFFER</Text>
+                  </View>
+                  <Text style={styles.offerLine1}>₹500 <Text style={{ textDecorationLine: 'line-through', opacity: 0.7 }}>₹0</Text> joining fee</Text>
                   <Text style={styles.offerLine2}>Get ₹1,000 vouchers*</Text>
                   <TouchableOpacity style={styles.applyNow}>
-                      <Text style={styles.applyNowText}>Apply now</Text>
-                      <Icon name="chevron-right" size={16} color="#000"/>
+                      <Text style={styles.applyNowText}>APPLY NOW</Text>
+                      <Icon name="arrow-forward" size={14} color="#000"/>
                   </TouchableOpacity>
                   <Text style={styles.termsText}>*T&C Apply | IDFC Bank Credit Card</Text>
               </View>
@@ -118,12 +121,12 @@ const OrderTrackingScreen = () => {
           <Text style={styles.sectionHeader}>You might be also interested in</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScrollContent}>
             {[
-              { image: 'https://i.pinimg.com/736x/88/54/2e/88542e74e6459c7f99999aee96a9990e.jpg', title: 'Min. 50% Off', cat: 'Palazzos' },
-              { image: 'https://i.pinimg.com/736x/21/d9/3e/21d93ebc40ef904bb978d386440268ec.jpg', title: 'Min. 50% Off', cat: "Women's Dupattas" },
-              { image: 'https://i.pinimg.com/736x/bd/d4/0b/bdd40ba235882650ee451556948a3350.jpg', title: 'Min. 50% Off', cat: "Kurta Sets" },
+              { image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&q=80', title: 'Min. 50% Off', cat: 'Palazzos' },
+              { image: 'https://images.unsplash.com/photo-1539008835279-43467f5b1335?w=500&q=80', title: 'Min. 50% Off', cat: "Women's Dupattas" },
+              { image: 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&q=80', title: 'Min. 50% Off', cat: "Kurta Sets" },
             ].map((item, index) => (
               <View key={index} style={styles.crossSellItem}>
-                <Image source={{ uri: item.image }} style={styles.crossSellItemImage} resizeMode="contain" />
+                <Image source={{ uri: item.image }} style={styles.crossSellItemImage} resizeMode="cover" />
                 <Text style={styles.crossSellItemTitle}>{item.title}</Text>
                 <Text style={styles.crossSellItemCat}>{item.cat}</Text>
               </View>
@@ -137,20 +140,20 @@ const OrderTrackingScreen = () => {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScrollContent}>
             {[
               { 
-                image: 'https://i.pinimg.com/736x/d6/00/be/d600becc18a5df9b64c7f074a38b5f3d.jpg',
+                image: 'https://images.unsplash.com/photo-1618244972963-dbee1a7edc95?w=500&q=80',
                 name: 'Anni Designer ...', rating: 4.2, reviews: '131', price: '₹654', oldPrice: '₹2,599', off: '74%' 
               },
               { 
-                image: 'https://i.pinimg.com/736x/95/8e/9c/958e9c680373ae03e6f98ef477589d97.jpg',
+                image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500&q=80',
                 name: 'Wazix Clothi ...', rating: 3.9, reviews: '1491', price: '₹1,418', oldPrice: '₹4,799', off: '70%' 
               },
               { 
-                image: 'https://i.pinimg.com/736x/2c/31/58/2c3158f968600cd956382029788f5f4b.jpg',
-                name: 'Some other ...', rating: 4.5, reviews: '80', price: '₹999', oldPrice: '₹1,999', off: '50%' 
+                image: 'https://images.unsplash.com/photo-1596755094514-f87e32f6b717?w=500&q=80',
+                name: 'Classic Shirt ...', rating: 4.5, reviews: '80', price: '₹999', oldPrice: '₹1,999', off: '50%' 
               }
             ].map((item, index) => (
               <View key={index} style={styles.recSellItem}>
-                <Image source={{ uri: item.image }} style={styles.recSellItemImage} resizeMode="contain" />
+                <Image source={{ uri: item.image }} style={styles.recSellItemImage} resizeMode="cover" />
                 <View style={styles.recItemInfo}>
                     <Text style={styles.recItemName} numberOfLines={1}>{item.name}</Text>
                     <View style={styles.recItemRatingRow}>
@@ -250,7 +253,7 @@ const OrderTrackingScreen = () => {
           style={styles.shopMoreButton}
           onPress={() => navigation.navigate('Home')}
         >
-          <Text style={styles.shopMoreText}>Shop more from 30 min delivery app</Text>
+          <Text style={styles.shopMoreText}>Shop more from Quick delivery app</Text>
         </TouchableOpacity>
 
       </ScrollView>
@@ -416,8 +419,9 @@ const styles = StyleSheet.create({
   },
   offerCard: {
     position: 'relative',
-    height: 140, // Adjust based on background image aspect ratio
+    height: 160, 
     marginHorizontal: 16,
+    marginTop: 3,
     marginBottom: 16,
     borderRadius: 8,
     overflow: 'hidden',
@@ -437,53 +441,74 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   limitedBadge: {
-    backgroundColor: '#f6be1c',
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFD700',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     alignSelf: 'flex-start',
-    marginBottom: 8,
+    flexWrap: 'nowrap',
+    marginBottom: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
   },
   limitedText: {
     fontSize: 8,
     color: '#000',
     fontWeight: 'bold',
+    letterSpacing: 0.2,
+    flexShrink: 0,
   },
   offerLine1: {
-    fontSize: 12,
-    color: '#fff',
-    fontWeight: '500',
-    marginBottom: 2,
+    fontSize: 16,
+    color: '#d61717ff',
+    fontWeight: 'bold',
+    marginBottom: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   offerLine2: {
-    fontSize: 12,
-    color: '#fff',
-    fontWeight: '500',
-    marginBottom: 10,
+    fontSize: 14,
+    color: '#d61717ff',
+    fontWeight: '600',
+    marginBottom: 12,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   applyNow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f6be1c',
-    borderRadius: 16,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     alignSelf: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 10,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
   },
   applyNowText: {
-    fontSize: 10,
+    fontSize: 11,
     color: '#000',
-    fontWeight: '500',
-    marginRight: 2,
+    fontWeight: 'bold',
+    marginRight: 4,
   },
   termsText: {
     fontSize: 8,
     color: '#fff',
   },
   creditCardImage: {
-    width: 100,
-    height: 80,
+    width: 80,
+    height: 64,
   },
   crossSellSection: {
     marginBottom: 16,
@@ -492,29 +517,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   crossSellItem: {
-    width: 130, // Adjust item width
+    width: 140, 
     backgroundColor: '#fff',
     marginHorizontal: 8,
-    borderRadius: 4,
-    padding: 8,
+    borderRadius: 8,
+    padding: 0,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#eee',
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    marginBottom: 10,
   },
   crossSellItemImage: {
-    width: 80,
-    height: 80,
+    width: '100%',
+    height: 120,
     marginBottom: 8,
   },
   crossSellItemTitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 2,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#212121',
+    marginTop: 4,
+    paddingHorizontal: 8,
+    textAlign: 'center',
   },
   crossSellItemCat: {
-    fontSize: 10,
+    fontSize: 11,
     color: '#757575',
+    marginBottom: 10,
+    paddingHorizontal: 8,
+    textAlign: 'center',
   },
   recSellItem: {
     width: 150, // Adjust item width

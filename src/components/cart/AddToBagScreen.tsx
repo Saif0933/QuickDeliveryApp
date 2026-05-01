@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-    SafeAreaView,
     ScrollView,
     StatusBar,
     StyleSheet,
@@ -11,28 +10,51 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import SuggestedForYou from '../../screen/SuggestedForYou';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCart, CartItem } from '../../Context/CartContext';
+import { useNavigation } from '@react-navigation/native';
 
 // --- Types ---
-interface ProductProps {
-  title: string;
-  price: string;
-  originalPrice: string;
-  discount: string;
-  image: string;
+interface ProductProps extends CartItem {
   isHotDeal?: boolean;
   outOfStock?: boolean;
   deliveryDate?: string;
+  onRemove: (id: string) => void;
 }
 
 const CartScreen: React.FC = () => {
+  const { cartItems, removeFromCart } = useCart();
+  const navigation = useNavigation<any>();
+
+  const calculateMRP = () => {
+    return cartItems.reduce((acc, item) => {
+      const price = parseInt(item.originalPrice.replace(/[^0-9]/g, '')) || 0;
+      return acc + (price * item.quantity);
+    }, 0);
+  };
+
+  const calculateTotal = () => {
+    return cartItems.reduce((acc, item) => {
+      const price = parseInt(item.price.replace(/[^0-9]/g, '')) || 0;
+      return acc + (price * item.quantity);
+    }, 0);
+  };
+
+  const mrp = calculateMRP();
+  const total = calculateTotal();
+  const discounts = mrp - total;
+  const fees = cartItems.length > 0 ? 7 : 0;
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
 
       {/* Header */}
       <View style={styles.header}>
-        <Icon name="arrow-left" size={24} color="#000" />
-        <Text style={styles.headerTitle}>My Cart</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-left" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>My Cart ({cartItems.length})</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -54,88 +76,83 @@ const CartScreen: React.FC = () => {
         </View>
 
         {/* Product Items */}
-        <ProductItem
-          isHotDeal
-          title="Men Slim Fit Casual Shirt"
-          price="₹599"
-          originalPrice="₹1,199"
-          discount="50% off"
-          deliveryDate="Delivery by May 7, Thu"
-          image="https://images.unsplash.com/photo-1596755094514-f87e32f6b717?w=300&q=80"
-        />
+        {cartItems.length > 0 ? (
+          cartItems.map((item) => (
+            <ProductItem
+              key={item.id}
+              {...item}
+              onRemove={removeFromCart}
+              deliveryDate="Delivery by May 7, Thu"
+            />
+          ))
+        ) : (
+          <View style={styles.emptyCart}>
+            <Icon name="cart-off" size={60} color="#878787" />
+            <Text style={styles.emptyCartText}>Your cart is empty!</Text>
+            <TouchableOpacity 
+              style={styles.shopNowBtn}
+              onPress={() => navigation.navigate('HomeScreen')}
+            >
+              <Text style={styles.shopNowText}>Shop Now</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-        <ProductItem
-          title="Women High-Rise Wide Jeans"
-          price="₹1,299"
-          originalPrice="₹2,499"
-          discount="48% off"
-          deliveryDate="Delivery by May 8, Wed"
-          image="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=300&q=80"
-        />
+        {cartItems.length > 0 && (
+          <>
+            {/* Price Details Card */}
+            <View style={styles.priceDetailsCard}>
+              <Text style={styles.priceTitle}>Price Details</Text>
+              <View style={styles.priceRow}>
+                <Text style={styles.priceLabel}>MRP ({cartItems.length} items)</Text>
+                <Text style={styles.priceValue}>₹{mrp.toLocaleString()}</Text>
+              </View>
+              <View style={styles.priceRow}>
+                <Text style={styles.priceLabel}>Fees</Text>
+                <Text style={styles.priceValue}>₹{fees}</Text>
+              </View>
+              <View style={styles.priceRow}>
+                <Text style={styles.priceLabel}>Discounts</Text>
+                <Text style={[styles.priceValue, {color: '#388E3C'}]}>−₹{discounts.toLocaleString()}</Text>
+              </View>
+              <View style={[styles.priceRow, styles.totalRow]}>
+                <Text style={styles.totalLabel}>Total Amount</Text>
+                <Text style={styles.totalLabel}>₹{(total + fees).toLocaleString()}</Text>
+              </View>
+              <View style={styles.savingsBanner}>
+                <Text style={styles.savingsText}>You'll save ₹{discounts.toLocaleString()} on this order!</Text>
+              </View>
+            </View>
 
-        {/* Out of Stock Section */}
-        <ProductItem
-          outOfStock
-          title="Men Solid Casual Jacket"
-          price=""
-          originalPrice=""
-          discount=""
-          image="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&q=80"
-        />
-
-        {/* Price Details Card */}
-        <View style={styles.priceDetailsCard}>
-          <Text style={styles.priceTitle}>Price Details</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>MRP</Text>
-            <Text style={styles.priceValue}>₹15,543</Text>
-          </View>
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Fees</Text>
-            <Text style={styles.priceValue}>₹7</Text>
-          </View>
-          <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Discounts</Text>
-            <Text style={[styles.priceValue, {color: '#388E3C'}]}>−₹10,501</Text>
-          </View>
-          <View style={[styles.priceRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total Amount</Text>
-            <Text style={styles.totalLabel}>₹4,599</Text>
-          </View>
-          <View style={styles.savingsBanner}>
-            <Text style={styles.savingsText}>You'll save ₹10,884 on this order!</Text>
-          </View>
-        </View>
+            <View style={styles.footerInfo}>
+              <Icon name="shield-check" size={18} color="#878787" />
+              <Text style={styles.footerText}>Safe and secure payments. Easy returns. 100% Authentic products.</Text>
+            </View>
+          </>
+        )}
 
         {/* Suggested For You Section */}
         <SuggestedForYou />
-
-        <View style={styles.footerInfo}>
-          <Icon name="shield-check" size={18} color="#878787" />
-          <Text style={styles.footerText}>Safe and secure payments. Easy returns. 100% Authentic products.</Text>
-        </View>
       </ScrollView>
-
     </SafeAreaView>
   );
 };
 
 // --- Sub Components ---
 
-const ProductItem: React.FC<ProductProps> = ({ isHotDeal, outOfStock, title, price, originalPrice, discount, deliveryDate, image }) => (
+const ProductItem: React.FC<ProductProps> = ({ id, isHotDeal, outOfStock, title, price, originalPrice, discount, deliveryDate, image, quantity, onRemove }) => (
   <View style={styles.productCard}>
     {isHotDeal && <Text style={styles.hotDealLabel}>Hot Deal</Text>}
     <View style={styles.productMain}>
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: image }}
-          
           style={styles.productImg}
           resizeMode="cover"
         />
         {!outOfStock && (
           <View style={styles.qtyPicker}>
-            <Text style={styles.qtyText}>Qty: 1</Text>
+            <Text style={styles.qtyText}>Qty: {quantity}</Text>
             <Icon name="menu-down" size={20} color="#000" />
           </View>
         )}
@@ -161,7 +178,10 @@ const ProductItem: React.FC<ProductProps> = ({ isHotDeal, outOfStock, title, pri
     {deliveryDate && <Text style={styles.deliveryText}>{deliveryDate}</Text>}
 
     <View style={styles.actionRow}>
-      <ActionButton icon="delete-outline" label="Remove" />
+      <TouchableOpacity style={styles.actionBtn} onPress={() => onRemove(id)}>
+        <Icon name="delete-outline" size={18} color="#666" />
+        <Text style={styles.actionLabel}>Remove</Text>
+      </TouchableOpacity>
       <ActionButton icon="heart-outline" label="Save for later" />
       <ActionButton icon="lightning-bolt" label="Buy this now" />
     </View>
@@ -174,7 +194,6 @@ const ActionButton = ({ icon, label }: any) => (
     <Text style={styles.actionLabel}>{label}</Text>
   </TouchableOpacity>
 );
-
 
 // --- Styles ---
 
@@ -236,6 +255,10 @@ const styles = StyleSheet.create({
   savingsText: { color: '#388E3C', fontWeight: 'bold', textAlign: 'center' },
   footerInfo: { padding: 20, flexDirection: 'row', alignItems: 'center' },
   footerText: { color: '#878787', fontSize: 11, marginLeft: 10, flex: 1 },
+  emptyCart: { padding: 40, alignItems: 'center', justifyContent: 'center' },
+  emptyCartText: { fontSize: 18, color: '#878787', marginTop: 10, fontWeight: '500' },
+  shopNowBtn: { marginTop: 20, backgroundColor: '#2874F0', paddingHorizontal: 30, paddingVertical: 12, borderRadius: 4 },
+  shopNowText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 }
 });
 
 export default CartScreen;

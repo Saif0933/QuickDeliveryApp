@@ -11,11 +11,13 @@ import {
     TouchableOpacity,
     View,
     Modal,
+    Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import OrderSummary from '../cart/OrderSummary';
 import CancellationPolicy from '../cart/CancellationPolicy';
 import { COLORS } from '../../theme/color';
+import { useCart } from '../../Context/CartContext';
 
 const { width } = Dimensions.get('window');
 
@@ -25,6 +27,8 @@ const ProductScreen = ({ route, navigation }: any) => {
     vendorImage = "https://images.unsplash.com/photo-1596755094514-f87e32f6b717?w=800&q=80",
     productName = "Product Name"
   } = (route?.params || {}) as any;
+
+  const { addToCart } = useCart();
 
   const [selectedSize, setSelectedSize] = useState('M');
   const [selectedColor, setSelectedColor] = useState(0);
@@ -356,7 +360,18 @@ const ProductScreen = ({ route, navigation }: any) => {
       <View style={styles.footer}>
         <TouchableOpacity
             style={styles.wishlistBtn}
-            onPress={() => navigation.navigate('AddToBagScreen')}
+            onPress={() => {
+              addToCart({
+                id: Math.random().toString(36).substr(2, 9), // Generate a unique ID if not provided
+                title: productData.title,
+                price: productData.price,
+                originalPrice: productData.mrp,
+                discount: productData.discount,
+                image: vendorImage,
+                quantity: 1,
+              });
+              Alert.alert('Success', 'Added to Bag!');
+            }}
           >
             <Ionicons name="cart-outline" size={22} color="#333" />
             <Text style={styles.wishlistBtnText}>Add to Bag</Text>

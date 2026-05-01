@@ -65,14 +65,14 @@ const PaymentScreen = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView>
         {/* Status Bar Section (Simulated) */}
-        <View style={styles.statusBar}>
+        {/* <View style={styles.statusBar}>
           <Text style={styles.statusBarText}>11:59</Text>
           <View style={styles.statusBarIcons}>
             <EntypoIcon name="signal" size={16} color="black" />
             <Text style={styles.statusBarText}> VoLTE </Text>
             <EntypoIcon name="battery" size={16} color="black" />
           </View>
-        </View>
+        </View> */}
 
         {/* Header */}
         <View style={styles.header}>
