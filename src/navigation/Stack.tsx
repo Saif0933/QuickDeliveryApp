@@ -1,8 +1,11 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AllRestaurantCart from '../components/cart/AllRestaurantCart';
+import AddToBagScreen from '../components/cart/AddToBagScreen';
 import OrderPlacedScreen from '../components/cart/OrderPlacedScreen';
+import OrderSummary from '../components/cart/OrderSummary';
 import OrderTrackingScreen from '../components/cart/OrderTrackingScreen';
+import PaymentScreen from '../components/cart/PaymentScreen';
 import FoodList from '../components/categories/FoodList';
 import MealsUnderScreen from '../components/categories/MealsUnderScreen';
 import ProductScreen from '../components/categories/ProductScreen';
@@ -15,10 +18,11 @@ import AddressBookScreen from '../screen/AddressBookScreen';
 import BookingScreen from '../screen/BookingScreen';
 import CategoryScreen from '../screen/Category';
 import { default as CartScreen, default as CheckoutScreen } from '../screen/CheckoutScreen';
-import DiningScreen from '../screen/DiningScreen';
+import FashionMode from '../screen/FashionMode';
 import FeedbackScreen from '../screen/FeedbackScreen';
 import GoldScreen from '../screen/GoldScreen';
 import HomeScreen from '../screen/HomeScreen';
+import TopCollectionsScreen from '../screen/TopCollectionsScreen';
 import LocationScreen from '../screen/LoctionScreen';
 import Login from '../screen/Login';
 import NotificationScreen from '../screen/NotificationScreen';
@@ -31,11 +35,13 @@ import SearchScreen from '../screen/SearchScreen';
 import SelectAddressScreen from '../screen/SelectAddressScreen';
 import SettingsScreen from '../screen/SettingScreen';
 import Splash from '../screen/Splash';
+import SuggestedForYou from '../screen/SuggestedForYou';
 import SupportScreen from '../screen/SupportScreen';
-import VegMode from '../screen/VegMode';
+import WalletScreen from '../screen/walletScreen';
 import YourOrder from '../screen/YourOrder';
 import YourProfile from '../screen/YourProfile';
-import ZomatoMoneyPage from '../screen/ZomatoMoneyPage';
+import BrandStoreScreen from '../screen/brand/BrandStoreScreen';
+import ProductBrand from '../screen/brand/ProductBrand';
 import { SingleResturantCart } from '../screen/cart/SingleResturantCart';
 import PrivacyPolicy from '../screen/legal/PrivacyPolicy';
 import RefundPolicy from '../screen/legal/RefundPolicy';
@@ -60,15 +66,15 @@ const MyStack = () => {
         <Stack.Screen name="Otp" component={Otp} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Category" component={CategoryScreen} />
-        <Stack.Screen name="ZomatoMoneyPage" component={ZomatoMoneyPage} />
+        <Stack.Screen name="WalletScreen" component={WalletScreen} />
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
         <Stack.Screen name="LocationScreen" component={LocationScreen} />
-        <Stack.Screen name="DiningScreen" component={DiningScreen} />
+        <Stack.Screen name="TopCollectionsScreen" component={TopCollectionsScreen} />
         <Stack.Screen name="YourProfile" component={YourProfile} />
         <Stack.Screen name="YourOrder" component={YourOrder} />
         <Stack.Screen 
-          name="VegMode" 
-          component={VegMode} 
+          name="FashionMode" 
+          component={FashionMode} 
           options={{ presentation: 'transparentModal' }} 
         />
         <Stack.Screen name="AddressBookScreen" component={AddressBookScreen} />
@@ -80,6 +86,8 @@ const MyStack = () => {
         <Stack.Screen name="BookingScreen" component={BookingScreen} />
         <Stack.Screen name="FoodList" component={FoodList} />
         <Stack.Screen name="ProductScreen" component={ProductScreen} />
+        <Stack.Screen name="BrandStoreScreen" component={BrandStoreScreen} />
+        <Stack.Screen name="ProductBrand" component={ProductBrand} />
         <Stack.Screen name="OrderPlacedScreen" component={OrderPlacedScreen} />
         <Stack.Screen name="RestaurantInfoScreen" component={RestaurantInfoScreen} />
         <Stack.Screen name="SearchScreen" component={SearchScreen} />
@@ -109,9 +117,13 @@ const MyStack = () => {
         <Stack.Screen name="cart" component={CartScreen} />
         <Stack.Screen name="SingleResturantCart" component={SingleResturantCart} />
         <Stack.Screen name="AllRestaurantCart" component={AllRestaurantCart} />
+        <Stack.Screen name="OrderSummary" component={OrderSummary} />
+        <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
         <Stack.Screen name="RefundPolicy" component={RefundPolicy} />
         <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
+        <Stack.Screen name="SuggestedForYou" component={SuggestedForYou} />
+        <Stack.Screen name="AddToBagScreen" component={AddToBagScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

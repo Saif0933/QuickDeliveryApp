@@ -59,6 +59,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 
 type RootStackParamList = {
   DiningScreen: undefined;
+  AddToBagScreen: undefined;
 };
 
 const BottomNavBar = ({ hideAnim }: { hideAnim?: Animated.Value }) => {
@@ -76,9 +77,9 @@ const BottomNavBar = ({ hideAnim }: { hideAnim?: Animated.Value }) => {
 
         {/* Under ₹250 (Inactive) */}
         <TouchableOpacity style={styles.inactiveTab}
-        onPress={() => navigation.navigate('DiningScreen')}>
+        onPress={() => navigation.navigate('AddToBagScreen')}>
           <MaterialCommunityIcons name="tag-outline" size={16} color="#6D768A" style={styles.iconSpaced}/>
-          <Text style={styles.inactiveTabText}>Under ₹250</Text>
+          <Text style={styles.inactiveTabText}>Cart</Text>
         </TouchableOpacity>
 
         {/* Dining (Inactive) */}

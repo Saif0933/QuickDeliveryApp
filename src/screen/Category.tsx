@@ -15,59 +15,59 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FoodList from "../components/FoodCard";
 
 const categories = [
-  { name: "All", image: require("../assets/food1.jpg") },
-  { name: "Biryani", image: require("../assets/food.jpg") },
-  { name: "Pizza", image: require("../assets/pizza.png") },
-  { name: "Thali", image: require("../assets/veg-thali.png") },
-  { name: "Veg Meals", image: require("../assets/roll.jpg") },
-  { name: "Veg Meals", image: require("../assets/food.jpg") },
-  { name: "Veg Meals", image: require("../assets/food1.jpg") },
+  { name: "All", image: { uri: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=200&q=80" } },
+  { name: "Shirts", image: { uri: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=200&q=80" } },
+  { name: "Jeans", image: { uri: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=200&q=80" } },
+  { name: "Sneakers", image: { uri: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80" } },
+  { name: "Jackets", image: { uri: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=200&q=80" } },
+  { name: "Activewear", image: { uri: "https://images.unsplash.com/photo-1518459031867-a89b944bffe4?w=200&q=80" } },
+  { name: "Accessories", image: { uri: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=200&q=80" } },
 ];
 
 const filters = [
   { label: "Flat 50% OFF", icon: "pricetag" },
   { label: "Under 30 mins", icon: "time-outline" },
-  { label: "Cheese Burst", icon: "pizza-outline" },
-  { label: "Special Thali", icon: "fast-food-outline" },
-  { label: "Biryani Special", icon: "restaurant-outline" },
+  { label: "Top Rated", icon: "star-outline" },
+  { label: "Summer Collection", icon: "sunny-outline" },
+  { label: "Premium Brands", icon: "diamond-outline" },
 ];
 
 const restaurants = [
   {
-    name: "Good Spoon",
-    image: require("../assets/food.jpg"),
-    rating: 4.0,
-    time: "35-40 mins",
+    name: "H&M Store",
+    image: { uri: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=400&q=80" },
+    rating: 4.8,
+    time: "30 mins",
   },
   {
-    name: "Pizzfy",
-    image: require("../assets/pizza.png"),
-    rating: 3.8,
+    name: "Zara Official",
+    image: { uri: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80" },
+    rating: 4.7,
+    time: "25-30 mins",
+  },
+  {
+    name: "Nike Hub",
+    image: { uri: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" },
+    rating: 4.9,
     time: "30-35 mins",
   },
   {
-    name: "Charlie Chops",
-    image: require("../assets/roll.jpg"),
-    rating: 4.1,
-    time: "30-35 mins",
-  },
-  {
-    name: "Pizza Hut",
-    image: require("../assets/north.jpg"),
-    rating: 4.0,
+    name: "Puma Outlet",
+    image: { uri: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400&q=80" },
+    rating: 4.5,
     time: "25-30 mins",
     offer: "FLAT 50% OFF",
   },
   {
-    name: "Kaveri’s Ashok",
-    image: require("../assets/roll.jpg"),
-    rating: 4.2,
+    name: "Levi's Exclusive",
+    image: { uri: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400&q=80" },
+    rating: 4.6,
     time: "25-30 mins",
   },
   {
-    name: "Oven Story Pizza",
-    image: require("../assets/veg-thali.png"),
-    rating: 4.5,
+    name: "Adidas Originals",
+    image: { uri: "https://images.unsplash.com/photo-1518459031867-a89b944bffe4?w=400&q=80" },
+    rating: 4.9,
     time: "30-35 mins",
     offer: "Up to 25% OFF",
   },
@@ -82,7 +82,7 @@ export default function CategoryScreen() {
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#FF3B5C" style={{ marginRight: 8 }} />
           <TextInput
-            placeholder="Restaurant name or dish"
+            placeholder="Brand name or clothing item"
             placeholderTextColor="#888"
             style={styles.searchInput}
           />
@@ -123,7 +123,7 @@ export default function CategoryScreen() {
       </ScrollView>
 
       {/* Restaurant List (Horizontal Scroll) */}
-      <Text style={styles.sectionTitle}>Popular Restaurants</Text>
+      <Text style={styles.sectionTitle}>Top Clothing Brands</Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

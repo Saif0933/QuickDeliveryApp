@@ -1,6 +1,6 @@
 
 import { useNavigation, useRoute } from "@react-navigation/native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -23,6 +23,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useGetAllCategory } from "../../api/hooks/getAllCategory";
 import { useGetAllVendors } from "../../api/hooks/useVender";
+import { useGetInventoryByCategory } from "../../api/hooks/inventory";
 import { COLORS } from "../../theme/color";
 
 const { width } = Dimensions.get("window");
@@ -123,9 +124,10 @@ interface MappedVendor {
 // --- Mock Data ---
 
 const BANNERS: string[] = [
-  "https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg",
-  "https://images.pexels.com/photos/1624487/pexels-photo-1624487.jpeg",
-  "https://img.freepik.com/premium-psd/delicious-burger-food-menu-web-banner-template_106176-414.jpg",
+  "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1000&q=80",
+  "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1000&q=80",
+  "https://images.unsplash.com/photo-1445205170230-053b830c6050?w=1000&q=80",
+  "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1000&q=80"
 ];
 
 const QUICK_FILTERS: QuickFilter[] = [
@@ -187,57 +189,149 @@ const FILTER_CONTENT: FilterContentMap = {
   ]
 };
 
+const STATIC_PRODUCTS: MappedVendor[] = [
+  {
+    id: "static_1",
+    restaurantName: "PUMA",
+    location: "Official Store",
+    time: "Free Delivery",
+    rating: "4.5",
+    logo: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80",
+    menuImages: [],
+    offerText: "SALE",
+    offerSub: "Cotton Crew Neck T-shirt",
+    foodName: "Men's Casual Tee",
+    price: "799",
+    isVeg: true,
+    foodImage: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80",
+  },
+  {
+    id: "static_2",
+    restaurantName: "ADIDAS",
+    location: "Global Lifestyle",
+    time: "Free Delivery",
+    rating: "4.8",
+    logo: "https://images.unsplash.com/photo-1518002171953-a080ee817e1f?w=500&q=80",
+    menuImages: [],
+    offerText: "SALE",
+    offerSub: "Breathable Performance Shorts",
+    foodName: "Sporty Performance Shorts",
+    price: "1299",
+    isVeg: true,
+    foodImage: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=500&q=80",
+  },
+  {
+    id: "static_3",
+    restaurantName: "H&M",
+    location: "Trendy Wear",
+    time: "Free Delivery",
+    rating: "4.2",
+    logo: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500&q=80",
+    menuImages: [],
+    offerText: "SALE",
+    offerSub: "Relaxed Fit Denim Jeans",
+    foodName: "Classic Blue Jeans",
+    price: "2499",
+    isVeg: true,
+    foodImage: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&q=80",
+  },
+  {
+    id: "static_4",
+    restaurantName: "LEVIS",
+    location: "Denim Co.",
+    time: "Free Delivery",
+    rating: "4.6",
+    logo: "https://images.unsplash.com/photo-1516244400-514114757577?w=500&q=80",
+    menuImages: [],
+    offerText: "SALE",
+    offerSub: "Checkered Slim Fit Shirt",
+    foodName: "Check Casual Shirt",
+    price: "1899",
+    isVeg: true,
+    foodImage: "https://images.unsplash.com/photo-1576566582414-25a81ca7b825?w=500&q=80",
+  }
+];
+
 // --- Sub Components ---
 
 const BannerCarousel = () => {
-  const [activeBanner, setActiveBanner] = useState<number>(0);
-  const flatListRef = useRef<FlatList<string>>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const zoomAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveBanner((prev) => {
-        let next = prev + 1;
-        if (next >= BANNERS.length) next = 0;
-        flatListRef.current?.scrollToIndex({ index: next, animated: true });
-        return next;
-      });
-    }, 3000);
+    const startAnimation = () => {
+      // 1. Zoom in during the display time
+      Animated.timing(zoomAnim, {
+        toValue: 1.15,
+        duration: 5000,
+        useNativeDriver: true,
+      }).start();
 
-    return () => clearInterval(interval);
-  }, []);
+      const timer = setTimeout(() => {
+        // 2. Fade out
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 1200,
+          useNativeDriver: true,
+        }).start(() => {
+          // 3. Switch index and reset zoom
+          setActiveIndex((prev) => (prev + 1) % BANNERS.length);
+          zoomAnim.setValue(1);
+          
+          // 4. Fade back in
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true,
+          }).start();
+        });
+      }, 3500);
 
-  const renderBanner = ({ item }: { item: string }) => (
-    <View style={styles.bannerWrapper}>
-      <Image source={{ uri: item }} style={styles.heroImage} resizeMode="cover" />
-      <View style={styles.bannerOverlay} />
-    </View>
-  );
+      return timer;
+    };
+
+    const timerId = startAnimation();
+    return () => clearTimeout(timerId);
+  }, [activeIndex]);
 
   return (
     <View style={styles.heroContainer}>
-      <FlatList
-        ref={flatListRef}
-        data={BANNERS}
-        renderItem={renderBanner}
-        keyExtractor={(_, index) => index.toString()}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
-          const index = Math.round(event.nativeEvent.contentOffset.x / width);
-          setActiveBanner(index);
-        }}
-      />
-      <View style={styles.paginationContainer}>
-        {BANNERS.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.paginationDot,
-              activeBanner === index ? styles.activeDot : styles.inactiveDot,
-            ]}
-          />
-        ))}
+      <View style={styles.bannerWrapper}>
+        <Animated.Image
+          source={{ uri: BANNERS[activeIndex] }}
+          style={[
+            styles.heroImage,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: zoomAnim }]
+            }
+          ]}
+          resizeMode="cover"
+        />
+        <View style={styles.bannerOverlay} />
+        
+        {/* Banner Content (Static Text for Premium Look) */}
+        <View style={styles.bannerContent}>
+           <Text style={styles.bannerTag}>NEW ARRIVAL</Text>
+           <Text style={styles.bannerTitle}>Season Collection</Text>
+           <View style={styles.bannerBadge}>
+              <Text style={styles.bannerBadgeText}>Up to 60% OFF</Text>
+           </View>
+        </View>
+
+        {/* Custom Indicators */}
+        <View style={styles.paginationContainer}>
+          {BANNERS.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.paginationDot,
+                activeIndex === index ? styles.activeDot : styles.inactiveDot,
+              ]}
+            />
+          ))}
+        </View>
       </View>
     </View>
   );
@@ -516,146 +610,61 @@ const FilterSection = ({ categories, selectedCategory, onSelectCategory }: Filte
   );
 };
 
-interface RestaurantCardProps {
-  item: MappedVendor;
-  index: number;
-  category: string | null;
-}
-
-const RestaurantCard = ({ item, index, category }: RestaurantCardProps) => {
+const ProductGridCard = ({ item, category }: { item: MappedVendor; category: string | null }) => {
   const navigation = useNavigation<any>();
   const scaleValue = useRef(new Animated.Value(1)).current;
-  const [imgIndex, setImgIndex] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-
-  // Carousel logic for Menu Images
-  useEffect(() => {
-    if (!item.menuImages || item.menuImages.length <= 1) return;
-    const interval = setInterval(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }).start(() => {
-        setImgIndex((prev) => (prev + 1) % item.menuImages.length);
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }).start();
-      });
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [item.menuImages, fadeAnim]);
 
   const onPressIn = () => {
-    Animated.spring(scaleValue, {
-      toValue: 0.95,
-      useNativeDriver: true,
-    }).start();
+    Animated.spring(scaleValue, { toValue: 0.98, useNativeDriver: true }).start();
   };
 
   const onPressOut = () => {
-    Animated.spring(scaleValue, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
+    Animated.spring(scaleValue, { toValue: 1, useNativeDriver: true }).start();
   };
 
-  const displayImage = item.menuImages && item.menuImages.length > 0 
-    ? item.menuImages[imgIndex] 
-    : item.logo;
+  const oldPrice = parseInt(item.price) + 200;
 
   return (
-    <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+    <Animated.View style={[styles.productGridCard, { transform: [{ scale: scaleValue }] }]}>
       <TouchableOpacity
-        style={styles.card}
-        activeOpacity={0.9}
+        activeOpacity={1}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         onPress={() => navigation.navigate('ProductScreen', {
           category: category || "All",
           vendorId: item.id,
           vendorName: item.restaurantName,
-          vendorImage: item.logo,
-          menuImages: item.menuImages
+          productName: item.foodName,
+          vendorImage: item.foodImage,
+          description: item.offerSub
         })}
       >
-        <View style={styles.restaurantHeader}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoImageWrapper}>
-              <Animated.Image 
-                source={{ uri: displayImage }} 
-                style={[styles.logo, { opacity: fadeAnim }]} 
-                resizeMode="cover" 
-              />
-              {item.menuImages.length > 1 && (
-                <View style={styles.cardDotContainer}>
-                  {item.menuImages.map((_, i) => (
-                    <View 
-                      key={i} 
-                      style={[styles.cardDot, { backgroundColor: i === imgIndex ? '#fff' : 'rgba(255,255,255,0.5)' }]} 
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
-            <View style={styles.ratingBadge}>
-              <Text style={styles.ratingText}>{item.rating}</Text>
-              <Ionicons name="star" size={10} color={COLORS.white} style={{ marginLeft: 2 }} />
-            </View>
+        <View style={styles.productGridImageContainer}>
+          <Image source={{ uri: item.foodImage }} style={styles.productGridImage} />
+          <View style={styles.productGridBadge}>
+            <Text style={styles.productGridBadgeText}>NEW</Text>
           </View>
-
-          <View style={styles.infoContainer}>
-            <Text style={styles.resName}>{item.restaurantName}</Text>
-            <Text style={styles.resMeta}>{item.location}</Text>
-            <View style={styles.timeRow}>
-              <MaterialCommunityIcons name="clock-time-four-outline" size={14} color={COLORS.textSecondary} />
-              <Text style={styles.resMeta}> {item.time}</Text>
-            </View>
-            <Text style={styles.homeDelivery}>Home delivery</Text>
-          </View>
-
-          <View style={styles.offerRibbon}>
-            <View style={styles.offerContent}>
-              <Text style={styles.offerTitle}>{item.offerText}</Text>
-              <Text style={styles.offerSub}>{item.offerSub}</Text>
-            </View>
-          </View>
+          <TouchableOpacity style={styles.gridFavoriteBtn}>
+             <Ionicons name="heart-outline" size={18} color="#444" />
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.dashedDivider} />
-
-        <View style={styles.foodItemRow}>
-          <View style={styles.foodDetails}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-              <VegIcon isVeg={item.isVeg} />
-              <View style={{ width: 6 }} />
-              {index === 0 && (
-                <View style={{ backgroundColor: COLORS.accent, paddingHorizontal: 4, borderRadius: 4 }}>
-                  <Text style={{ fontSize: 10, color: COLORS.primary, fontWeight: '600' }}>Best Seller</Text>
-                </View>
-              )}
-            </View>
-            <Text style={styles.foodName}>{item.foodName}</Text>
-            <Text style={styles.price}>₹{item.price}</Text>
-          </View>
-
-          <View style={styles.foodImageContainer}>
-            <Image source={{ uri: item.foodImage }} style={styles.foodImage} />
-            <View style={styles.addButton}>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('ProductScreen', {
-                  category: category || "All",
-                  vendorId: item.id,
-                  vendorName: item.restaurantName,
-                  vendorImage: item.logo
-                })}
-              >
-                <Text style={styles.addText}>view</Text>
-              </TouchableOpacity>
+        <View style={styles.productGridInfo}>
+          <View style={styles.brandRow}>
+            <Text style={styles.productGridBrand}>{item.restaurantName}</Text>
+            <View style={styles.productGridRating}>
+              <Text style={styles.gridRatingText}>{item.rating}</Text>
+              <Ionicons name="star" size={8} color="#fff" />
             </View>
           </View>
+          
+          <Text style={styles.productGridTitle} numberOfLines={1}>{item.foodName}</Text>
+          
+          <View style={styles.productGridPriceRow}>
+            <Text style={styles.productGridPrice}>₹{item.price}</Text>
+            <Text style={styles.productGridOldPrice}>₹{oldPrice}</Text>
+          </View>
+          <Text style={styles.productGridDiscount}>Save ₹200</Text>
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -673,47 +682,54 @@ export default function FoodList() {
 
   // --- API INTEGRATION ---
   const {
-    data: restaurantData,
-    isLoading: vendorsLoading,
+    data: productData,
+    isLoading: productsLoading,
     fetchNextPage,
     hasNextPage
-  } = useGetAllVendors({
+  } = useGetInventoryByCategory({
     limit: 20,
     search: search || undefined,
-    categoryId: (selectedCategory && selectedCategory !== 'static_all') ? selectedCategory : undefined
+    categoryId: (selectedCategory && selectedCategory !== 'static_all') ? selectedCategory : (categoryData?.[0]?.id || '')
   });
 
-  const isLoading = vendorsLoading || categoryLoading;
+  const isLoading = productsLoading || categoryLoading;
 
   // Flatten the pages into a single array
-  const allVendors = restaurantData?.pages.flatMap((page: any) => page.vendors) || [];
+  const allProducts = productData?.pages.flatMap((page: any) => page.products) || [];
+  
+  // Combine Static Products with API Products
+  const combinedData = useMemo(() => {
+    return [...STATIC_PRODUCTS, ...allProducts];
+  }, [allProducts]);
 
 
   // --- RENDER ITEM FOR FLATLIST ---
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
-    const vendorItem = item as any;
-    const firstProduct = vendorItem.VendorProduct?.[0];
-    const menuImages = (vendorItem.menuImages && vendorItem.menuImages.length > 0)
-      ? vendorItem.menuImages.map((mi: any) => (mi.imageUrl as any).url)
-      : [];
+  const renderItem = ({ item }: { item: any }) => {
+    // Check if it's static data or API data
+    if (item.id && item.id.toString().startsWith('static_')) {
+      return <ProductGridCard item={item} category={selectedCategory} />;
+    }
 
-    const mappedVendor: MappedVendor = {
-      id: vendorItem.id,
-      restaurantName: vendorItem.shopName || vendorItem.companyName || vendorItem.ownerName || vendorItem.name || vendorItem.title || 'Delicious Restaurant',
-      location: vendorItem.city || vendorItem.mainAddress || 'Ranchi',
-      time: "30-40 mins",
-      rating: vendorItem.rating || "4.2",
-      logo: resolveImageUrl(vendorItem.images || vendorItem.image || vendorItem.logo),
-      menuImages: menuImages,
-      offerText: "FLAT",
-      offerSub: "20% OFF",
-      foodName: firstProduct?.name || firstProduct?.product?.name || "Chef's Special",
-      price: firstProduct?.price?.toString() || "199",
-      isVeg: firstProduct?.isVeg ?? true,
-      foodImage: resolveImageUrl(firstProduct?.image || firstProduct?.product?.images || vendorItem.images || vendorItem.image || vendorItem.logo),
+    const productItem = item as any;
+    const product = productItem.product;
+
+    const mappedProduct: MappedVendor = {
+      id: productItem.id,
+      restaurantName: productItem.Vendor?.shopName || productItem.Vendor?.companyName || 'Official Store',
+      location: productItem.Vendor?.city || 'Ranchi',
+      time: "Free Delivery",
+      rating: "4.5",
+      logo: resolveImageUrl(product.images?.[0]?.image || product.images),
+      menuImages: [],
+      offerText: "SALE",
+      offerSub: product.description || "Premium Quality Product",
+      foodName: product.name || "Apparel Item",
+      price: product.sellingPrice?.d?.[0]?.toString() || "499",
+      isVeg: product.isVeg ?? true,
+      foodImage: resolveImageUrl(product.images?.[0]?.image || product.images),
     };
 
-    return <RestaurantCard item={mappedVendor} index={index} category={selectedCategory} />;
+    return <ProductGridCard item={mappedProduct} category={selectedCategory} />;
   };
 
 
@@ -736,7 +752,7 @@ export default function FoodList() {
         )}
 
         {/* --- DYNAMIC FILTER SECTION IMPLEMENTATION --- */}
-        {categoryLoading ? (
+        {/* {categoryLoading ? (
           <View style={{ height: 100, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator size="small" color={COLORS.primary} />
           </View>
@@ -755,9 +771,9 @@ export default function FoodList() {
               }
             }}
           />
-        )}
+        )} */}
 
-        <Text style={styles.sectionTitle}>All Restaurants</Text>
+        <Text style={styles.sectionTitle}>Products for You</Text>
       </View>
     );
   };
@@ -782,7 +798,7 @@ export default function FoodList() {
           <View style={styles.searchBar}>
             <Ionicons name="search-outline" size={20} color={COLORS.primary} />
             <TextInput
-              placeholder="Search dish or Res..."
+              placeholder="Search products..."
               placeholderTextColor={COLORS.muted}
               style={styles.searchInput}
               value={search}
@@ -799,34 +815,23 @@ export default function FoodList() {
         </View>
       </View>
 
-      {/* --- REPLACED SCROLLVIEW WITH FLATLIST --- */}
-      {isLoading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        </View>
-      ) : (
-        <FlatList
-          data={allVendors}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderItem}
-          ListHeaderComponent={ListHeader}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          onEndReached={() => {
-            if (hasNextPage) fetchNextPage();
-          }}
-          onEndReachedThreshold={0.5}
-
-          ListEmptyComponent={() => (
-            !isLoading && (
-              <View style={{ padding: 20, alignItems: 'center' }}>
-                <Text style={{ color: COLORS.muted }}>No items found</Text>
-              </View>
-            )
-          )}
-        />
-      )}
-
+      <FlatList
+        data={combinedData}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => item.id || index.toString()}
+        ListHeaderComponent={ListHeader}
+        numColumns={2}
+        columnWrapperStyle={styles.gridRow}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+        onEndReached={() => {
+          if (hasNextPage) fetchNextPage();
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={hasNextPage ? (
+          <ActivityIndicator size="small" color={COLORS.primary} style={{ marginVertical: 20 }} />
+        ) : null}
+      />
     </SafeAreaView>
   );
 }
@@ -850,58 +855,198 @@ const styles = StyleSheet.create({
   },
   // --- MODIFIED SEARCH BAR STYLES ---
   searchBar: {
-    flex: 1, // Added flex: 1 to take up remaining space
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: COLORS.background,
-    borderRadius: 12,
-    paddingHorizontal: 14,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 12,
+    borderRadius: 8,
     height: 44,
+    borderWidth: 1,
+    borderColor: '#e0e0e0'
   },
-  searchInput: { marginLeft: 10, fontSize: 14, flex: 1, color: COLORS.textPrimary },
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 14,
+    color: COLORS.textPrimary,
+  },
+
+  gridRow: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+  },
+  productGridCard: {
+    width: (width - 40) / 2,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+  },
+  productGridImageContainer: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#f9f9f9',
+    position: 'relative',
+  },
+  productGridImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  productGridBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: '#000',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  productGridBadgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
+  gridFavoriteBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  productGridInfo: {
+    padding: 10,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  productGridBrand: {
+    fontSize: 10,
+    color: '#888',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  productGridRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#388e3c',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+  },
+  gridRatingText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: 'bold',
+    marginRight: 1,
+  },
+  productGridTitle: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '500',
+    marginBottom: 6,
+  },
+  productGridPriceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  productGridPrice: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  productGridOldPrice: {
+    fontSize: 11,
+    color: '#999',
+    textDecorationLine: 'line-through',
+    marginLeft: 6,
+  },
+  productGridDiscount: {
+    fontSize: 10,
+    color: '#388e3c',
+    fontWeight: 'bold',
+    marginTop: 2,
+  },
 
   heroContainer: {
     width: width,
     height: 220,
-    backgroundColor: COLORS.secondary,
+    backgroundColor: '#000',
     position: 'relative',
+    overflow: 'hidden',
   },
   bannerWrapper: {
     width: width,
     height: 220,
+    position: 'relative',
   },
   heroImage: {
-    width: "100%",
-    height: "100%",
+    width: width,
+    height: '100%',
   },
   bannerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  bannerContent: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    bottom: 40,
+    left: 20,
+  },
+  bannerTag: {
+    color: COLORS.primary,
+    fontSize: 10,
+    fontWeight: 'bold',
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  bannerTitle: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  bannerBadge: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    alignSelf: 'flex-start',
+    borderRadius: 2,
+  },
+  bannerBadgeText: {
+    color: '#000',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   paginationContainer: {
     position: 'absolute',
     bottom: 12,
-    flexDirection: 'row',
     width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
+    flexDirection: "row",
+    justifyContent: "center",
   },
   paginationDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
+    marginHorizontal: 4,
   },
   activeDot: {
     backgroundColor: COLORS.white,
-    width: 20,
+    width: 14,
   },
   inactiveDot: {
-    backgroundColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
   },
 
   filterContainer: {

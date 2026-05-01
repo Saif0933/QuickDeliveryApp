@@ -21,15 +21,15 @@ import { COLORS } from '../theme/color';
 // --- MOCK DATA ---
 const ORDER_DATA = {
   id: '#7366397495',
-  restaurant: 'The Pizza Project By Oven Story',
+  restaurant: 'H&M Official Store',
   location: 'Kokar, Ranchi',
-  image: 'https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg',
+  image: 'https://images.unsplash.com/photo-1562157873-818bc0726f68?w=200&q=80',
   items: [
     {
-      name: '1 x 1+1 Veg Cheesy Pizza Mania',
-      desc: 'Capsicum (Serves 1), Capsicum (Serves 1).',
+      name: '1 x Summer Casual T-Shirt',
+      desc: 'Size M, Yellow.',
       price: 249,
-      isVeg: true,
+      isVeg: false,
     },
   ],
   bill: {
@@ -64,7 +64,7 @@ const OrderDetailsScreen = () => {
 
   const VegIcon = () => (
     <View style={styles.vegIconBorder}>
-      <View style={styles.vegIconDot} />
+      <Ionicons name="shirt-outline" size={10} color={COLORS.highlight} />
     </View>
   );
 
@@ -157,7 +157,7 @@ const OrderDetailsScreen = () => {
             <Text style={styles.billValue}>₹{ORDER_DATA.bill.itemTotal.toFixed(2)}</Text>
           </View>
           <View style={styles.billRow}>
-            <Text style={styles.billLabel}>GST & restaurant packaging</Text>
+            <Text style={styles.billLabel}>GST & store packaging</Text>
             <Text style={styles.billValue}>₹{ORDER_DATA.bill.gst.toFixed(2)}</Text>
           </View>
           <View style={styles.billRow}>
@@ -238,12 +238,8 @@ const OrderDetailsScreen = () => {
 
         {/* --- FOOTER LICENSE --- */}
         <View style={styles.licenseContainer}>
-             <Image 
-                source={{uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/FSSAI_logo.svg/1200px-FSSAI_logo.svg.png'}} 
-                style={styles.fssaiLogo} 
-                resizeMode="contain"
-            />
-            <Text style={styles.licenseText}>Lic. No. 11121001000148</Text>
+             <Ionicons name="shield-checkmark" size={24} color={COLORS.TEXT_DARK} style={{opacity: 0.5}} />
+            <Text style={styles.licenseText}>100% Original Products</Text>
         </View>
 
         <View style={{ height: 100 }} /> 

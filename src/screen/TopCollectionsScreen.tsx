@@ -147,14 +147,14 @@ const MeatDeliveryScreen = () => {
           <TextInput
             ref={searchInputRef}
             style={styles.searchInput}
-            placeholder="Search for meat, cuts..."
+            placeholder="Search for shirts, jeans..."
             placeholderTextColor={COLORS.muted}
             value={searchText}
             onChangeText={setSearchText}
           />
         ) : (
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Chicken & Sausages</Text>
+            <Text style={styles.headerTitle}>Top Collections</Text>
             <Text style={styles.headerSubtitle}>{PRODUCTS.length} Items</Text>
           </View>
         )}
@@ -178,12 +178,12 @@ const MeatDeliveryScreen = () => {
              ]}
            >
               <View style={styles.heroTextContainer}>
-                 <Text style={styles.heroHeading}>Fresh &{'\n'}Fast Delivery</Text>
+                 <Text style={styles.heroHeading}>Trendy &{'\n'}Fast Delivery</Text>
                  
                  <View style={styles.heroFeatures}>
                    <View style={styles.checkRow}>
                       <MaterialCommunityIcons name="checkbox-marked-circle" size={18} color={COLORS.primary} />
-                      <Text style={styles.checkText}>Veg and Non-veg </Text>
+                      <Text style={styles.checkText}>Casual & Formal </Text>
                    </View>
                    <View style={styles.checkRow}>
                       <MaterialCommunityIcons name="checkbox-marked-circle" size={18} color={COLORS.primary} />
@@ -197,7 +197,7 @@ const MeatDeliveryScreen = () => {
               </View>
               
               <Image 
-                source={{ uri: "https://images.immediate.co.uk/production/volatile/sites/30/2022/06/Party-food-recipes-fcfb3af.jpg?resize=1366,1503" }} 
+                source={{ uri: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" }} 
                 style={styles.heroImage} 
               />
            </Animated.View>

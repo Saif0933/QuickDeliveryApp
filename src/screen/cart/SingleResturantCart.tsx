@@ -75,7 +75,7 @@ export const SingleResturantCart = ({ route }: { route: any }) => {
     return (
       <SafeAreaView style={styles.centerContainer}>
         <MaterialIcons name="remove-shopping-cart" size={60} color={COLORS.muted} />
-        <Text style={styles.emptyText}>Your cart from this restaurant is empty.</Text>
+        <Text style={styles.emptyText}>Your cart from this store is empty.</Text>
         <TouchableOpacity style={styles.addMoreBtn} onPress={() => navigation.goBack()}>
           <Text style={styles.addMoreText}>Go Back</Text>
         </TouchableOpacity>
@@ -98,8 +98,8 @@ export const SingleResturantCart = ({ route }: { route: any }) => {
           <MaterialIcons name="arrow-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.restaurantName} numberOfLines={1}>{vendor?.shopName || "Restaurant"}</Text>
-          <Text style={styles.deliveryTime}>35-40 mins to Home</Text>
+          <Text style={styles.restaurantName} numberOfLines={1}>{vendor?.shopName || "Store"}</Text>
+          <Text style={styles.deliveryTime}>30 mins delivery to Home</Text>
         </View>
         <TouchableOpacity style={styles.shareButton}>
           <MaterialIcons name="share" size={24} color={COLORS.textPrimary} />
@@ -116,8 +116,8 @@ export const SingleResturantCart = ({ route }: { route: any }) => {
               style={styles.vendorLogo} 
             />
             <View>
-              <Text style={styles.vendorName}>{vendor?.shopName || "Restaurant"}</Text>
-              <Text style={styles.vendorSubtitle}>Items from this restaurant</Text>
+              <Text style={styles.vendorName}>{vendor?.shopName || "Store"}</Text>
+              <Text style={styles.vendorSubtitle}>Items from this store</Text>
             </View>
           </View>
 
@@ -129,11 +129,6 @@ export const SingleResturantCart = ({ route }: { route: any }) => {
 
             return (
               <View key={item.id || index} style={styles.itemRow}>
-                {/* Veg/Non-Veg Icon */}
-                <View style={[styles.vegBadge, { borderColor: isVeg ? COLORS.highlight : 'red' }]}>
-                  <View style={[styles.vegDot, { backgroundColor: isVeg ? COLORS.highlight : 'red' }]} />
-                </View>
-
                 {/* Info Text */}
                 <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.product?.name || item.name || "Item"}</Text>

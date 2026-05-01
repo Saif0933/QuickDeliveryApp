@@ -12,7 +12,6 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -20,7 +19,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // --- CUSTOM IMPORTS ---
 import { useGetAllCategory } from '../api/hooks/getAllCategory';
@@ -28,8 +26,10 @@ import { useGetAllVendors } from '../api/hooks/useVender';
 import FoodList from '../components/FoodCard';
 import FloatingCart from '../components/cart/FloatingCart';
 import BottomNavBar from '../navigation/BottomNavBar';
-import { COLORS } from '../theme/color';
 import { useLocationStore } from '../store/locationStore';
+import { COLORS } from '../theme/color';
+
+import SuggestedForYou from './SuggestedForYou';
 
 
 const { width, height } = Dimensions.get('window');
@@ -42,7 +42,9 @@ type RootStackParamList = {
   ZomatoMoneyPage: undefined;
   ProfileScreen: undefined;
   FoodList: { categoryId?: string; category?: string };
-  ProductScreen: { category?: string; vendorId: string; vendorName: string; vendorImage: string; menuImages?: string[] };
+  ProductScreen: { category?: string; vendorId: string; vendorName: string; vendorImage: string; productName?: string; description?: string; menuImages?: string[] };
+  BrandStoreScreen: { vendorId: string; vendorName: string; vendorImage: string };
+  ProductBrand: { vendorId: string; vendorName: string; vendorImage: string; vendorLogo?: string };
   CheckoutScreen: undefined;
   DiningScreen: undefined;
   VegMode: undefined;
@@ -54,31 +56,100 @@ type RootStackParamList = {
 // --- DATA ---
 const staticCategories = [
   {
-    id: 'special_1',
-    name: 'Meals Under\n₹250',
-    image: { url: 'https://b.zmtcdn.com/data/o2_assets/52eb9796bb9bcf0eba64c643349e97211634401116.png' },
+    id: 'branded',
+    name: 'Top Brands',
+    image: { url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&q=80' },
     isSpecial: true,
   },
   {
-    id: 'static_all',
-    name: 'All',
-    image: { url: 'https://tse1.mm.bing.net/th/id/OIP.y9WHqmBEubDgxpHWqRN9sAHaEO?pid=Api&P=0&h=180' },
+    id: 'men',
+    name: 'Men',
+    image: { url: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=200&q=80' },
+    isSpecial: false,
+  },
+  {
+    id: 'women',
+    name: 'Women',
+    image: { url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&q=80' },
+    isSpecial: false,
+  },
+  {
+    id: 'non-branded',
+    name: 'Casual',
+    image: { url: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=200&q=80' },
     isSpecial: false,
   },
 ];
 
-const HEADER_HEIGHT = 60;
-const SEARCH_HEIGHT = 70;
+const staticClothingBrands = [
+  {
+    id: 'cb-1',
+    name: "Nike",
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
+    discount: "Up to 50% off"
+  },
+  {
+    id: 'cb-2',
+    name: "H&M",
+    image: "https://images.unsplash.com/photo-1544441893-675973e31985?w=400&q=80",
+    discount: "Flat 40% off"
+  },
+  {
+    id: 'cb-3',
+    name: "Zara",
+    image: "https://images.unsplash.com/photo-1489987707023-af0825ae1eeb?w=400&q=80",
+    discount: "Buy 1 Get 1"
+  },
+  {
+    id: 'cb-4',
+    name: "Puma",
+    image: "https://images.unsplash.com/photo-1608231387042-6e2eeaa518d6?w=400&q=80",
+    discount: "Min 30% off"
+  },
+  {
+    id: 'cb-5',
+    name: "Levi's",
+    image: "https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?w=400&q=80",
+    discount: "Deal of the day"
+  },
+  {
+    id: 'cb-6',
+    name: "Adidas",
+    image: "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=400&q=80",
+    discount: "Up to 60% off"
+  }
+];
+
+const HEADER_HEIGHT = 115;
+const SEARCH_HEIGHT = 20;
 const BANNER_HEIGHT = 220;
-const HERO_HEIGHT = HEADER_HEIGHT + SEARCH_HEIGHT + BANNER_HEIGHT;
+const HERO_HEIGHT = HEADER_HEIGHT + BANNER_HEIGHT + 10;
 
 const banners = [
-  { id: '1', img: require('../assets/logo.jpeg') },
-  { id: '2', img: 'https://media.edinburgh.org/wp-content/uploads/2023/04/26161552/thumb_40653_point_of_interest_bigger.jpeg' },
+  { 
+    id: '1', 
+    img: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80',
+    title: 'THE NEW EDIT',
+    subtitle: 'SUMMER\nSYMPHONY',
+    badge: 'NEW COLLECTION'
+  },
+  { 
+    id: '2', 
+    img: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80',
+    title: 'LUXURY ESSENTIALS',
+    subtitle: 'TIMELESS\nELEGANCE',
+    badge: 'LIMITED EDITION'
+  },
+  { 
+    id: '3', 
+    img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80',
+    title: 'URBAN VIBE',
+    subtitle: 'CITY\nCOLLECTIVE',
+    badge: 'TOP TRENDING'
+  },
 ];
 
 const HomeScreen: React.FC = () => {
-  const [vegMode, setVegMode] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const { primaryLocation, secondaryLocation, initializeLocation } = useLocationStore();
@@ -121,9 +192,7 @@ const HomeScreen: React.FC = () => {
 
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  const handleVegToggle = (val: boolean) => {
-    setVegMode(val);
-  };
+  // veg toggle removed
 
   useEffect(() => {
     const animateBanner = () => {
@@ -131,16 +200,16 @@ const HomeScreen: React.FC = () => {
         Animated.delay(3000),
         Animated.timing(slideAnim, {
           toValue: -width,
-          duration: 600,
+          duration: 1000,
           useNativeDriver: true,
-          easing: Easing.inOut(Easing.ease),
+          easing: Easing.inOut(Easing.bezier(0.25, 0.1, 0.25, 1)),
         }),
         Animated.delay(3000),
         Animated.timing(slideAnim, {
           toValue: -width * 2,
-          duration: 600,
+          duration: 1000,
           useNativeDriver: true,
-          easing: Easing.inOut(Easing.ease),
+          easing: Easing.inOut(Easing.bezier(0.25, 0.1, 0.25, 1)),
         }),
       ]).start(({ finished }) => {
         if (finished) {
@@ -160,7 +229,26 @@ const HomeScreen: React.FC = () => {
           style={styles.bannerImage}
           resizeMode="cover"
         />
-        <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.1)' }} />
+        {/* Editorial Gradient Overlay */}
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.3)', padding: 24, justifyContent: 'flex-end', paddingBottom: 60, borderRadius: 20, marginHorizontal: 12, overflow: 'hidden' }]}>
+          
+          {/* Top Info Bar */}
+          <View style={{ position: 'absolute', top: 20, left: 24, right: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+             <View style={{ backgroundColor: '#FFF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 2 }}>
+                <Text style={{ color: '#000', fontSize: 9, fontWeight: '900', letterSpacing: 1.5, textTransform: 'uppercase' }}>{item.badge}</Text>
+             </View>
+             <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '800', letterSpacing: 1 }}>0{index + 1} / 0{banners.length}</Text>
+          </View>
+
+          <View style={{ marginBottom: 0 }}>
+            <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '600', letterSpacing: 4, textTransform: 'uppercase', marginBottom: 8, opacity: 0.8 }}>
+              {item.title}
+            </Text>
+            <Text style={{ color: '#FFF', fontSize: 34, fontWeight: '900', letterSpacing: -1, lineHeight: 38 }}>
+              {item.subtitle}
+            </Text>
+          </View>
+        </View>
       </View>
     );
   };
@@ -169,7 +257,7 @@ const HomeScreen: React.FC = () => {
   const { data: categoryData, isLoading: categoryLoading } = useGetAllCategory({});
 
   const displayCategories = [...staticCategories, ...(categoryData || [])];
-  const allVendors = restaurantData?.pages.flatMap(page => page.vendors).slice(0, 20) || [];
+  const allVendors = restaurantData?.pages.flatMap(page => page.vendors) || [];
   const midPoint = Math.ceil(allVendors.length / 2);
   const firstRowVendors = allVendors.slice(0, midPoint);
   const secondRowVendors = allVendors.slice(midPoint);
@@ -233,9 +321,10 @@ const HomeScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FoodList
+      <Animated.ScrollView
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -244,8 +333,8 @@ const HomeScreen: React.FC = () => {
             tintColor={COLORS.primary}
           />
         }
-        ListHeaderComponent={
-          <>
+      >
+        <View>
             {/* Hero Section */}
             <View style={styles.heroContainer}>
               <View style={styles.bannerOuterContainer}>
@@ -259,61 +348,78 @@ const HomeScreen: React.FC = () => {
                   {renderBannerContent(banners[1], 1)}
                   {renderBannerContent(banners[0], 2)}
                 </Animated.View>
+
+                {/* Pagination Dots indicator */}
+                <View style={[styles.bannerPagination, { left: 36, bottom: 40 }]}>
+                   {banners.map((_, i) => {
+                     const dotWidth = slideAnim.interpolate({
+                       inputRange: [-width * (i + 1), -width * i, -width * (i - 1)],
+                       outputRange: [10, 24, 10],
+                       extrapolate: 'clamp'
+                     });
+                     const dotOpacity = slideAnim.interpolate({
+                       inputRange: [-width * (i + 1), -width * i, -width * (i - 1)],
+                       outputRange: [0.4, 1, 0.4],
+                       extrapolate: 'clamp'
+                     });
+                     return (
+                       <Animated.View 
+                         key={i} 
+                         style={[styles.bannerDot, { width: dotWidth, opacity: dotOpacity, backgroundColor: '#FFF' }]} 
+                       />
+                     );
+                   })}
+                </View>
               </View>
 
-              <View style={styles.header}>
-                <View style={styles.headerLeft}>
-                  <Ionicons name="location-sharp" size={26} color={COLORS.primary} />
-                  <View style={styles.locationContainer}>
-                    <TouchableOpacity
-                      style={styles.locationRow}
+              <View style={[styles.header, { backgroundColor: COLORS.primary, height: 115, flexDirection: 'column', paddingBottom: 10 }]}>
+                {/* Upper Row: Location & Profile */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 8 }}>
+                  <View style={styles.headerLeft}>
+                    <TouchableOpacity 
+                      style={{ backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, flexDirection: 'row', alignItems: 'center' }}
                       onPress={() => navigation.navigate('LocationScreen')}
                     >
-                      <Text style={styles.locationTitle}>{primaryLocation || "Locating..."}</Text>
-                      <Ionicons name="chevron-down" size={16} color="#333" style={{ marginLeft: 4 }} />
+                      <Ionicons name="location-sharp" size={14} color="#FFF" />
+                      <Text numberOfLines={1} style={{ color: '#FFF', fontSize: 13, fontWeight: '700', marginHorizontal: 6 }}>{primaryLocation || 'Bangaluru'}</Text>
+                      <Ionicons name="chevron-down" size={12} color="#FFF" style={{ opacity: 0.8 }} />
                     </TouchableOpacity>
-                    <Text style={styles.locationSub} numberOfLines={1}>{secondaryLocation || "Fetching address..."}</Text>
+                  </View>
+
+                  <View style={styles.headerRight}>
+                    <TouchableOpacity style={{ marginRight: 15 }} onPress={() => navigation.navigate('ZomatoMoneyPage')}>
+                      <Ionicons name="wallet-outline" size={24} color="#FFF" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center' }} onPress={() => navigation.navigate('ProfileScreen')}>
+                      <Text style={{ color: COLORS.primary, fontWeight: '900', fontSize: 13 }}>S</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
 
-                <View style={styles.headerRight}>
-                  {/* <TouchableOpacity style={styles.goldBadge} onPress={() => navigation.navigate('GoldScreen')}>
-                    <Text style={styles.goldText}>Elite</Text>
-                  </TouchableOpacity> */}
-                  <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('ZomatoMoneyPage')}>
-                    <MaterialCommunityIcons name="wallet-outline" size={24} color="#333" />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.profileBtn} onPress={() => navigation.navigate('ProfileScreen')}>
-                    <Text style={styles.profileText}>S</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View style={styles.searchWrapper}>
-                <View style={styles.searchRow}>
-                  <View style={styles.searchBar}>
-                    <Ionicons name="search" size={20} color={COLORS.primary} />
-                    <TextInput
-                      placeholder='Search "momos"'
-                      style={styles.searchInput}
-                      placeholderTextColor="#888"
-                      onPressIn={() => navigation.navigate('SearchScreen')}
+                {/* Lower Row: Search Bar (Moved UP) */}
+                <View style={{ width: '100%', paddingHorizontal: 4 }}>
+                  <View style={{ 
+                    flexDirection: 'row', 
+                    alignItems: 'center', 
+                    backgroundColor: '#FFF', 
+                    borderRadius: 25, 
+                    height: 48, 
+                    paddingHorizontal: 15,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 5,
+                    elevation: 5
+                  }}>
+                    <Ionicons name="search" size={18} color="#666" style={{ marginRight: 10 }} />
+                    <TextInput 
+                      placeholder='Search "Shirts", "Nike", "Brands"' 
+                      style={{ flex: 1, fontSize: 13, color: '#333', fontWeight: '500' }} 
+                      placeholderTextColor="#999" 
+                      onPressIn={() => navigation.navigate('SearchScreen')} 
                     />
-                    <View style={styles.verticalLine} />
-                    <Ionicons name="mic-outline" size={22} color={COLORS.primary} style={{ marginLeft: 8 }} />
-                  </View>
-                  <View style={styles.vegModeContainer}>
-                    <Switch
-                      value={vegMode}
-                      onValueChange={handleVegToggle}
-                      trackColor={{ false: '#E0E0E0', true: '#007E33' }}
-                      thumbColor="#fff"
-                      style={styles.vegSwitch}
-                    />
-                    <View style={styles.vegTextColumn}>
-                      <Text style={[styles.vegModeLabel, vegMode && { color: '#007E33' }]}>VEG</Text>
-                      <Text style={[styles.vegModeSubLabel, vegMode && { color: '#007E33' }]}>MODE</Text>
-                    </View>
+                    <View style={{ width: 1, height: 20, backgroundColor: '#EEE', marginHorizontal: 10 }} />
+                    <Ionicons name="mic-outline" size={20} color="#666" />
                   </View>
                 </View>
               </View>
@@ -342,11 +448,11 @@ const HomeScreen: React.FC = () => {
                         <TouchableOpacity onPress={() => navigation.navigate('MealsUnderScreen')}>
                           <View style={styles.specialCategory}>
                             <Image source={{ uri: c.image?.url }} style={styles.specialCategoryImg} />
-                            <View style={styles.specialCategoryOverlay}>
-                              <Text style={styles.specialCategoryText}>MEALS UNDER</Text>
-                              <Text style={styles.specialCategoryPrice}>₹250</Text>
-                              <View style={styles.exploreSmallBtn}>
-                                <Text style={styles.exploreSmallText}>Explore ›</Text>
+                            <View style={[styles.specialCategoryOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+                              <Text style={[styles.specialCategoryText, { fontSize: 9, marginBottom: 2, color: 'white' }]}>TOP</Text>
+                              <Text style={[styles.specialCategoryPrice, { fontSize: 13, color: '#FFD700', marginLeft: 4 }]}>BRANDS</Text>
+                              <View style={[styles.exploreSmallBtn, { backgroundColor: '#FFD700' }]}>
+                                <Text style={[styles.exploreSmallText, { color: '#000' }]}>Explore ›</Text>
                               </View>
                             </View>
                           </View>
@@ -397,106 +503,101 @@ const HomeScreen: React.FC = () => {
               </ScrollView>
             </View> */}
 
-            {/* Dynamic Recommended */}
-            <Text style={styles.sectionTitle}>RECOMMENDED FOR YOU</Text>
+            {/* Dynamic Recommended - Amazon Style */}
+            <TouchableOpacity 
+              style={styles.amazonSectionHeader}
+              onPress={() => navigation.navigate('ProductBrand', {
+                vendorId: 'cb-1',
+                vendorName: 'Nike',
+                vendorImage: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80',
+                vendorLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/1200px-Logo_NIKE.svg.png'
+              })}
+            >
+              <Text style={styles.amazonSectionTitle}>Featured Clothing & Brands</Text>
+              <View>
+                <Text style={styles.amazonSeeAll}>See all deals</Text>
+              </View>
+            </TouchableOpacity>
+            
             {isLoading ? (
               <View style={{ height: 200, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
               </View>
             ) : (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recommendedContainer}>
-                <View style={{ flexDirection: 'column' }}>
-                  <View style={styles.recommendedRow}>
-                    {firstRowVendors.map((vendor) => {
-                      const menuImages = (vendor.menuImages && vendor.menuImages.length > 0)
-                        ? vendor.menuImages.map((mi) => mi.imageUrl?.url).filter(Boolean)
-                        : [vendor.images?.url || 'https://via.placeholder.com/150'];
-
-                      return (
-                        <TouchableOpacity
-                          key={vendor.id.toString()}
-                          onPress={() => navigation.navigate('ProductScreen', {
-                            category: selectedCategory,
-                            vendorId: vendor.id.toString(),
-                            vendorName: vendor.shopName || 'Store',
-                            vendorImage: menuImages[0],
-                            menuImages: menuImages
-                          })}
-                        >
-                          <RestaurantCard data={{
-                            name: vendor.shopName || vendor.companyName || 'Unknown Store',
-                            images: menuImages,
-                            discount: 'FLAT 20% OFF',
-                            rating: '4.2',
-                            time: '30-40 mins',
-                            isYellow: false
-                          }} />
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                  <View style={styles.recommendedRow}>
-                    {secondRowVendors.map((vendor: any) => {
-                      const menuImages = (vendor.menuImages && vendor.menuImages.length > 0)
-                        ? vendor.menuImages.map((mi: any) => mi.imageUrl?.url).filter(Boolean)
-                        : [vendor.images?.url || 'https://via.placeholder.com/150'];
-
-                      return (
-                        <TouchableOpacity
-                          key={vendor.id.toString()}
-                          onPress={() => navigation.navigate('ProductScreen', {
-                            category: selectedCategory,
-                            vendorId: vendor.id.toString(),
-                            vendorName: vendor.shopName || 'Store',
-                            vendorImage: menuImages[0],
-                            menuImages: menuImages
-                          })}
-                        >
-                          <RestaurantCard data={{
-                            name: vendor.shopName || vendor.companyName || 'Unknown Store',
-                            images: menuImages,
-                            discount: 'FLAT 15% OFF',
-                            rating: '4.0',
-                            time: '25-30 mins',
-                            isYellow: true
-                          }} />
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </View>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.amazonScrollContainer}>
+                {staticClothingBrands.map((brand, index) => {
+                  return (
+                    <TouchableOpacity
+                      key={brand.id}
+                      onPress={() => {
+                        navigation.navigate('ProductBrand', {
+                          vendorId: brand.id,
+                          vendorName: brand.name,
+                          vendorImage: brand.image,
+                          vendorLogo: brand.id === 'cb-1' 
+                            ? 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/1200px-Logo_NIKE.svg.png'
+                            : brand.image // Fallback logo
+                        });
+                      }}
+                      style={[styles.amazonCard, { width: 150, marginRight: 12, marginBottom: 0 }]}
+                      activeOpacity={0.9}
+                    >
+                      <View style={styles.amazonImgWrapper}>
+                        <Image source={{ uri: brand.image }} style={styles.amazonImg} resizeMode="cover" />
+                      </View>
+                      <View style={styles.amazonInfo}>
+                        <View style={styles.amazonDiscountRow}>
+                          <View style={styles.amazonDiscountBadge}>
+                            <Text style={styles.amazonDiscountText}>{brand.discount}</Text>
+                          </View>
+                          <Text style={styles.amazonDealTag}>Limited time deal</Text>
+                        </View>
+                        <Text style={styles.amazonBrandName} numberOfLines={1}>{brand.name}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </ScrollView>
             )}
-          </>
-        }
-      />
+        </View>
+        
+        {/* Horizontal Trending Products List */}
+        <FoodList />
+        
+        {/* Suggested For You Added Below Trending Deals */}
+        <SuggestedForYou />
+        
+      </Animated.ScrollView>
 
-      {/* Sticky Search Bar Overlay */}
       <Animated.View
         style={[
-          styles.searchWrapper,
           {
             position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100,
-            backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
+            backgroundColor: COLORS.primary,
             paddingTop: 10, opacity: stickyHeaderOpacity,
-            transform: [{ translateY: stickyHeaderTranslateY }], elevation: 5
+            transform: [{ translateY: stickyHeaderTranslateY }], elevation: 5,
+            paddingBottom: 15
           }
         ]}
       >
-        <View style={styles.searchRow}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search" size={20} color={COLORS.primary} />
-            <TextInput placeholder='Search "momos"' style={styles.searchInput} placeholderTextColor="#888" onPressIn={() => navigation.navigate('SearchScreen')} />
-            <View style={styles.verticalLine} />
-            <Ionicons name="mic-outline" size={22} color={COLORS.primary} style={{ marginLeft: 8 }} />
-          </View>
-          <View style={styles.vegModeContainer}>
-            <Switch value={vegMode} onValueChange={handleVegToggle} trackColor={{ false: '#E0E0E0', true: '#007E33' }} thumbColor="#fff" style={styles.vegSwitch} />
-            <View style={styles.vegTextColumn}>
-              <Text style={[styles.vegModeLabel, vegMode && { color: '#007E33' }]}>VEG</Text>
-              <Text style={[styles.vegModeSubLabel, vegMode && { color: '#007E33' }]}>MODE</Text>
+        <View style={{ paddingHorizontal: 16 }}>
+           <View style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              backgroundColor: '#FFF', 
+              borderRadius: 12, 
+              height: 48, 
+              paddingHorizontal: 15
+            }}>
+              <Ionicons name="search" size={18} color={COLORS.primary} style={{ marginRight: 10 }} />
+              <TextInput 
+                placeholder='Search Brands...' 
+                style={{ flex: 1, fontSize: 13, color: '#333', fontWeight: '500' }} 
+                placeholderTextColor="#AAA" 
+                onPressIn={() => navigation.navigate('SearchScreen')} 
+              />
+              <Ionicons name="mic-outline" size={18} color={COLORS.primary} />
             </View>
-          </View>
         </View>
       </Animated.View>
 
@@ -529,9 +630,9 @@ const HomeScreen: React.FC = () => {
                 {c.isSpecial ? (
                   <View style={styles.specialCategory}>
                     <Image source={{ uri: c.image?.url }} style={styles.specialCategoryImg} />
-                    <View style={styles.specialCategoryOverlay}>
-                      <Text style={styles.specialCategoryText}>MEALS UNDER</Text>
-                      <Text style={styles.specialCategoryPrice}>₹250</Text>
+                    <View style={[styles.specialCategoryOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+                      <Text style={[styles.specialCategoryText, { fontSize: 9, marginBottom: 2, color: 'white' }]}>TOP</Text>
+                      <Text style={[styles.specialCategoryPrice, { fontSize: 13, color: '#FFD700', marginLeft: 4 }]}>BRANDS</Text>
                     </View>
                   </View>
                 ) : (
@@ -719,98 +820,79 @@ const HomeScreen: React.FC = () => {
   );
 };
 
-// Restaurant Card Component
-const RestaurantCard = ({ data }: { data: any }) => {
-  const [index, setIndex] = React.useState(0);
-  const fadeAnim = React.useRef(new Animated.Value(1)).current;
 
-  React.useEffect(() => {
-    if (!data.images || data.images.length <= 1) return;
-    const interval = setInterval(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }).start(() => {
-        setIndex((prev) => (prev + 1) % data.images.length);
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }).start();
-      });
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [data.images, fadeAnim]);
-
-  return (
-    <View style={styles.recommendedCard}>
-      <View style={styles.recommendedImgContainer}>
-        <Animated.Image
-          source={{ uri: data.images[index] }}
-          style={[styles.recommendedImg, { opacity: fadeAnim }]}
-        />
-        {data.images.length > 1 && (
-          <View style={styles.cardDotContainer}>
-            {data.images.map((_: any, i: number) => (
-              <View
-                key={i}
-                style={[styles.cardDot, { backgroundColor: i === index ? '#fff' : 'rgba(255,255,255,0.5)' }]}
-              />
-            ))}
-          </View>
-        )}
-      </View>
-      <View style={[styles.discountBadge, data.isYellow && styles.discountBadgeYellow]}>
-        <Text style={[styles.discountText, data.isYellow && styles.discountTextDark]}>{data.discount}</Text>
-      </View>
-      <View style={styles.cardContent}>
-        <View style={styles.nameRow}>
-          <Text style={styles.recommendedName} numberOfLines={1}>{data.name}</Text>
-          <View style={styles.ratingBadgeSmall}>
-            <Text style={styles.ratingTextSmall}>{data.rating}★</Text>
-          </View>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Ionicons name="time-outline" size={12} color="#52b957ff" style={{ marginRight: 4 }} />
-          <Text style={styles.recommendedTime}>{data.time}</Text>
-        </View>
-      </View>
-    </View>
-  );
-};
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   heroContainer: { height: HERO_HEIGHT, position: 'relative', overflow: 'visible' },
-  header: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 12, paddingTop: 10, paddingBottom: 8 },
-  headerLeft: { flexDirection: 'row', alignItems: 'flex-start', flex: 1 },
-  locationContainer: { marginLeft: 8, flex: 1 },
+  header: { 
+    position: 'absolute', 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    zIndex: 20, 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 16, 
+    paddingTop: 12, 
+    paddingBottom: 10,
+    backgroundColor: 'rgba(255,255,255,0.95)' // Added soft background for contrast
+  },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  iconCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#FDECEF', justifyContent: 'center', alignItems: 'center' },
+  locationContainer: { marginLeft: 10, flex: 1 },
   locationRow: { flexDirection: 'row', alignItems: 'center' },
-  locationTitle: { fontSize: 16, fontWeight: '900', color: '#1C1C1C' },
-  locationSub: { fontSize: 12, color: COLORS.textSecondary, marginTop: 1, width: '90%', fontWeight: 800 },
+  locationTitle: { fontSize: 14, fontWeight: '800', color: '#111' },
+  locationSub: { fontSize: 11, color: '#666', marginTop: 1, fontWeight: '500' },
   headerRight: { flexDirection: 'row', alignItems: 'center' },
-  goldBadge: { backgroundColor: '#2D2D2D', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, marginRight: 10 },
-  goldText: { fontSize: 10, fontWeight: '900', color: '#D4AF37' },
-  iconBtn: { marginRight: 12 },
-  profileBtn: { width: 32, height: 32, borderRadius: 60, backgroundColor: '#E0F2F1', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#000' },
-  profileText: { fontSize: 16, fontWeight: 'bold', color: '#00695C' },
+  walletBadge: { backgroundColor: '#F9F9F9', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20, marginRight: 12, borderWidth: 1, borderColor: '#EEE', flexDirection: 'row', alignItems: 'center' },
+  walletText: { fontSize: 13, fontWeight: '700', color: '#333', marginLeft: 6 },
+  profileBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#E0F2F1', justifyContent: 'center', alignItems: 'center', position: 'relative' },
+  profileText: { fontSize: 15, fontWeight: 'bold', color: '#00695C' },
+  onlineStatus: { position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: 5, backgroundColor: '#4CAF50', borderWidth: 2, borderColor: '#FFF' },
 
-  searchWrapper: { position: 'absolute', top: HEADER_HEIGHT, left: 0, right: 0, zIndex: 30, paddingBottom: 10 },
-  searchRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 },
-  searchBar: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 15, height: 48, borderWidth: 0.5, borderColor: COLORS.SOFT_BLUE, marginRight: 10, elevation: 4 },
-  searchInput: { flex: 1, marginLeft: 8, fontSize: 15, color: '#000' },
-  verticalLine: { width: 1, height: 20, backgroundColor: '#ddd' },
-  vegModeContainer: { flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 50 },
-  vegTextColumn: { alignItems: 'center', marginTop: -2 },
-  vegModeLabel: { fontSize: 10, fontWeight: '900', color: COLORS.primary, letterSpacing: 0.5, lineHeight: 12 },
-  vegModeSubLabel: { fontSize: 8, color: COLORS.primary, fontWeight: '900', letterSpacing: 0.5, lineHeight: 10 },
-  vegSwitch: { transform: [{ scale: 0.7 }], marginBottom: 0 },
+  searchWrapper: { position: 'absolute', top: 60, left: 0, right: 0, zIndex: 30, paddingBottom: 10 },
+  searchRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 },
+  pillSearchBar: { 
+    flex: 1, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#F3F4F6', 
+    borderRadius: 25, 
+    height: 50,
+  },
+  pillSearchInput: { flex: 1, marginLeft: 10, fontSize: 14, color: '#333' },
+  micCircle: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center', marginRight: 8, elevation: 1 },
 
-  bannerOuterContainer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1, backgroundColor: '#f2f2f2', borderBottomLeftRadius: 24, borderBottomRightRadius: 24, overflow: 'hidden' },
-  bannerMovingTrack: { width: width * 3, height: HERO_HEIGHT, flexDirection: 'row' },
-  bannerSlide: { width, height: HERO_HEIGHT, overflow: 'hidden', position: 'relative' },
-  bannerImage: { width: '100%', height: '100%' },
+  bannerOuterContainer: { 
+    position: 'absolute', 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    bottom: 0, 
+    zIndex: 1, 
+    backgroundColor: '#fff', 
+    overflow: 'hidden', 
+    paddingTop: 120 // Header Height (115) + extra 5px
+  },
+  bannerMovingTrack: { width: width * 3, height: 220, flexDirection: 'row' },
+  bannerSlide: { width, height: 220, overflow: 'visible', position: 'relative' },
+  bannerImage: { width: width - 32, height: '100%', marginHorizontal: 16, borderRadius: 24 },
+  bannerPagination: {
+    position: 'absolute',
+    bottom: 25,
+    right: 36, // Moved dots to the right for a different look
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 10
+  },
+  bannerDot: {
+    height: 2, // Thinner, more professional line indicator
+    borderRadius: 1,
+    backgroundColor: 'rgba(255,255,255,0.4)',
+    marginRight: 8
+  },
 
   categoriesContainer: { paddingLeft: 12, marginBottom: 16, paddingTop: 16 },
   categoryItem: { alignItems: 'center', marginRight: 16 },
@@ -831,24 +913,47 @@ const styles = StyleSheet.create({
   filterChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: '#EAEAEA', marginRight: 10, elevation: 3 },
   filterText: { fontSize: 13, color: '#1C1C1C', fontWeight: '700' },
 
-  sectionTitle: { fontSize: 13, fontWeight: '800', color: COLORS.muted, marginLeft: 12, marginBottom: 12, letterSpacing: 1 },
-  recommendedContainer: { paddingLeft: 12, marginBottom: 10 },
-  recommendedRow: { flexDirection: 'row', marginBottom: 12 },
-  recommendedCard: { width: 120, height: 130, marginRight: 12, borderRadius: 12 },
-  recommendedImgContainer: { width: '100%', height: 80, overflow: 'hidden', borderTopLeftRadius: 12, borderTopRightRadius: 12, position: 'relative' },
-  recommendedImg: { width: '100%', height: '100%' },
-  cardDotContainer: { position: 'absolute', bottom: 5, width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
-  cardDot: { width: 4, height: 4, borderRadius: 2, marginHorizontal: 2 },
-  discountBadge: { position: 'absolute', top: 10, left: -4, backgroundColor: '#000', paddingHorizontal: 4, paddingVertical: 4, borderTopRightRadius: 4, borderBottomRightRadius: 4, marginLeft: 4 },
-  discountBadgeYellow: { backgroundColor: '#000' },
-  discountText: { fontSize: 8, color: '#fff', fontWeight: 'bold' },
-  discountTextDark: { color: '#fff' },
-  cardContent: { padding: 10 },
-  nameRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  recommendedName: { fontSize: 13, fontWeight: '800', color: '#1C1C1C', flex: 1 },
-  ratingBadgeSmall: { backgroundColor: COLORS.highlight, borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, marginLeft: 4 },
-  ratingTextSmall: { color: '#fff', fontSize: 9, fontWeight: 'bold' },
-  recommendedTime: { fontSize: 11, color: '#52b957ff', marginTop: 0 },
+  // Amazon Style additions
+  amazonSectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 12, marginBottom: 12, marginTop: 10 },
+  amazonSectionTitle: { fontSize: 18, fontWeight: '700', color: '#0F1111' },
+  amazonSeeAll: { fontSize: 13, color: '#007185', fontWeight: '500' },
+  amazonScrollContainer: { paddingLeft: 12, paddingRight: 4, paddingBottom: 16 },
+  amazonCard: { 
+    width: 150, 
+    marginRight: 10, 
+    backgroundColor: '#fff', 
+    borderWidth: 1, 
+    borderColor: '#E5E7EB', 
+    borderRadius: 6, 
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  amazonImgWrapper: { 
+    width: '100%', 
+    height: 160, 
+    backgroundColor: '#F9FAFB', 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  amazonImg: { width: '100%', height: '100%' },
+  amazonInfo: { padding: 10 },
+  amazonDiscountRow: { flexDirection: 'column', alignItems: 'flex-start', marginBottom: 4 },
+  amazonDiscountBadge: { 
+    backgroundColor: '#CC0C39', 
+    paddingHorizontal: 6, 
+    paddingVertical: 3,
+    borderRadius: 2,
+    marginBottom: 4
+  },
+  amazonDiscountText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
+  amazonDealTag: { fontSize: 10, color: '#CC0C39', fontWeight: 'bold' },
+  amazonBrandName: { fontSize: 13, color: '#0F1111', lineHeight: 18 },
 
   // --- FILTER MODAL STYLES ---
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },

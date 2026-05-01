@@ -4,20 +4,20 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosError } from "axios";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    ImageBackground,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    ToastAndroid,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import api from "../api/api";
 import { useAuth } from "../Context/AuthContext";
@@ -112,15 +112,21 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
           {/* Header */}
           <View style={styles.headerWrapper}>
             <ImageBackground
-              source={require("../assets/restro.jpeg")}
+              source={require("../assets/cloth.webp")}
               style={styles.topContainer}
               resizeMode="cover"
-            />
+            >
+              <View style={styles.overlay}>
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>🚀 30 MIN DELIVERY</Text>
+                </View>
+              </View>
+            </ImageBackground>
           </View>
 
           {/* Main content */}
           <View style={styles.content}>
-            <Text style={styles.title}>Order Now From Multiple Resturant</Text>
+            <Text style={styles.title}>Premium Cloth Delivery{"\n"}At Your Doorstep</Text>
 
             <View style={styles.dividerContainer}>
               <View style={styles.line} />
@@ -199,41 +205,66 @@ const styles = StyleSheet.create({
   },
 
   headerWrapper: {
-    height: height * 0.45,
+    height: height * 0.5,
     width: "100%",
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
     overflow: "hidden",
   },
 
   topContainer: {
     width: "100%",
     height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+  },
+
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    justifyContent: "flex-end",
+    padding: 20,
+  },
+
+  badge: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: "flex-start",
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+
+  badgeText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
 
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingTop: 24,
     alignItems: "center",
   },
 
   title: {
-    fontSize: 24,
+    fontSize: 28,
     textAlign: "center",
-    marginBottom: 20,
-    fontWeight: "800",
+    marginBottom: 24,
+    fontWeight: "900",
     color: COLORS.textPrimary,
-    lineHeight: 34,
+    lineHeight: 38,
+    letterSpacing: -0.5,
   },
 
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    marginBottom: 24,
+    marginBottom: 32,
   },
 
   line: {
@@ -243,82 +274,84 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    fontSize: 13,
+    fontSize: 12,
     color: COLORS.textSecondary,
-    fontWeight: "600",
+    fontWeight: "700",
     textTransform: "uppercase",
-    marginHorizontal: 12,
-    letterSpacing: 0.5,
+    marginHorizontal: 16,
+    letterSpacing: 1.5,
   },
 
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    height: 54,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 16,
+    height: 60,
     width: "100%",
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: COLORS.secondary,
+    marginBottom: 20,
+    borderWidth: 1.5,
+    borderColor: "#E9ECEF",
     overflow: "hidden",
   },
 
   countryCode: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: COLORS.background,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     height: "100%",
-    borderRightWidth: 1,
-    borderRightColor: COLORS.secondary,
   },
 
   flag: {
-    fontSize: 22,
-    marginRight: 6,
+    fontSize: 20,
+    marginRight: 8,
   },
 
   code: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
     color: COLORS.textPrimary,
   },
 
   verticalDivider: {
-    width: 1,
-    height: "100%",
-    backgroundColor: COLORS.secondary,
+    width: 1.5,
+    height: "60%",
+    backgroundColor: "#E9ECEF",
   },
 
   input: {
     flex: 1,
-    fontSize: 15,
-    fontWeight: "500",
+    fontSize: 17,
+    fontWeight: "600",
     color: COLORS.textPrimary,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     height: "100%",
   },
 
   continueBtn: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 16,
-    borderRadius: 10,
+    paddingVertical: 18,
+    borderRadius: 16,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    elevation: 4,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 
   disabledBtn: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.muted,
     elevation: 0,
   },
 
   continueText: {
     color: COLORS.white,
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "800",
+    letterSpacing: 0.5,
   },
 
   footerContainer: {
@@ -330,14 +363,15 @@ const styles = StyleSheet.create({
 
   footer: {
     textAlign: "center",
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.textSecondary,
-    lineHeight: 20,
+    lineHeight: 18,
+    opacity: 0.8,
   },
 
   link: {
     color: COLORS.textPrimary,
-    fontWeight: "600",
+    fontWeight: "700",
     textDecorationLine: "underline",
   },
 

@@ -6,7 +6,7 @@ import { COLORS } from '../theme/color';
 
 const { width } = Dimensions.get('window');
 
-const ZomatoMoneyPage: React.FC = ({ navigation }: any) => {
+const WalletScreen: React.FC = ({ navigation }: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
@@ -17,23 +17,21 @@ const ZomatoMoneyPage: React.FC = ({ navigation }: any) => {
           <Icon name="arrow-back" size={24} color="#1C1C1C" />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Restro Money</Text>
+        <Text style={styles.headerTitle}>Wallet Balance</Text>
 
         <TouchableOpacity style={styles.profileIcon}>
           <Icon name="history" size={26} color="#1C1C1C" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
-        style={styles.content} 
+      <ScrollView
+        style={styles.content}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        
         {/* Premium Balance Card */}
         <View style={styles.balanceCardWrapper}>
           <View style={styles.balanceCard}>
-            {/* Background Decoration Circles */}
             <View style={styles.decoCircle1} />
             <View style={styles.decoCircle2} />
 
@@ -46,29 +44,17 @@ const ZomatoMoneyPage: React.FC = ({ navigation }: any) => {
 
             <Text style={styles.balanceAmount}>₹0.00</Text>
             <Text style={styles.balanceInfo}>Safe & Secure Payments</Text>
-
           </View>
         </View>
 
-        {/* Quick Actions Grid */}
+        {/* Quick Actions */}
         <Text style={styles.sectionLabel}>Quick Actions</Text>
         <View style={styles.quickActionsContainer}>
-          {/* <TouchableOpacity style={styles.actionCard} activeOpacity={0.7}>
-            <View style={[styles.actionIcon, { backgroundColor: '#E3F2FD' }]}>
-              <Icon name="qr-code-scanner" size={24} color="#1565C0" />
-            </View>
-            <Text style={styles.quickActionText}>Scan & Pay</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionCard} activeOpacity={0.7}>
-            <View style={[styles.actionIcon, { backgroundColor: '#FFF3E0' }]}>
-              <Icon name="card-giftcard" size={24} color="#EF6C00" />
-            </View>
-            <Text style={styles.quickActionText}>Gift Card</Text>
-          </TouchableOpacity> */}
-
-          <TouchableOpacity style={styles.actionCard} activeOpacity={0.7}
-          onPress={() => navigation.navigate('SupportScreen')}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('SupportScreen')}
+          >
             <View style={[styles.actionIcon, { backgroundColor: '#E8F5E9' }]}>
               <Icon name="support-agent" size={24} color="#2E7D32" />
             </View>
@@ -85,7 +71,6 @@ const ZomatoMoneyPage: React.FC = ({ navigation }: any) => {
             </TouchableOpacity>
           </View>
 
-          {/* Transaction List */}
           <View style={styles.transactionList}>
             <View style={styles.emptyTransaction}>
               <Icon name="receipt-long" size={48} color={COLORS.muted} />
@@ -98,17 +83,13 @@ const ZomatoMoneyPage: React.FC = ({ navigation }: any) => {
   );
 };
 
-export default ZomatoMoneyPage;
-
-/* ---------------------- THEMED STYLES ---------------------- */
+export default WalletScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9F9F9', 
+    backgroundColor: '#F9F9F9',
   },
-
-  /* Header */
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -135,18 +116,15 @@ const styles = StyleSheet.create({
   profileIcon: {
     padding: 8,
   },
-
   content: {
     flex: 1,
   },
-
-  /* Premium Balance Card */
   balanceCardWrapper: {
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
   balanceCard: {
-    backgroundColor: '#1E1E2E', 
+    backgroundColor: '#1E1E2E',
     borderRadius: 24,
     padding: 24,
     position: 'relative',
@@ -175,7 +153,6 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     backgroundColor: 'rgba(255,255,255,0.03)',
   },
-
   balanceTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -205,27 +182,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 20,
   },
-  cardDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    marginBottom: 16,
-  },
-  addMoneyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.primary, 
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-  },
-  addMoneyText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFF',
-  },
-
-  /* Quick Actions (MODIFIED) */
   sectionLabel: {
     fontSize: 14,
     fontWeight: '700',
@@ -237,20 +193,19 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   quickActionsContainer: {
-    // Changed: Removed row layout to allow full width stacking
-    flexDirection: 'column', 
+    flexDirection: 'column',
     paddingHorizontal: 16,
     marginBottom: 24,
   },
   actionCard: {
     backgroundColor: '#fff',
-    width: '100%', // Changed: Full width
+    width: '100%',
     paddingVertical: 16,
-    paddingHorizontal: 20, // Added: Horizontal padding for row layout
+    paddingHorizontal: 20,
     borderRadius: 16,
-    flexDirection: 'row', // Changed: Items side-by-side
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start', // Changed: Align to left
+    justifyContent: 'flex-start',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -263,16 +218,13 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 0, // Changed: Removed bottom margin
-    marginRight: 16, // Added: Right margin for spacing
+    marginRight: 16,
   },
   quickActionText: {
-    fontSize: 14, // Slightly increased size for list view readability
+    fontSize: 14,
     fontWeight: '600',
     color: '#333',
   },
-
-  /* Transaction Section */
   transactionSection: {
     backgroundColor: '#fff',
     borderTopLeftRadius: 30,
@@ -301,45 +253,6 @@ const styles = StyleSheet.create({
   },
   transactionList: {
     backgroundColor: '#fff',
-  },
-  transactionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  transactionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-  },
-  transactionDetails: {
-    flex: 1,
-  },
-  transactionDescription: {
-    fontSize: 15,
-    color: '#1C1C1C',
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  transactionDate: {
-    fontSize: 11,
-    color: '#999',
-    fontWeight: '500',
-  },
-  amountCredit: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#2E7D32', 
-  },
-  amountDebit: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#1C1C1C', 
   },
   emptyTransaction: {
     alignItems: 'center',

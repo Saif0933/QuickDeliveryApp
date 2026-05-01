@@ -37,15 +37,15 @@ const mapVendorToFoodItem = (vendor: Vendor): FoodItem => {
   return {
     id: vendor.id.toString(),
     // Fallback to company name if shop name is missing
-    name: vendor.shopName || vendor.companyName || "Unknown Restaurant",
-    // Static placeholders since these fields aren't in the backend response yet
-    dish: "North Indian • Chinese",
-    price: "₹200 for one",
-    time: "30-45 mins",
-    distance: "2.5 km",
+    name: vendor.shopName || vendor.companyName || "Unknown Store",
+    // Static placeholders aligned with e-commerce (Flipkart) style UI
+    dish: "Men Printed Round Neck T-shirt", // Mocked product description
+    price: "₹499",
+    time: "₹999", // Moved original price to `time` field for UI mapping
+    distance: "50% off", // Moved discount to `distance` field for UI mapping
     rating: "4.2",
-    offer: "Extra 20% OFF",
-    discount: "FLAT 40% OFF",
+    offer: "Bank Offer",
+    discount: "Buy 2 Get 1",
     // Use Menu Images if available (Zomato-style)
     // Map MenuImage objects to URI objects for the UI carousel
     images: vendor.menuImages && vendor.menuImages.length > 0
@@ -112,6 +112,7 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
         category: "Recommended",
         vendorId: item.id,
         vendorName: item.name,
+        productName: item.dish,
         vendorImage: (typeof item.images[0] === 'object' && 'uri' in item.images[0]
           ? item.images[0].uri
           : "") || ""
@@ -148,59 +149,41 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
                 key={i}
                 style={[
                   styles.dot,
-                  { backgroundColor: i === index ? '#fff' : 'rgba(255,255,255,0.5)' }
+                  { backgroundColor: i === index ? '#2874F0' : '#e0e0e0' }
                 ]}
               />
             ))}
           </View>
         )}
-
-        {/* Floating Tag */}
-        <View style={styles.glassTag}>
-          <Text style={styles.glassTagText} numberOfLines={1}>
-            {item.dish.split('•')[0]}
-          </Text>
-        </View>
       </View>
 
-      {/* Content Section */}
+      {/* Content Section (Flipkart Style) */}
       <View style={styles.contentContainer}>
-        <View style={styles.headerRow}>
-          <View style={styles.infoColumn}>
-            <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-            <Text style={styles.cuisineText}>
-              {item.dish} • {item.price}
-            </Text>
-            <View style={styles.metaRow}>
-              <View style={styles.timePill}>
-                <Ionicons name="time-outline" size={12} color="#555" style={{ marginRight: 3 }} />
-                <Text style={styles.metaText}>{item.time}</Text>
-              </View>
-              <Text style={styles.metaDot}>•</Text>
-              <Text style={styles.metaText}>{item.distance}</Text>
-            </View>
-          </View>
+        {/* Brand Name */}
+        <Text style={styles.brandName} numberOfLines={1}>{item.name}</Text>
+        
+        {/* Product Description */}
+        <Text style={styles.productDesc} numberOfLines={1}>{item.dish}</Text>
 
-          <View style={styles.ratingBox}>
-            <Text style={styles.ratingText}>{item.rating}</Text>
-            <Ionicons name="star" size={10} color="#fff" style={{ marginLeft: 2 }} />
-          </View>
+        {/* Price Row */}
+        <View style={styles.priceRow}>
+          <Text style={styles.currentPrice}>{item.price}</Text>
+          <Text style={styles.originalPrice}>{item.time}</Text> {/* Using `time` field as mocked original price */}
+          <Text style={styles.discountText}>{item.distance}</Text> {/* Using `distance` field as mocked discount text */}
         </View>
 
-        <View style={styles.divider} />
-
-        <View style={styles.footerRow}>
-          <View style={styles.offerItem}>
-            <MaterialIcons name="local-offer" size={15} color="#1665D8" />
-            <Text style={styles.offerText}>{item.offer}</Text>
+        {/* Bottom Row - Rating and Assured Badge */}
+        <View style={styles.extraRow}>
+          <View style={styles.ratingWrapper}>
+            <Text style={styles.ratingText}>{item.rating}</Text>
+            <Ionicons name="star" size={8} color="#fff" />
           </View>
-          <View style={styles.dotSeparator} />
-          <View style={styles.offerItem}>
-            <Ionicons name="trending-up" size={15} color="#28A745" />
-            <Text style={styles.discountText}>{item.discount}</Text>
+          <View style={styles.assuredBadge}>
+             <Text style={styles.assuredText}>F-Assured</Text>
           </View>
         </View>
       </View>
+      
     </TouchableOpacity>
   );
 };
@@ -231,12 +214,57 @@ const FoodList: React.FC<FoodListProps> = ({
     isError
   } = useGetAllVendors({ limit: 10 }); // Fetch 10 items per page
 
-  // 2. Flatten Pages into a single array & Map to FoodItem
+  // 2. Flatten Pages into a single array & Map to FoodItem and append static data
+  const staticItems: FoodItem[] = [
+    {
+      id: "static-1",
+      name: "Puma",
+      dish: "Men Regular Fit Solid Shirt",
+      price: "₹799",
+      time: "₹1999",
+      distance: "60% off",
+      rating: "4.5",
+      offer: "Special Price",
+      discount: "New Arrival",
+      images: [{ uri: "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=500&q=80" }],
+    },
+    {
+      id: "static-2",
+      name: "Roadster",
+      dish: "Men Printed T-shirt",
+      price: "₹349",
+      time: "₹999",
+      distance: "65% off",
+      rating: "4.1",
+      offer: "Combo Offer",
+      discount: "Top Rated",
+      images: [{ uri: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80" }],
+    },
+    {
+      id: "static-3",
+      name: "H&M",
+      dish: "Women Relaxed Fit Jeans",
+      price: "₹1299",
+      time: "₹2499",
+      distance: "45% off",
+      rating: "4.8",
+      offer: "Limited Time",
+      discount: "Fast Delivery",
+      images: [{ uri: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&q=80" }],
+    }
+  ];
+
   const foodItems = useMemo(() => {
-    if (!data) return [];
-    return data.pages.flatMap((page) =>
-      page.vendors.map((vendor) => mapVendorToFoodItem(vendor))
-    );
+    let items = [...staticItems];
+    if (data) {
+      items = [
+        ...items,
+        ...data.pages.flatMap((page) =>
+          page.vendors.map((vendor) => mapVendorToFoodItem(vendor))
+        )
+      ];
+    }
+    return items;
   }, [data]);
 
   // 3. Render Footer Loader
@@ -254,7 +282,7 @@ const FoodList: React.FC<FoodListProps> = ({
     return (
       <View style={{ padding: 20, alignItems: 'center' }}>
         <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={{ marginTop: 10, color: '#888' }}>Loading Restaurants...</Text>
+        <Text style={{ marginTop: 10, color: '#888' }}>Loading Stores...</Text>
       </View>
     );
   }
@@ -262,29 +290,26 @@ const FoodList: React.FC<FoodListProps> = ({
   if (isError) {
     return (
       <View style={{ padding: 20, alignItems: 'center' }}>
-        <Text style={{ color: 'red' }}>Failed to load restaurants.</Text>
+        <Text style={{ color: 'red' }}>Failed to load stores.</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={{ backgroundColor: "#fff", paddingVertical: 10 }}>
+      {ListHeaderComponent}
+      <Text style={styles.sectionHeader}>
+        {foodItems.length > 0
+          ? `Trending Deals (${foodItems.length}+)`
+          : "No products found"}
+      </Text>
       <FlatList
         data={foodItems}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <FoodCard item={item} />}
-
-        // Header
-        ListHeaderComponent={
-          <>
-            {ListHeaderComponent}
-            <Text style={styles.sectionHeader}>
-              {foodItems.length > 0
-                ? `${foodItems.length}+ Restaurants near by you`
-                : "No Restaurants found"}
-            </Text>
-          </>
-        }
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
 
         // Infinite Scroll Props
         onEndReached={() => {
@@ -295,13 +320,6 @@ const FoodList: React.FC<FoodListProps> = ({
         onEndReachedThreshold={0.5} // Trigger when half a screen away from bottom
 
         ListFooterComponent={renderFooter}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[{ paddingBottom: 100 }, contentContainerStyle]}
-
-        // Scroll Props passed from parent
-        onScroll={onScroll}
-        scrollEventThrottle={scrollEventThrottle}
-        refreshControl={refreshControl}
       />
     </View>
   );
@@ -309,47 +327,27 @@ const FoodList: React.FC<FoodListProps> = ({
 
 const styles = StyleSheet.create({
   sectionHeader: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#546E7A",
-    letterSpacing: 1,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#212121",
     paddingHorizontal: 16,
     marginBottom: 12,
-    marginTop: 15,
   },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 16,
-    marginBottom: 20,
-    marginHorizontal: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 4,
-    overflow: 'hidden',
+    width: 150, // Fixed width for horizontal scroll
+    marginRight: 12,
+    marginBottom: 10,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: "#e0e0e0",
+    overflow: "hidden",
   },
   imageContainer: {
-    height: 140,
+    height: 180, // Taller image for apparel
     width: "100%",
-    position: 'relative',
-    backgroundColor: '#f8f8f8',
-  },
-  dotContainer: {
-    position: 'absolute',
-    bottom: 10,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginHorizontal: 3,
+    position: "relative",
+    backgroundColor: "#F9F9F9",
   },
   image: {
     width: "100%",
@@ -357,139 +355,112 @@ const styles = StyleSheet.create({
   },
   bookmarkWrapper: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: 8,
+    right: 8,
     backgroundColor: "#fff",
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 2,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    elevation: 3,
   },
-  glassTag: {
+  dotContainer: {
     position: "absolute",
-    top: 10,
-    left: 10,
-    backgroundColor: COLORS.black,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
-    maxWidth: '70%',
-    elevation: 2,
+    bottom: 8,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
   },
-  glassTagText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 0.3,
+  dot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    marginHorizontal: 2,
   },
   contentContainer: {
-    padding: 14,
-    backgroundColor: '#fff',
+    padding: 10,
+    backgroundColor: "#fff",
   },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+  brandName: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#878787", // Typical flipkart brand gray
+    marginBottom: 2,
+    textTransform: "uppercase",
   },
-  infoColumn: {
-    flex: 1,
-    paddingRight: 10,
-  },
-  name: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: "#1C1C1C",
-    letterSpacing: -0.3,
-    marginBottom: 4,
-  },
-  cuisineText: {
+  productDesc: {
     fontSize: 12,
-    color: "#666",
-    fontWeight: "500",
+    color: "#212121", // Dark text for product
     marginBottom: 6,
   },
-  borderSide: {
-    borderRightWidth: 1,
-    borderRightColor: '#eee',
-    paddingRight: 10,
-    marginRight: 10,
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 6,
+    flexWrap: "wrap",
   },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  currentPrice: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#212121",
+    marginRight: 6,
   },
-  timePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
+  originalPrice: {
+    fontSize: 12,
+    color: "#878787",
+    textDecorationLine: "line-through",
+    marginRight: 6,
+  },
+  discountText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#388E3C", // Flipkart green discount
+  },
+  extraRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  assuredBadge: {
+    backgroundColor: "#2874F0", // Flipkart blue
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 2,
+  },
+  assuredText: {
+    color: "#fff",
+    fontSize: 9,
+    fontWeight: "bold",
+    fontStyle: "italic",
+  },
+  ratingWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#388E3C", // Green rating
+    paddingHorizontal: 4,
+    paddingVertical: 2,
     borderRadius: 4,
-  },
-  metaText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#52b957ff',
-  },
-  metaDot: {
-    fontSize: 10,
-    color: '#ccc',
-    marginHorizontal: 6,
-  },
-  ratingBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: "#24963F",
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginTop: 2,
   },
   ratingText: {
     color: "#fff",
-    fontWeight: "900",
+    fontSize: 10,
+    fontWeight: "bold",
+    marginRight: 2,
+  },
+  fastDeliveryBox: {
+    backgroundColor: "#F9F9F9",
+    padding: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+  },
+  fastDeliveryText: {
     fontSize: 11,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#F0F0F0",
-    marginVertical: 12,
-    borderStyle: 'dashed',
-    borderWidth: 1,
-    borderColor: '#eee',
-    borderRadius: 1,
-  },
-  footerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  offerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  offerText: {
-    fontSize: 11,
-    color: "#1665D8",
-    fontWeight: "700",
-    marginLeft: 5,
-  },
-  discountText: {
-    fontSize: 11,
-    color: "#28A745",
-    fontWeight: "700",
-    marginLeft: 5,
-  },
-  dotSeparator: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#ddd",
-    marginHorizontal: 10,
+    color: "#212121",
+    fontWeight: "500",
   }
 });
 

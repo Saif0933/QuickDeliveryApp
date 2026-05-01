@@ -56,7 +56,7 @@ export default function RestaurantInfoScreen({
   const handleShare = async () => {
     try {
       await Share.share({
-        message: "Check out The Pizza Project on the app!",
+        message: "Check out H&M Official Store on the app!",
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -110,8 +110,8 @@ export default function RestaurantInfoScreen({
         {/* --- MAIN INFO CARD --- */}
         <View style={styles.card}>
           <View style={styles.cardPadding}>
-            <Text style={styles.title}>The Pizza Project By Oven Story</Text>
-            <Text style={styles.subtitle}>Pizza • ₹300 for one</Text>
+            <Text style={styles.title}>H&M Official Store</Text>
+            <Text style={styles.subtitle}>Apparel • Premium</Text>
             <Text style={styles.address}>
               L/2, 1st Floor, Housing Colony, Harmu,{"\n"}Ranchi
             </Text>
@@ -173,10 +173,10 @@ export default function RestaurantInfoScreen({
 
             <View style={styles.infoContentCol}>
               <Text style={styles.infoTitle}>
-                This is a delivery-only kitchen
+                This is an online-only store
               </Text>
               <Text style={styles.infoSub}>
-                There are multiple brands delivering from this kitchen
+                This store provides exclusive online products
               </Text>
             </View>
 
@@ -221,7 +221,7 @@ export default function RestaurantInfoScreen({
             </View>
 
             <View style={styles.infoContentCol}>
-              <Text style={styles.infoTitle}>Live on Restro since 2025</Text>
+              <Text style={styles.infoTitle}>Live on App since 2025</Text>
             </View>
 
             <View style={styles.badgeNew}>
@@ -254,7 +254,7 @@ export default function RestaurantInfoScreen({
             </View>
 
             <View style={styles.infoContentCol}>
-              <Text style={styles.infoTitle}>Hide this restaurant</Text>
+              <Text style={styles.infoTitle}>Hide this store</Text>
             </View>
 
             <Feather
@@ -273,11 +273,11 @@ export default function RestaurantInfoScreen({
           <Text style={styles.legalLabel}>GST Number</Text>
           <Text style={styles.legalValue}>20XXXXXXXXXX1ZI</Text>
 
-          <Text style={styles.legalLabel}>FSSAI Lic No</Text>
-          <Text style={styles.legalValue}>11124001000411</Text>
+          <Text style={styles.legalLabel}>Registration No</Text>
+          <Text style={styles.legalValue}>REG-2025-001</Text>
 
           <Text style={styles.legalText}>
-            Please review the terms of service for Restro{" "}
+            Please review the terms of service for DeliveryApp{" "}
             <Text style={{ color: COLORS.primary }}>here</Text>
           </Text>
         </View>
@@ -289,7 +289,7 @@ export default function RestaurantInfoScreen({
           style={styles.footerBtn}
           onPress={() => navigation?.goBack()}
         >
-          <Text style={styles.footerBtnText}>Go back to menu</Text>
+          <Text style={styles.footerBtnText}>Go back to catalog</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

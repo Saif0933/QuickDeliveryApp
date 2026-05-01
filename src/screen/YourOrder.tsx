@@ -697,38 +697,37 @@ const YourOrders = ({ navigation }: any) => {
   const [orders, setOrders] = useState<Order[]>([
     {
       id: "1",
-      restaurant: "Pizza Hut",
+      restaurant: "H&M Store",
       location: "Bariatu, Ranchi",
-      menu: "View menu",
-      items: "1 x Create Your Flavour Fun Combo - Classic Onion Capsicum",
+      menu: "View store",
+      items: "1 x Men's Casual Shirt - Blue",
       date: "17 Feb, 4:15 PM",
-      price: "₹191.92",
+      price: "₹1499.00",
       status: "Delivered",
-      image: "https://tse2.mm.bing.net/th/id/OIP.3Dh9FWm684Jc41gmv8eZHwHaEE?pid=Api&P=0&h=180",
+      image: "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=200&q=80",
     },
     {
       id: "2",
-      restaurant: "Pizza Hut",
+      restaurant: "Zara Official",
       location: "Bariatu, Ranchi",
-      menu: "View menu",
-      items: "1 x Create Your Flavour Fun Combo - Classic Onion Capsicum",
+      menu: "View store",
+      items: "1 x Women's Denim Jacket",
       date: "17 Feb, 4:15 PM",
-      price: "₹191.92",
+      price: "₹2999.00",
       status: "Payment failed",
-      image: "https://tse1.mm.bing.net/th/id/OIP.y9WHqmBEubDgxpHWqRN9sAHaEO?pid=Api&P=0&h=180",
+      image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=200&q=80",
     },
     {
       id: "3",
-      restaurant: "Kolkata@99",
+      restaurant: "Nike Hub",
       location: "Sector 5, Salt Lake, Kolkata",
-      menu: "View menu",
-      items: "1 x Gulab Jamun [8 Pieces]",
+      menu: "View store",
+      items: "1 x Air Max Sneakers - Size 10",
       date: "31 Jan, 2:30 AM",
-      price: "₹203.80",
+      price: "₹8999.00",
       status: "Refund completed",
       extra: "Ref ID: 503108693626",
-      image:
-        "https://tse2.mm.bing.net/th/id/OIP.zec59lWeYML7_-wwsSYBHAHaE8?pid=Api&P=0&h=180",
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&q=80",
     },
   ]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -887,11 +886,10 @@ const YourOrders = ({ navigation }: any) => {
     </View>
   );
 
-  // Empty State
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconBg}>
-        <Ionicons name="fast-food-outline" size={50} color={COLORS.muted} />
+        <Ionicons name="shirt-outline" size={50} color={COLORS.muted} />
       </View>
       <Text style={styles.emptyTitle}>No orders found</Text>
       <Text style={styles.emptySubtitle}>
@@ -956,7 +954,7 @@ const YourOrders = ({ navigation }: any) => {
                 { top: menuPosition.top + 10, right: menuPosition.right } // Adjust position
               ]}
             >
-              {/* Option 1: Share restaurant */}
+              {/* Option 1: Share store */}
               <TouchableOpacity 
                 style={styles.popupMenuItem}
                 onPress={() => {
@@ -965,7 +963,7 @@ const YourOrders = ({ navigation }: any) => {
                 }}
               >
                 <Ionicons name="arrow-redo-outline" size={20} color={TEXT_DARK} />
-                <Text style={styles.popupMenuText}>Share restaurant</Text>
+                <Text style={styles.popupMenuText}>Share brand / store</Text>
               </TouchableOpacity>
 
               {/* Option 2: Order details */}

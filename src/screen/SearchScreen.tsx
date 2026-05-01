@@ -17,7 +17,7 @@ import { COLORS } from "../theme/color";
 import { useGetAllCategory } from "../api/hooks/getAllCategory";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const initialTags = ["Chicken Handi", "Pizza", "Albela Biryani", "Chicken Planet"];
+const initialTags = ["Shirts", "Jeans", "Sneakers", "Jackets"];
 
 const SearchScreen = () => {
   const navigation = useNavigation();
@@ -66,7 +66,7 @@ const SearchScreen = () => {
             </TouchableOpacity>
             <TextInput
               style={styles.input}
-              placeholder="Search category or Res.."
+              placeholder="Search category or brand.."
               placeholderTextColor={COLORS.LITE_GRAY}
               value={searchText}
               onChangeText={(text) => setSearchText(text)}

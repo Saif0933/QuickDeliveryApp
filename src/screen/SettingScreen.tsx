@@ -1,17 +1,17 @@
 // SettingsScreen.tsx
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
-  Alert,
-} from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React from "react";
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { COLORS } from "../theme/color";
 
 type RootStackParamList = {

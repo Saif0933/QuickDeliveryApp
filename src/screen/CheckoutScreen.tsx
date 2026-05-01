@@ -236,8 +236,8 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import Header from '../components/cart/Header'
-import FoodItems from '../components/cart/FoodItems'
+import Header from '../components/cart/Header';
+import FoodItems from '../components/cart/FoodItems';
 import CouponsSection from '../components/cart/CouponsSection';
 import DeliverySection from '../components/cart/DeliverySection';
 import FeedingIndiaSection from '../components/cart/FeedingIndiaSection';

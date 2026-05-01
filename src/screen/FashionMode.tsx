@@ -48,42 +48,42 @@ const VegMode = ({
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Title */}
-            <Text style={styles.header}>Veg Mode</Text>
+            <Text style={styles.header}>Fashion Mode</Text>
 
             {/* See veg dishes from */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>See veg dishes from</Text>
+              <Text style={styles.sectionTitle}>See clothing from</Text>
               <TouchableOpacity
                 style={styles.row}
                 onPress={() => setDishOption("all")}
               >
-                <Text style={styles.text}>All restaurants</Text>
+                <Text style={styles.text}>All stores</Text>
                 <Icon
                   name={
                     dishOption === "all" ? "radio-button-checked" : "radio-button-unchecked"
                   }
                   size={22}
-                  color={dishOption === "all" ? "#00923F" : "#bbb"}
+                  color={dishOption === "all" ? "#1C1C1C" : "#bbb"}
                 />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.row}
                 onPress={() => setDishOption("pure")}
               >
-                <Text style={styles.text}>Pure Veg restaurants only</Text>
+                <Text style={styles.text}>Premium brands only</Text>
                 <Icon
                   name={
                     dishOption === "pure" ? "radio-button-checked" : "radio-button-unchecked"
                   }
                   size={22}
-                  color={dishOption === "pure" ? "#00923F" : "#bbb"}
+                  color={dishOption === "pure" ? "#1C1C1C" : "#bbb"}
                 />
               </TouchableOpacity>
             </View>
 
             {/* Select Veg Mode days */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Select Veg Mode days</Text>
+              <Text style={styles.sectionTitle}>Select Fashion Mode days</Text>
               <TouchableOpacity
                 style={styles.row}
                 onPress={() => setDayOption("all")}
@@ -94,7 +94,7 @@ const VegMode = ({
                     dayOption === "all" ? "radio-button-checked" : "radio-button-unchecked"
                   }
                   size={22}
-                  color={dayOption === "all" ? "#00923F" : "#bbb"}
+                  color={dayOption === "all" ? "#1C1C1C" : "#bbb"}
                 />
               </TouchableOpacity>
               <TouchableOpacity
@@ -109,7 +109,7 @@ const VegMode = ({
                       : "radio-button-unchecked"
                   }
                   size={22}
-                  color={dayOption === "custom" ? "#00923F" : "#bbb"}
+                  color={dayOption === "custom" ? "#1C1C1C" : "#bbb"}
                 />
               </TouchableOpacity>
 
@@ -142,7 +142,7 @@ const VegMode = ({
 
           {/* Confirm Button */}
           <TouchableOpacity style={styles.confirmButton}>
-            <Text style={styles.confirmText}>Switch on Veg Mode</Text>
+            <Text style={styles.confirmText}>Switch on Fashion Mode</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -215,8 +215,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
   dayCircleActive: {
-    backgroundColor: "#00923F",
-    borderColor: "#00923F",
+    backgroundColor: "#1C1C1C",
+    borderColor: "#1C1C1C",
   },
   dayText: {
     fontSize: 14,
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   confirmButton: {
-    backgroundColor: "#00923F",
+    backgroundColor: "#1C1C1C",
     paddingVertical: 16,
     marginHorizontal: 20,
     borderRadius: 8,
