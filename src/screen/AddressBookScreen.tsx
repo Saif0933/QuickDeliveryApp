@@ -15,15 +15,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Address, useAddresses, useDeleteAddress } from '../api/hooks/address';
 import { COLORS } from "../theme/color";
 
-// --- THEME ---
-const BG_COLOR = "#F8F9FD";
-const CARD_BG = "#FFFFFF";
-const TEXT_DARK = "#1A1D1E";
-const TEXT_GREY = "#6C7278";
-
+// --- DESIGN TOKENS ---
+const BG_COLOR = "#FFFFFF";
+const CARD_BG = "#F9FAFB";
+const TEXT_DARK = "#111827";
+const TEXT_GREY = "#6B7280";
+const PRIMARY = COLORS.primary || "#000000";
 
 const AddressBookScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -32,7 +33,6 @@ const AddressBookScreen: React.FC = () => {
   const { data: addressesData, isLoading } = useAddresses();
   const deleteMutation = useDeleteAddress();
 
-  // Reverse so newest is on top ("on first")
   const addresses = addressesData ? [...addressesData].reverse() : [];
 
   // Modal State
@@ -41,22 +41,17 @@ const AddressBookScreen: React.FC = () => {
 
   const handleGoBack = () => navigation.goBack();
 
-  const handleAddAddress = () => Alert.alert("Add", "Open Add Form");
-
   // --- SHARE FUNCTION ---
   const handleShare = async (addr: any) => {
     try {
       await Share.share({
-        message: `Address: ${addr.type}\n${addr.completeAddress}\nPhone: ${addr.receiverContact}`,
+        message: `My Address (${addr.type}):\n${addr.completeAddress}\nContact: ${addr.receiverContact}`,
       });
     } catch (error: any) {
-      Alert.alert(error.message);
+      Alert.alert("Error", error.message);
     }
   };
 
-  // --- MODAL HANDLERS ---
-  
-  // Open the modal when "Edit" button is clicked
   const openOptions = (addr: Address) => {
     setSelectedAddress(addr);
     setModalVisible(true);
@@ -67,7 +62,6 @@ const AddressBookScreen: React.FC = () => {
     setSelectedAddress(null);
   };
 
-  // Option 1: Edit
   const handleEditOption = () => {
     if (selectedAddress) {
       closeOptions();
@@ -75,10 +69,9 @@ const AddressBookScreen: React.FC = () => {
     }
   };
 
-  // Option 2: Delete
   const handleDeleteOption = () => {
     if (selectedAddress) {
-        Alert.alert("Delete Address", "Are you sure you want to remove this address?", [
+        Alert.alert("Delete Address", "This will permanently remove this address from your account.", [
             { text: "Cancel", style: "cancel", onPress: closeOptions },
             { 
                 text: "Delete", 
@@ -88,8 +81,7 @@ const AddressBookScreen: React.FC = () => {
                         await deleteMutation.mutateAsync(selectedAddress.id);
                         closeOptions();
                     } catch (error: any) {
-                        const msg = error.response?.data?.message || error.message || "Failed to delete address";
-                        Alert.alert("Error", `${msg}\n\nDetails: ${JSON.stringify(error.response?.data || error)}`);
+                        Alert.alert("Error", "Failed to delete address. Please try again.");
                     }
                 }
             }
@@ -97,12 +89,18 @@ const AddressBookScreen: React.FC = () => {
     }
   };
 
-  // Option 3: Update Delivery Instructions
-  const handleUpdateInstructions = () => {
-    if (selectedAddress) {
-        Alert.alert("Update", "Update Delivery Instructions for " + selectedAddress.type);
-    }
-    closeOptions();
+  const renderAddressIcon = (type: string) => {
+    const t = type.toLowerCase();
+    if (t === 'home') return <Ionicons name="home" size={20} color={PRIMARY} />;
+    if (t === 'work' || t === 'office') return <MaterialCommunityIcons name="briefcase" size={20} color="#8B5CF6" />;
+    return <Ionicons name="location" size={20} color="#10B981" />;
+  };
+
+  const getIconBg = (type: string) => {
+    const t = type.toLowerCase();
+    if (t === 'home') return "#EFF6FF";
+    if (t === 'work' || t === 'office') return "#F5F3FF";
+    return "#ECFDF5";
   };
 
   return (
@@ -114,103 +112,106 @@ const AddressBookScreen: React.FC = () => {
         <TouchableOpacity style={styles.backBtn} onPress={handleGoBack}>
           <Ionicons name="arrow-back" size={24} color={TEXT_DARK} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Address Book</Text>
+        <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitle}>Address Book</Text>
+            <Text style={styles.headerSubtitle}>{addresses.length} saved locations</Text>
+        </View>
+        <TouchableOpacity 
+            style={styles.headerAddBtn}
+            onPress={() => navigation.navigate('SelectAddressScreen')}
+        >
+            <Ionicons name="add" size={24} color={PRIMARY} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.sectionTitle}>SAVED ADDRESSES</Text>
-
-        {/* "Add New" Dashed Button */}
-        <TouchableOpacity
-          style={styles.addNewCard}
-          activeOpacity={0.7}
-          onPress={() => navigation.navigate('SelectAddressScreen')}
-        >
-          <View style={styles.addIconCircle}>
-            <Ionicons name="add" size={24} color={COLORS.primary} />
+        {isLoading ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color={PRIMARY} />
+            <Text style={styles.loaderText}>Loading your addresses...</Text>
           </View>
-          <Text style={styles.addNewText}>Add New Address</Text>
-        </TouchableOpacity>
-
-        {/* Address List */}
-        <View style={styles.listContainer}>
-          {isLoading ? (
-            <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />
-          ) : addresses.map((addr: any) => {
-            const type = (addr.type || "other").toLowerCase();
-            const isHome = type === "home";
-            const iconName = isHome ? "home-outline" : "location-outline";
-            const iconColor = isHome ? COLORS.primary : "#F97316"; 
-            const iconBg = isHome ? "#E3F2FD" : "#FFF7ED";
-
-            return (
+        ) : addresses.length > 0 ? (
+          <View style={styles.listContainer}>
+            {addresses.map((addr: any) => (
               <View key={addr.id} style={styles.addressCard}>
-                {/* Header Row: Icon + Label + Actions */}
-                <View style={styles.cardHeader}>
-                  <View style={styles.titleRow}>
-                    <View
-                      style={[styles.iconWrapper, { backgroundColor: iconBg }]}
-                    >
-                      <Ionicons name={iconName} size={20} color={iconColor} />
-                    </View>
-                    <View>
-                      <Text style={styles.label}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
-                      <Text style={styles.tag}>{addr.city || "Ranchi"}</Text>
-                    </View>
+                <View style={styles.cardMain}>
+                  <View style={[styles.iconContainer, { backgroundColor: getIconBg(addr.type || 'other') }]}>
+                    {renderAddressIcon(addr.type || 'other')}
                   </View>
-
-                  {/* Simple Actions */}
-                  <View style={styles.actionsRow}>
-                    <TouchableOpacity
-                      style={styles.actionIconBtn}
-                      onPress={() => openOptions(addr)}
-                    >
-                      <Ionicons name="pencil-outline" size={18} color={TEXT_GREY} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={styles.actionIconBtn}
-                      onPress={() => handleShare(addr)}
-                    >
-                      <Ionicons name="share-social-outline" size={18} color={TEXT_GREY} />
-                    </TouchableOpacity>
+                  
+                  <View style={styles.addressInfo}>
+                    <View style={styles.typeRow}>
+                      <Text style={styles.addressType}>{(addr.type || 'Other').toUpperCase()}</Text>
+                      {addr.isDefault && (
+                        <View style={styles.defaultBadge}>
+                           <Text style={styles.defaultText}>DEFAULT</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.receiverName}>{addr.receiverName}</Text>
+                    <Text style={styles.fullAddress} numberOfLines={3}>
+                      {addr.completeAddress}
+                    </Text>
+                    <View style={styles.contactRow}>
+                      <Ionicons name="call" size={14} color={TEXT_GREY} />
+                      <Text style={styles.contactText}>{addr.receiverContact}</Text>
+                    </View>
                   </View>
                 </View>
 
-                {/* Details */}
-                <Text style={styles.detailsText} numberOfLines={2}>
-                  {addr.completeAddress}
-                </Text>
-
-                {/* Footer Info */}
-                <View style={styles.cardFooter}>
-                  <View style={styles.metaItem}>
-                    <Ionicons name="call-outline" size={14} color={TEXT_GREY} />
-                    <Text style={styles.metaText}>{addr.receiverContact}</Text>
-                  </View>
-                  <View style={styles.dot} />
-                  <View style={styles.metaItem}>
-                    <Ionicons name="person-outline" size={14} color={TEXT_GREY} />
-                    <Text style={styles.metaText}>{addr.receiverName}</Text>
-                  </View>
+                <View style={styles.cardActions}>
+                   <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('SelectAddressScreen', { address: addr })}>
+                      <Ionicons name="pencil-outline" size={18} color={TEXT_DARK} />
+                      <Text style={styles.actionBtnText}>Edit</Text>
+                   </TouchableOpacity>
+                   <View style={styles.vDivider} />
+                   <TouchableOpacity style={styles.actionBtn} onPress={() => handleShare(addr)}>
+                      <Ionicons name="share-outline" size={18} color={TEXT_DARK} />
+                      <Text style={styles.actionBtnText}>Share</Text>
+                   </TouchableOpacity>
+                   <View style={styles.vDivider} />
+                   <TouchableOpacity style={styles.actionBtn} onPress={() => openOptions(addr)}>
+                      <Ionicons name="ellipsis-horizontal" size={18} color={TEXT_DARK} />
+                      <Text style={styles.actionBtnText}>More</Text>
+                   </TouchableOpacity>
                 </View>
               </View>
-            );
-          })}
-        </View>
-
-        {addresses.length === 0 && (
-          <View style={{ alignItems: "center", marginTop: 50 }}>
-            <Text style={{ color: TEXT_GREY }}>No addresses found.</Text>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+                <Ionicons name="map-outline" size={48} color="#D1D5DB" />
+            </View>
+            <Text style={styles.emptyTitle}>No Addresses Found</Text>
+            <Text style={styles.emptySubtitle}>You haven't saved any addresses yet. Add one now for faster checkout.</Text>
+            <TouchableOpacity 
+                style={styles.emptyAddBtn}
+                onPress={() => navigation.navigate('SelectAddressScreen')}
+            >
+                <Text style={styles.emptyAddBtnText}>Add New Address</Text>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
 
-      {/* --- POPUP MODAL --- */}
+      {/* Floating Add Button */}
+      {!isLoading && addresses.length > 0 && (
+        <TouchableOpacity 
+            style={styles.fab}
+            onPress={() => navigation.navigate('SelectAddressScreen')}
+            activeOpacity={0.9}
+        >
+            <Ionicons name="add" size={30} color="#FFF" />
+            <Text style={styles.fabText}>Add New</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* --- OPTIONS MODAL --- */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -219,43 +220,31 @@ const AddressBookScreen: React.FC = () => {
       >
         <TouchableWithoutFeedback onPress={closeOptions}>
           <View style={styles.modalOverlay}>
-            
-            {/* ADDED: Cross/Close Button Floating Above */}
-            <TouchableOpacity 
-                style={styles.closeButton} 
-                onPress={closeOptions}
-                activeOpacity={0.8}
-            >
-                <Ionicons name="close" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHandle} />
+              <Text style={styles.modalHeader}>Manage Address</Text>
+              
+              <TouchableOpacity style={styles.modalOption} onPress={handleEditOption}>
+                <View style={[styles.modalOptionIcon, { backgroundColor: '#F3F4F6' }]}>
+                   <Ionicons name="pencil" size={20} color={TEXT_DARK} />
+                </View>
+                <Text style={styles.modalOptionText}>Edit Address Details</Text>
+              </TouchableOpacity>
 
-            <TouchableWithoutFeedback>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Address options</Text>
+              <TouchableOpacity style={styles.modalOption} onPress={handleDeleteOption}>
+                <View style={[styles.modalOptionIcon, { backgroundColor: '#FEE2E2' }]}>
+                   <Ionicons name="trash" size={20} color="#EF4444" />
+                </View>
+                <Text style={[styles.modalOptionText, { color: '#EF4444' }]}>Remove from Address Book</Text>
+              </TouchableOpacity>
 
-                {/* Option 1: Edit */}
-                <TouchableOpacity style={styles.optionItem} onPress={handleEditOption}>
-                    <Ionicons name="pencil-outline" size={22} color={TEXT_DARK} />
-                    <Text style={styles.optionText}>Edit Address</Text>
-                    <Ionicons name="chevron-forward" size={20} color={TEXT_GREY} style={{marginLeft: 'auto'}} />
-                </TouchableOpacity>
-
-                {/* Option 2: Delete */}
-                <TouchableOpacity style={styles.optionItem} onPress={handleDeleteOption}>
-                    <Ionicons name="trash-outline" size={22} color={TEXT_DARK} />
-                    <Text style={styles.optionText}>Delete Address</Text>
-                    <Ionicons name="chevron-forward" size={20} color={TEXT_GREY} style={{marginLeft: 'auto'}} />
-                </TouchableOpacity>
-
-                {/* Option 3: Update Instructions */}
-                <TouchableOpacity style={styles.optionItem} onPress={handleUpdateInstructions}>
-                    <Ionicons name="bicycle-outline" size={22} color={TEXT_DARK} />
-                    <Text style={styles.optionText}>Update Delivery Instructions</Text>
-                    <Ionicons name="chevron-forward" size={20} color={TEXT_GREY} style={{marginLeft: 'auto'}} />
-                </TouchableOpacity>
-
-              </View>
-            </TouchableWithoutFeedback>
+              <TouchableOpacity style={[styles.modalOption, { borderBottomWidth: 0 }]} onPress={closeOptions}>
+                <View style={[styles.modalOptionIcon, { backgroundColor: '#F3F4F6' }]}>
+                   <Ionicons name="close" size={20} color={TEXT_DARK} />
+                </View>
+                <Text style={styles.modalOptionText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
@@ -277,177 +266,254 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: BG_COLOR,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
   backBtn: {
-    marginRight: 16,
-    padding: 4,
+    padding: 8,
+    marginLeft: -8,
+  },
+  headerTitleContainer: {
+    flex: 1,
+    marginLeft: 8,
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 20,
+    fontWeight: "800",
     color: TEXT_DARK,
     letterSpacing: -0.5,
   },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  sectionTitle: {
+  headerSubtitle: {
     fontSize: 12,
-    fontWeight: "700",
-    color: "#9CA3AF",
-    marginBottom: 12,
-    letterSpacing: 1,
-    marginTop: 10,
+    color: TEXT_GREY,
+    fontWeight: "500",
   },
-
-  /* Add New Card (Dashed) */
-  addNewCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: "#D1D5DB",
-    borderStyle: "dashed",
-    marginBottom: 20,
-    backgroundColor: "rgba(255,255,255,0.5)",
-  },
-  addIconCircle: {
-    marginRight: 8,
-  },
-  addNewText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.primary,
-  },
-
-  /* Address List */
-  listContainer: {
-    gap: 16,
-  },
-  addressCard: {
-    backgroundColor: CARD_BG,
-    borderRadius: 16,
-    padding: 16,
-    // Soft Modern Shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconWrapper: {
+  headerAddBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  label: {
+  container: {
+    flex: 1,
+  },
+  loaderContainer: {
+    marginTop: 100,
+    alignItems: 'center',
+  },
+  loaderText: {
+    marginTop: 12,
+    color: TEXT_GREY,
+    fontSize: 14,
+  },
+  listContainer: {
+    padding: 20,
+    gap: 20,
+  },
+  addressCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+  },
+  cardMain: {
+    padding: 20,
+    flexDirection: 'row',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addressInfo: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  typeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  addressType: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: TEXT_GREY,
+    letterSpacing: 1,
+  },
+  defaultBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  defaultText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#166534',
+  },
+  receiverName: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: '700',
     color: TEXT_DARK,
-    marginBottom: 2,
+    marginBottom: 4,
   },
-  tag: {
-    fontSize: 10,
-    color: "#999",
-    fontWeight: "600",
-  },
-  actionsRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  actionIconBtn: {
-    padding: 6,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 8,
-  },
-  detailsText: {
+  fullAddress: {
     fontSize: 14,
     color: TEXT_GREY,
     lineHeight: 20,
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  cardFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-    paddingTop: 12,
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  metaText: {
-    fontSize: 12,
-    color: TEXT_DARK,
+  contactText: {
+    fontSize: 13,
+    color: TEXT_GREY,
     marginLeft: 6,
-    fontWeight: "500",
+    fontWeight: '500',
   },
-  dot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: "#D1D5DB",
-    marginHorizontal: 10,
+  cardActions: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+    backgroundColor: '#FAFBFC',
   },
-
-  /* MODAL STYLES */
+  actionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+  },
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: TEXT_DARK,
+    marginLeft: 8,
+  },
+  vDivider: {
+    width: 1,
+    height: '60%',
+    backgroundColor: '#E5E7EB',
+    alignSelf: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    backgroundColor: PRIMARY,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 30,
+    elevation: 8,
+    shadowColor: PRIMARY,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  fabText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
+    marginLeft: 8,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+    marginTop: 60,
+  },
+  emptyIconCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: TEXT_DARK,
+    marginBottom: 12,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: TEXT_GREY,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 32,
+  },
+  emptyAddBtn: {
+    backgroundColor: PRIMARY,
+    paddingHorizontal: 30,
+    paddingVertical: 14,
+    borderRadius: 14,
+  },
+  emptyAddBtnText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '700',
+  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
     padding: 24,
     paddingBottom: 40,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+  modalHandle: {
+    width: 40,
+    height: 5,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  modalHeader: {
+    fontSize: 18,
+    fontWeight: '800',
     color: TEXT_DARK,
     marginBottom: 24,
+    textAlign: 'center',
   },
-  optionItem: {
+  modalOption: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
-  optionText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: TEXT_DARK,
-      marginLeft: 16,
+  modalOptionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
   },
-  /* ADDED: Style for the Floating Close Button */
-  closeButton: {
-      width: 45,
-      height: 45,
-      borderRadius: 22.5,
-      backgroundColor: '#1A1D1E', // Dark background like image
-      justifyContent: 'center',
-      alignItems: 'center',
-      alignSelf: 'center',
-      marginBottom: 15,
-  }
+  modalOptionText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: TEXT_DARK,
+  },
 });
