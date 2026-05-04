@@ -53,10 +53,10 @@ const OrderPlacedScreen: React.FC = () => {
         }),
       ]).start(); 
 
-      // --- NEW: Auto-navigation after 2 seconds ---
+      // --- NEW: Auto-navigation after 25 seconds ---
       const timer = setTimeout(() => {
-        navigation.replace('OrderTrackingScreen');
-      }, 2000);
+        navigation.replace('OrderDetailsScreen');
+      }, 2500);
 
       // Cleanup timer on unmount
       return () => clearTimeout(timer);

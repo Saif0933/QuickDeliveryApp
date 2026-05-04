@@ -24,7 +24,7 @@ import VegMode from './FashionMode';
 
 type RootStackParamList = {
   ProfilePage: undefined;
-  ZomatoMoneyPage: undefined;
+  WalletScreen: undefined;
   YourProfile: undefined;
   YourOrder: undefined;
   VegMode: undefined;

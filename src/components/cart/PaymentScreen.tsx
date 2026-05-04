@@ -42,20 +42,22 @@ const PaymentScreen = () => {
           {discount && <Text style={styles.discountText}>{discount}</Text>}
           {cashback && <Text style={styles.cashbackText}>{cashback}</Text>}
 
-          {id === 'COD' && (
-            <View style={styles.codDetails}>
-              <Text style={styles.codText}>
-                Due to handling costs, a nominal fee of ₹10 will be charged for orders placed using this option. Avoid this fee by paying online now.
-              </Text>
-              <TouchableOpacity
-                style={styles.placeOrderButton}
-                onPress={() => navigation.navigate('OrderPlacedScreen')}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.placeOrderText}>Place Order</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          <View style={styles.optionMessageContainer}>
+             <Text style={styles.optionMessageText}>
+               {id === 'UPI' && "Pay directly from your bank account using any UPI app."}
+               {id === 'CARD' && "All major credit and debit cards are supported. 100% Secure."}
+               {id === 'EMI' && "Easy monthly installments available on select bank cards."}
+               {id === 'COD' && "Pay by Cash or QR code at the time of delivery."}
+             </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.placeOrderButton}
+            onPress={() => navigation.navigate('OrderPlacedScreen')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.placeOrderText}>Place Order</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -81,7 +83,6 @@ const PaymentScreen = () => {
               <AntIcon name="arrowleft" size={24} color="black" />
             </TouchableOpacity>
             <View>
-              <Text style={styles.stepText}>Step 3 of 3</Text>
               <Text style={styles.headerTitle}>Payments</Text>
             </View>
           </View>
@@ -307,9 +308,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   placeOrderButton: {
-    backgroundColor: '#FBBC05',
+    backgroundColor: '#000',
     paddingVertical: 12,
-    borderRadius: 4,
+    borderRadius: 8,
     marginTop: 15,
     alignItems: 'center',
   },
@@ -347,6 +348,19 @@ const styles = StyleSheet.create({
   },
   smileyIcon: {
     marginTop: 15,
+  },
+  optionMessageContainer: {
+    backgroundColor: '#f8f9fa',
+    padding: 10,
+    borderRadius: 6,
+    marginTop: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: '#000',
+  },
+  optionMessageText: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 18,
   },
 });
 

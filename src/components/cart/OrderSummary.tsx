@@ -133,7 +133,6 @@ const OrderSummary = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <Header />
       <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
-        <Stepper />
         <DeliverTo />
         <View style={styles.separator} />
         <ProductItem />
@@ -159,7 +158,7 @@ const OrderSummary = () => {
           </View>
         </View>
         
-        <View style={{ height: 100 }} />
+
       </ScrollView>
       
       {/* Footer */}
@@ -319,15 +318,15 @@ const styles = StyleSheet.create({
   continueButton: {
     width: 160,
     height: 44,
-    backgroundColor: '#FFD700',
-    borderRadius: 2,
+    backgroundColor: '#000',
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   continueButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#212121',
+    color: '#fff',
   },
 });
 

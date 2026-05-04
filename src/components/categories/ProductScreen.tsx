@@ -1,23 +1,21 @@
 import React, { useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    Modal,
-    Alert,
+  Animated,
+  Dimensions,
+  Image,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import OrderSummary from '../cart/OrderSummary';
-import CancellationPolicy from '../cart/CancellationPolicy';
-import { COLORS } from '../../theme/color';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useCart } from '../../Context/CartContext';
+import CancellationPolicy from '../cart/CancellationPolicy';
 
 const { width } = Dimensions.get('window');
 
@@ -34,6 +32,7 @@ const ProductScreen = ({ route, navigation }: any) => {
   const [selectedColor, setSelectedColor] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showPolicy, setShowPolicy] = useState(false);
+  const [expandedLink, setExpandedLink] = useState<string | null>(null);
 
   const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -126,21 +125,29 @@ const ProductScreen = ({ route, navigation }: any) => {
 
       {/* --- HEADER BAR --- */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBtn} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+        <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={26} color="#000" />
         </TouchableOpacity>
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerBtn}>
-            <Ionicons name="share-outline" size={22} color="#333" />
+        <View style={styles.headerRightGroup}>
+          <TouchableOpacity style={styles.headerIcon}>
+            <Ionicons name="search-outline" size={24} color="#000" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerBtn}>
-            <Ionicons name="cart-outline" size={24} color="#333" />
+          <TouchableOpacity style={styles.headerIcon}>
+            <Ionicons name="heart-outline" size={24} color="#000" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.headerIcon}>
+            <View>
+              <Ionicons name="cart-outline" size={24} color="#000" />
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>1</Text>
+              </View>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* --- IMAGE CAROUSEL WITH OVERLAY --- */}
+        {/* --- IMAGE SECTION --- */}
         <View style={styles.imageSection}>
           <ScrollView
             horizontal
@@ -153,234 +160,244 @@ const ProductScreen = ({ route, navigation }: any) => {
             scrollEventThrottle={16}
           >
             {currentGallery.map((img, index) => (
-              <View key={index} style={{ width: width, height: 450 }}>
+              <View key={index} style={{ width: width, height: 500 }}>
                 <Image source={{ uri: img }} style={styles.mainImage} resizeMode="cover" />
               </View>
             ))}
           </ScrollView>
-          
-          {/* PRODUCT NAME OVERLAY ON IMAGE */}
-          <View style={styles.imageOverlay}>
-            <View style={styles.nameBadge}>
-               <Text style={styles.imageOverlayName}>{productName || "Men's Luxury Cotton Shirt"}</Text>
-            </View>
-          </View>
-          
-          <TouchableOpacity 
-            style={styles.heartBtn} 
-            onPress={() => setIsFavorite(!isFavorite)}
-          >
-            <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={24} color={isFavorite ? COLORS.primary : "#333"} />
+
+          {/* Floating Size Guide Button */}
+          <TouchableOpacity style={styles.floatingSizeBtn}>
+             <MaterialCommunityIcons name="ruler" size={18} color="#000" />
+             <Text style={styles.sizeBtnText}>SIZE</Text>
           </TouchableOpacity>
 
-          {/* DOT INDICATOR */}
-          <View style={styles.dotContainer}>
+          <View style={styles.paginationContainer}>
             {currentGallery.map((_, i) => {
-              const widthIndicator = scrollX.interpolate({
+              const dotOpacity = scrollX.interpolate({
                 inputRange: [width * (i - 1), width * i, width * (i + 1)],
-                outputRange: [8, 16, 8],
+                outputRange: [0.3, 1, 0.3],
                 extrapolate: 'clamp'
               });
-              const opacity = scrollX.interpolate({
-                inputRange: [width * (i - 1), width * i, width * (i + 1)],
-                outputRange: [0.4, 1, 0.4],
-                extrapolate: 'clamp'
-              });
-              return <Animated.View key={i} style={[styles.dot, { width: widthIndicator, opacity }]} />;
+              return <Animated.View key={i} style={[styles.paginationDot, { opacity: dotOpacity }]} />;
             })}
           </View>
         </View>
 
-        {/* --- PRODUCT INFO --- */}
-        <View style={styles.infoSection}>
-          <View style={styles.brandContainer}>
-            <View style={styles.brandHeaderLeft}>
-                <Image source={{ uri: vendorImage }} style={styles.brandLogo} />
-                <View>
-                    <Text style={styles.brandName}>{productData.brand}</Text>
-                    <TouchableOpacity 
-                        style={styles.visitStoreBtn}
-                        onPress={() => navigation.navigate('BrandStoreScreen', { vendorId: route.params?.vendorId, vendorName: route.params?.vendorName, vendorImage: route.params?.vendorImage })}
-                    >
-                        <Text style={styles.visitStoreText}>Visit the Store ›</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-            <View style={styles.ratingBadge}>
-              <Text style={styles.ratingText}>{productData.rating}</Text>
-              <Ionicons name="star" size={12} color="#fff" />
-            </View>
+        <View style={styles.productMainInfo}>
+           <View style={styles.titleRow}>
+             <Text style={styles.productTitle}>{productData.title}</Text>
+             <Text style={styles.colorCount}>4 colors</Text>
+           </View>
+
+           <View style={styles.priceSection}>
+              <Text style={styles.mrpLabel}>MRP <Text style={styles.mrpValue}>{productData.price}</Text></Text>
+              <Text style={styles.taxInfo}>Price inclusive of all taxes.</Text>
+           </View>
+        </View>
+
+        <View style={styles.selectionBlock}>
+          <Text style={styles.blockTitle}>Color</Text>
+          <Text style={styles.blockSubValue}>{productData.colors[selectedColor].name}</Text>
+          <View style={styles.colorGrid}>
+            {productData.colors.map((color, index) => (
+              <TouchableOpacity 
+                key={index} 
+                onPress={() => setSelectedColor(index)}
+                style={[styles.colorCircleWrapper, selectedColor === index && styles.colorCircleActive]}
+              >
+                <View style={[styles.colorCircle, { backgroundColor: color.hex }]} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.selectionBlock}>
+          <View style={styles.blockHeaderRow}>
+             <Text style={styles.blockTitle}>Select Size</Text>
+             <TouchableOpacity><Text style={styles.chartLink}>Size chart</Text></TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sizeGrid}>
+            {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+              <TouchableOpacity 
+                key={size} 
+                onPress={() => setSelectedSize(size)}
+                style={[styles.sizeBox, selectedSize === size && styles.sizeBoxActive]}
+              >
+                <Text style={[styles.sizeText, selectedSize === size && styles.sizeTextActive]}>{size}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.deliveryBlock}>
+          <Text style={styles.blockTitle}>Delivery & Return Details</Text>
+          <View style={styles.pincodeBox}>
+             <Text style={styles.pincodeText}>Pin Code</Text>
+             <TouchableOpacity><Text style={styles.changePincode}>Change Pincode</Text></TouchableOpacity>
           </View>
           
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>{productData.price}</Text>
-            <Text style={styles.originalPrice}>{productData.mrp}</Text>
-            <Text style={styles.discountBadge}>{productData.discount}</Text>
+          <View style={styles.deliveryFeature}>
+             <Ionicons name="reload-outline" size={20} color="#666" />
+             <View style={styles.featureInfo}>
+                <Text style={styles.featureTitle}>10 day Return and Exchange</Text>
+                <TouchableOpacity><Text style={styles.featureLink}>Return Policies</Text></TouchableOpacity>
+             </View>
           </View>
-          <Text style={styles.taxText}>Inclusive of all taxes</Text>
 
-          <View style={styles.shortDescContainer}>
-            <Text style={styles.shortDescText}>
-                {route.params?.description || productData.description}
-            </Text>
+          <View style={styles.deliveryFeature}>
+             <Ionicons name="cash-outline" size={20} color="#666" />
+             <View style={styles.featureInfo}>
+                <Text style={styles.featureTitle}>Cash on Delivery Available</Text>
+             </View>
           </View>
+        </View>
 
           <View style={styles.divider} />
 
-          {/* --- COLOR SELECTION --- */}
-          <View style={styles.selectionSection}>
-            <Text style={styles.sectionTitle}>Color: <Text style={styles.selectionValue}>{productData.colors[selectedColor].name}</Text></Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectionScroll}>
-              {productData.colors.map((color, index) => (
-                <TouchableOpacity 
-                  key={index} 
-                  style={[styles.colorItem, selectedColor === index && styles.activeSelection]}
-                  onPress={() => setSelectedColor(index)}
-                >
-                  <View style={[styles.colorPreview, { backgroundColor: color.hex }]} />
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          {/* --- SIZE SELECTION --- */}
-          <View style={styles.selectionSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Size: <Text style={styles.selectionValue}>{selectedSize}</Text></Text>
-              <TouchableOpacity><Text style={styles.sizeChartLink}>Size Chart</Text></TouchableOpacity>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectionScroll}>
-              {productData.sizes.map((size) => (
-                <TouchableOpacity 
-                  key={size} 
-                  style={[styles.sizeItem, selectedSize === size && styles.activeSelection]}
-                  onPress={() => setSelectedSize(size)}
-                >
-                  <Text style={[styles.sizeText, selectedSize === size && styles.activeSelectionText]}>{size}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* --- DELIVERY INFO --- */}
-          <TouchableOpacity 
-            style={styles.deliverySection} 
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('AddressBookScreen')}
-          >
-             <View style={styles.deliveryRow}>
-                <Ionicons name="location-outline" size={20} color="#333" />
-                <Text style={styles.deliveryLabel}>Delivery to <Text style={styles.deliveryValue}>Ranchi 834005</Text></Text>
-             </View>
-             <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                <View>
-                  <Text style={styles.deliveryTime}>FREE delivery <Text style={styles.deliveryDay}>{productData.delivery}</Text></Text>
-                  <Text style={styles.sellerText}>Sold by <Text style={styles.deliveryValue}>{productData.seller}</Text></Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color="#999" />
-             </View>
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-          {/* --- TRUST POLICIES --- */}
-          <View style={styles.policyRow}>
-             <View style={styles.policyItem}>
-                <View style={styles.policyIconContainer}>
-                   <Ionicons name="return-up-back-outline" size={20} color={COLORS.primary} />
-                </View>
-                <Text style={styles.policyLabel}>10-day return</Text>
-             </View>
-             
-             <View style={styles.policyItem}>
-                <View style={styles.policyIconContainer}>
-                   <Ionicons name="cash-outline" size={20} color={COLORS.primary} />
-                </View>
-                <Text style={styles.policyLabel}>Cash on delivery</Text>
-             </View>
-
-             <View style={styles.policyItem}>
-                <View style={styles.policyIconContainer}>
-                   <Ionicons name="shield-checkmark-outline" size={20} color={COLORS.primary} />
-                </View>
-                <Text style={styles.policyLabel}>Secure payment</Text>
-             </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* --- DESCRIPTION --- */}
-          <View style={styles.descSection}>
-            <Text style={styles.sectionTitle}>Product Details</Text>
-            {productData.features.map((feature, i) => (
-              <View key={i} style={styles.featureItem}>
-                <View style={styles.featureDot} />
-                <Text style={styles.featureText}>{feature}</Text>
+        <View style={styles.productDetailsBlock}>
+           <Text style={styles.blockTitle}>Product Details</Text>
+           <View style={styles.detailsGrid}>
+              <View style={styles.detailRow}>
+                 <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Fabric Composition</Text>
+                    <Text style={styles.detailValue}>100% Cotton</Text>
+                 </View>
+                 <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Length</Text>
+                    <Text style={styles.detailValue}>Medium</Text>
+                 </View>
               </View>
-            ))}
-            <Text style={styles.fullDescription}>{productData.description}</Text>
-          </View>
+              <View style={styles.detailRow}>
+                 <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Package Contains</Text>
+                    <Text style={styles.detailValue}>1 Women's Tshirt</Text>
+                 </View>
+                 <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Transparency</Text>
+                    <Text style={styles.detailValue}>Opaque</Text>
+                 </View>
+              </View>
+              <View style={styles.detailRow}>
+                 <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>USP</Text>
+                    <Text style={styles.detailValue}>Crew Neck, David Bowie</Text>
+                 </View>
+                 <View style={styles.detailItem}>
+                    <Text style={styles.detailLabel}>Wash Care</Text>
+                    <Text style={styles.detailValue}>Machine wash cold</Text>
+                 </View>
+              </View>
+           </View>
+           <TouchableOpacity style={styles.moreDetailsBtn}>
+              <Text style={styles.moreDetailsText}>More details ⌵</Text>
+           </TouchableOpacity>
+        </View>
 
-          <View style={styles.divider} />
+        <View style={styles.trustSection}>
+           <View style={styles.trustItem}>
+              <Ionicons name="shield-checkmark" size={32} color="#000" />
+              <Text style={styles.trustText}>Assured Quality</Text>
+           </View>
+           <View style={styles.trustItem}>
+              <Ionicons name="reload-circle" size={32} color="#000" />
+              <Text style={styles.trustText}>Easy Returns</Text>
+           </View>
+           <View style={styles.trustItem}>
+              <MaterialCommunityIcons name="truck-delivery" size={32} color="#000" />
+              <Text style={styles.trustText}>Free Shipping</Text>
+           </View>
+        </View>
 
-          {/* --- SIMILAR PRODUCTS --- */}
-          <View style={styles.similarSection}>
-            <Text style={styles.sectionTitle}>Similar Products</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.similarScroll}>
+        <View style={styles.recentlyViewedSection}>
+           <Text style={styles.blockTitle}>Shop From Recently Viewed</Text>
+           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 15 }}>
               {SIMILAR_PRODUCTS.map((item) => (
-                <TouchableOpacity 
-                  key={item.id} 
-                  style={styles.similarProductCard}
-                  onPress={() => navigation.push('ProductScreen', {
-                    vendorName: item.brand,
-                    productName: item.title,
-                    vendorImage: item.image,
-                    description: "Premium " + item.brand + " essentials."
-                  })}
-                >
-                  <Image source={{ uri: item.image }} style={styles.similarProductImage} />
-                  <View style={styles.similarProductInfo}>
-                    <Text style={styles.similarProductBrand}>{item.brand}</Text>
-                    <Text style={styles.similarProductTitle} numberOfLines={1}>{item.title}</Text>
-                    <View style={styles.similarProductPriceRow}>
-                      <Text style={styles.similarProductPrice}>{item.price}</Text>
-                      <Text style={styles.similarProductDiscount}>{item.discount}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
+                <View key={item.id} style={styles.recentProductCard}>
+                   <Image source={{ uri: item.image }} style={styles.recentImage} />
+                   <Text style={styles.recentTitle} numberOfLines={1}>{item.title}</Text>
+                   <Text style={styles.recentPrice}>₹{item.price.replace('₹', '')}</Text>
+                </View>
               ))}
-            </ScrollView>
-          </View>
+           </ScrollView>
+        </View>
+
+        <View style={styles.linksSection}>
+           {/* Link 1 */}
+           <View style={styles.linkContainer}>
+              <TouchableOpacity 
+                style={styles.linkRow} 
+                onPress={() => setExpandedLink(expandedLink === 'brand' ? null : 'brand')}
+              >
+                 <Text style={styles.linkText}>More Tshirts by Quick delivery App</Text>
+                 <Ionicons name={expandedLink === 'brand' ? "chevron-down" : "chevron-forward"} size={16} color="#666" />
+              </TouchableOpacity>
+              {expandedLink === 'brand' && (
+                <View style={styles.linkDropdown}>
+                   <Text style={styles.linkDropdownText}>Explore a wide variety of premium designs and limited edition drops exclusively from Quick delivery App.</Text>
+                </View>
+              )}
+           </View>
+
+           {/* Link 2 */}
+           <View style={styles.linkContainer}>
+              <TouchableOpacity 
+                style={styles.linkRow}
+                onPress={() => setExpandedLink(expandedLink === 'chest' ? null : 'chest')}
+              >
+                 <Text style={styles.linkText}>More Chest Print Tshirts</Text>
+                 <Ionicons name={expandedLink === 'chest' ? "chevron-down" : "chevron-forward"} size={16} color="#666" />
+              </TouchableOpacity>
+              {expandedLink === 'chest' && (
+                <View style={styles.linkDropdown}>
+                   <Text style={styles.linkDropdownText}>Discover trendy graphic prints and bold chest statements curated for your style.</Text>
+                </View>
+              )}
+           </View>
+
+           {/* Link 3 */}
+           <View style={styles.linkContainer}>
+              <TouchableOpacity 
+                style={styles.linkRow}
+                onPress={() => setExpandedLink(expandedLink === 'all' ? null : 'all')}
+              >
+                 <Text style={styles.linkText}>All Tshirts</Text>
+                 <Ionicons name={expandedLink === 'all' ? "chevron-down" : "chevron-forward"} size={16} color="#666" />
+              </TouchableOpacity>
+              {expandedLink === 'all' && (
+                <View style={styles.linkDropdown}>
+                   <Text style={styles.linkDropdownText}>View our entire collection of cotton, linen, and slim-fit t-shirts for every occasion.</Text>
+                </View>
+              )}
+           </View>
         </View>
       </ScrollView>
 
       {/* --- FOOTER BUTTONS --- */}
-      <View style={styles.footer}>
-        <TouchableOpacity
-            style={styles.wishlistBtn}
-            onPress={() => {
-              addToCart({
-                id: Math.random().toString(36).substr(2, 9), // Generate a unique ID if not provided
-                title: productData.title,
-                price: productData.price,
-                originalPrice: productData.mrp,
-                discount: productData.discount,
-                image: vendorImage,
-                quantity: 1,
-              });
-              Alert.alert('Success', 'Added to Bag!');
-            }}
-          >
-            <Ionicons name="cart-outline" size={22} color="#333" />
-            <Text style={styles.wishlistBtnText}>Add to Bag</Text>
+      <View style={styles.newFooter}>
+        <TouchableOpacity style={styles.footerIconBtn}>
+          <Ionicons name="share-social-outline" size={22} color="#333" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.footerIconBtn} onPress={() => setIsFavorite(!isFavorite)}>
+          <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={22} color={isFavorite ? "#e53935" : "#333"} />
         </TouchableOpacity>
         <TouchableOpacity 
-          style={styles.buyNowBtn}
-          onPress={() => navigation.navigate('OrderSummary')}
+          style={styles.addToBagBtn}
+          onPress={() => {
+            addToCart({
+              id: Math.random().toString(36).substr(2, 9),
+              title: productData.title,
+              price: productData.price,
+              originalPrice: productData.mrp,
+              discount: productData.discount,
+              image: vendorImage,
+              quantity: 1,
+            });
+            navigation.navigate('OrderSummary');
+          }}
         >
-            <Text style={styles.buyNowBtnText}>Buy Now</Text>
+          <Ionicons name="cart-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.addToBagText}>Buy Now</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -397,413 +414,390 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#f5f5f5',
   },
-  headerRight: {
-    flexDirection: 'row',
-  },
-  headerBtn: {
+  headerIcon: {
     padding: 8,
-    marginLeft: 10,
+  },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#e53935',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 8,
+    fontWeight: 'bold',
   },
   imageSection: {
     width: width,
-    height: 450,
+    height: 500,
     backgroundColor: '#fff',
   },
   mainImage: {
     width: width,
-    height: 450,
+    height: 500,
   },
-  imageOverlay: {
+  floatingSizeBtn: {
     position: 'absolute',
-    bottom: 40,
-    left: 20,
+    bottom: 30,
     right: 20,
-    zIndex: 2,
-  },
-  nameBadge: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    maxWidth: '85%',
-  },
-  imageOverlayName: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  heartBtn: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    flexDirection: 'column',
     alignItems: 'center',
-    elevation: 5,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    zIndex: 10,
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
   },
-  dotContainer: {
+  sizeBtnText: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    marginTop: 2,
+  },
+  paginationContainer: {
     position: 'absolute',
     bottom: 20,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 3,
   },
-  dot: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.primary,
-    marginHorizontal: 4,
+  paginationDot: {
+    width: 25,
+    height: 2,
+    backgroundColor: '#000',
+    marginHorizontal: 3,
   },
-  infoSection: {
-    padding: 20,
+  productMainInfo: {
+    padding: 16,
     backgroundColor: '#fff',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    marginTop: -20,
   },
-  brandContainer: {
+  titleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
-  brandHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  brandLogo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 15,
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
-  },
-  brandName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 2,
-  },
-  visitStoreBtn: {
-    paddingVertical: 2,
-  },
-  visitStoreText: {
+  productTitle: {
     fontSize: 14,
-    color: COLORS.primary,
+    color: '#666',
+    flex: 1,
+    lineHeight: 20,
+    marginRight: 15,
+  },
+  colorCount: {
+    fontSize: 12,
+    color: '#1a73e8',
     fontWeight: '600',
   },
-  ratingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#388e3c',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  ratingText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginRight: 2,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: 5,
-  },
-  price: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginRight: 10,
-  },
-  originalPrice: {
-    fontSize: 16,
-    color: '#999',
-    textDecorationLine: 'line-through',
-    marginRight: 10,
-  },
-  discountBadge: {
-    fontSize: 16,
-    color: '#cc0c39',
-    fontWeight: 'bold',
-  },
-  taxText: {
-    fontSize: 12,
-    color: '#666',
+  priceSection: {
     marginTop: 4,
   },
-  shortDescContainer: {
-    marginTop: 15,
-    paddingHorizontal: 0,
+  mrpLabel: {
+    fontSize: 15,
+    color: '#000',
+    fontWeight: 'bold',
   },
-  shortDescText: {
-    fontSize: 14,
-    color: '#444',
-    lineHeight: 22,
-    opacity: 0.8,
+  mrpValue: {
+    fontSize: 16,
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
-    marginVertical: 20,
+  taxInfo: {
+    fontSize: 11,
+    color: '#999',
+    marginTop: 4,
   },
-  selectionSection: {
-    marginBottom: 20,
+  selectionBlock: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 8,
+    borderTopColor: '#f8f9fa',
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
+  blockTitle: {
     fontSize: 15,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 12,
   },
-  selectionValue: {
-    fontWeight: 'normal',
-    color: '#666',
-  },
-  sizeChartLink: {
-     fontSize: 14,
-     color: COLORS.primary,
-     fontWeight: 'bold'
-  },
-  selectionScroll: {
-    paddingLeft: 0,
-  },
-  colorItem: {
-    width: 60,
-    height: 80,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginRight: 12,
-    padding: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  colorPreview: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 6,
-  },
-  sizeItem: {
-    width: 60,
-    height: 44,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  sizeText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  activeSelection: {
-    borderColor: COLORS.primary,
-    borderWidth: 2,
-  },
-  activeSelectionText: {
-    color: COLORS.primary,
-  },
-  deliverySection: {
-    paddingVertical: 5,
-  },
-  deliveryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  deliveryLabel: {
-    fontSize: 15,
-    color: '#333',
-    marginLeft: 8,
-  },
-  deliveryValue: {
-    fontWeight: 'bold',
-  },
-  deliveryTime: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 4,
-  },
-  deliveryDay: {
-    fontWeight: 'bold',
-  },
-  sellerText: {
+  blockSubValue: {
     fontSize: 13,
     color: '#666',
+    marginTop: 4,
+    marginBottom: 12,
   },
-  descSection: {
-    paddingBottom: 20,
-  },
-  featureItem: {
+  colorGrid: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 10,
+    flexWrap: 'wrap',
   },
-  featureDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#333',
-    marginTop: 7,
-    marginRight: 10,
-  },
-  featureText: {
-    fontSize: 14,
-    color: '#444',
-    lineHeight: 20,
-    flex: 1,
-  },
-  fullDescription: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 22,
-    marginTop: 15,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    height: 80,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    justifyContent: 'space-between'
-  },
-  wishlistBtn: {
-    flex: 1,
-    height: 50,
-    borderRadius: 12,
+  colorCircleWrapper: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
-    borderColor: '#ddd',
-    flexDirection: 'row',
+    borderColor: '#eee',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: 12,
   },
-  wishlistBtnText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginLeft: 8,
+  colorCircleActive: {
+    borderColor: '#000',
+    borderWidth: 2,
   },
-  buyNowBtn: {
-    flex: 1,
-    height: 50,
-    borderRadius: 12,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+  colorCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
   },
-  buyNowBtnText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-
-  // Policy Styles
-  policyRow: {
+  blockHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 0,
-    marginVertical: 10,
-  },
-  policyItem: {
     alignItems: 'center',
-    flex: 1,
+    marginBottom: 15,
   },
-  policyIconContainer: {
-    width: 40,
+  chartLink: {
+    fontSize: 12,
+    color: '#1a73e8',
+    fontWeight: '600',
+  },
+  sizeGrid: {
+    flexDirection: 'row',
+  },
+  sizeBox: {
+    width: 50,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F0F7FF',
+    borderWidth: 1,
+    borderColor: '#eee',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginRight: 10,
   },
-  policyLabel: {
-    fontSize: 10,
+  sizeBoxActive: {
+    borderColor: '#000',
+    borderWidth: 2,
+  },
+  sizeText: {
+    fontSize: 13,
     color: '#333',
-    fontWeight: '600',
-    textAlign: 'center',
   },
-
-  // Similar Products Styles
-  similarSection: {
-    marginTop: 10,
+  sizeTextActive: {
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  deliveryBlock: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 8,
+    borderTopColor: '#f8f9fa',
+  },
+  pincodeBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f1f3f4',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 15,
     marginBottom: 20,
   },
-  similarScroll: {
-    marginTop: 15,
+  pincodeText: {
+    fontSize: 14,
+    color: '#666',
   },
-  similarProductCard: {
-    width: 140,
-    marginRight: 15,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
-    overflow: 'hidden',
+  changePincode: {
+    fontSize: 13,
+    color: '#1a73e8',
+    fontWeight: '600',
   },
-  similarProductImage: {
-    width: '100%',
-    height: 160,
-    resizeMode: 'cover',
+  deliveryFeature: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 15,
   },
-  similarProductInfo: {
-    padding: 10,
+  featureInfo: {
+    marginLeft: 12,
+    flex: 1,
   },
-  similarProductBrand: {
-    fontSize: 9,
-    color: '#888',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    marginBottom: 2,
-  },
-  similarProductTitle: {
-    fontSize: 12,
+  featureTitle: {
+    fontSize: 13,
     color: '#333',
     fontWeight: '500',
-    marginBottom: 6,
   },
-  similarProductPriceRow: {
+  featureLink: {
+    fontSize: 12,
+    color: '#1a73e8',
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  productDetailsBlock: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 8,
+    borderTopColor: '#f8f9fa',
+  },
+  detailsGrid: {
+    marginTop: 15,
+  },
+  detailRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 20,
   },
-  similarProductPrice: {
+  detailItem: {
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  detailValue: {
+    fontSize: 13,
+    color: '#333',
+  },
+  moreDetailsBtn: {
+    alignSelf: 'flex-end',
+    marginTop: 10,
+  },
+  moreDetailsText: {
+    fontSize: 12,
+    color: '#1a73e8',
+    fontWeight: '600',
+  },
+  trustSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 20,
+    backgroundColor: '#fff',
+    borderTopWidth: 8,
+    borderTopColor: '#f8f9fa',
+  },
+  trustItem: {
+    alignItems: 'center',
+  },
+  trustText: {
+    fontSize: 10,
+    color: '#666',
+    marginTop: 8,
+    fontWeight: '600',
+  },
+  recentlyViewedSection: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 8,
+    borderTopColor: '#f8f9fa',
+  },
+  recentProductCard: {
+    width: 120,
+    marginRight: 15,
+  },
+  recentImage: {
+    width: 120,
+    height: 160,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  recentTitle: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 8,
+  },
+  recentPrice: {
     fontSize: 13,
     fontWeight: 'bold',
     color: '#000',
+    marginTop: 4,
+  },
+  linksSection: {
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 8,
+    borderTopColor: '#f8f9fa',
+  },
+  linkRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+  },
+  linkText: {
+    fontSize: 14,
+    color: '#1a73e8',
+    fontWeight: '500',
+  },
+  linkContainer: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+  },
+  linkDropdown: {
+    paddingBottom: 15,
+    paddingHorizontal: 4,
+  },
+  linkDropdownText: {
+    fontSize: 13,
+    color: '#666',
+    lineHeight: 18,
+  },
+  newFooter: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: 70,
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    justifyContent: 'space-between',
+  },
+  footerIconBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#eee',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  addToBagBtn: {
+    flex: 1,
+    height: 48,
+    backgroundColor: '#202124',
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 4,
+  },
+  addToBagText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  divider: {
+    height: 8,
+    backgroundColor: '#f8f9fa',
   },
   similarProductDiscount: {
     fontSize: 9,

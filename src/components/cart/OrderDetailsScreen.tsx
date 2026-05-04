@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 // but this is to make it look close to the static image.
 const { width, height } = Dimensions.get('window');
 
-const OrderTrackingScreen = () => {
+const OrderDetailsScreen = () => {
   const navigation: any = useNavigation();
 
   return (
@@ -805,4 +805,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OrderTrackingScreen;
+export default OrderDetailsScreen;

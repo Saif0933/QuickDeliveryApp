@@ -17,7 +17,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // --- CUSTOM IMPORTS ---
@@ -39,9 +39,9 @@ type RootStackParamList = {
   HomeScreen: undefined;
   LocationScreen: undefined;
   GoldScreen: undefined;
-  ZomatoMoneyPage: undefined;
+  WalletScreen: undefined;
   ProfileScreen: undefined;
-  FoodList: { categoryId?: string; category?: string };
+  CategoryProduct: { categoryId?: string; category?: string };
   ProductScreen: { category?: string; vendorId: string; vendorName: string; vendorImage: string; productName?: string; description?: string; menuImages?: string[] };
   BrandStoreScreen: { vendorId: string; vendorName: string; vendorImage: string };
   ProductBrand: { vendorId: string; vendorName: string; vendorImage: string; vendorLogo?: string };
@@ -50,35 +50,29 @@ type RootStackParamList = {
   VegMode: undefined;
   SearchScreen: undefined;
   MealsUnderScreen: undefined;
-  AllRestaurantCart: undefined;
+  AddToBagScreen: undefined;
+  WishListScreen: undefined;
+  OrderSummary: undefined;
+  PaymentScreen: undefined;
+  OrderPlacedScreen: undefined;
+  OrderTrackingScreen: undefined;
 };
 
 // --- DATA ---
-const staticCategories = [
-  {
-    id: 'branded',
-    name: 'Top Brands',
-    image: { url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&q=80' },
-    isSpecial: true,
-  },
-  {
-    id: 'men',
-    name: 'Men',
-    image: { url: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=200&q=80' },
-    isSpecial: false,
-  },
-  {
-    id: 'women',
-    name: 'Women',
-    image: { url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&q=80' },
-    isSpecial: false,
-  },
-  {
-    id: 'non-branded',
-    name: 'Casual',
-    image: { url: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=200&q=80' },
-    isSpecial: false,
-  },
+const womenCategories = [
+  { id: '1', name: 'Women', image: { url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&q=80' } },
+  { id: '2', name: 'Shein Plus', image: { url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=200&q=80' } },
+  { id: '3', name: 'Jeans & Jeggings', image: { url: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=200&q=80' } },
+  { id: '4', name: 'T-shirts', image: { url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&q=80' } },
+  { id: '5', name: 'Dresses', image: { url: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=200&q=80' } },
+];
+
+const menCategories = [
+  { id: '6', name: 'Men', image: { url: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=200&q=80' } },
+  { id: '7', name: 'T-shirts', image: { url: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=200&q=80' } },
+  { id: '8', name: 'Jeans', image: { url: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=200&q=80' } },
+  { id: '9', name: 'Trouser & Pants', image: { url: 'https://images.unsplash.com/photo-1624371414361-e6e9021b3164?w=200&q=80' } },
+  { id: '10', name: 'Joggers', image: { url: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=200&q=80' } },
 ];
 
 const staticClothingBrands = [
@@ -122,7 +116,7 @@ const staticClothingBrands = [
 
 const HEADER_HEIGHT = 115;
 const SEARCH_HEIGHT = 20;
-const BANNER_HEIGHT = 220;
+const BANNER_HEIGHT = 280;
 const HERO_HEIGHT = HEADER_HEIGHT + BANNER_HEIGHT + 10;
 
 const banners = [
@@ -230,7 +224,7 @@ const HomeScreen: React.FC = () => {
           resizeMode="cover"
         />
         {/* Editorial Gradient Overlay */}
-        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.3)', padding: 24, justifyContent: 'flex-end', paddingBottom: 60, borderRadius: 20, marginHorizontal: 12, overflow: 'hidden' }]}>
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.3)', padding: 24, justifyContent: 'flex-end', paddingBottom: 60, borderRadius: 0, marginHorizontal: 0, overflow: 'hidden' }]}>
           
           {/* Top Info Bar */}
           <View style={{ position: 'absolute', top: 20, left: 24, right: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -256,7 +250,7 @@ const HomeScreen: React.FC = () => {
   const { data: restaurantData, isLoading } = useGetAllVendors({ limit: 20 });
   const { data: categoryData, isLoading: categoryLoading } = useGetAllCategory({});
 
-  const displayCategories = [...staticCategories, ...(categoryData || [])];
+  const displayCategories = [...womenCategories, ...menCategories, ...(categoryData || [])];
   const allVendors = restaurantData?.pages.flatMap(page => page.vendors) || [];
   const midPoint = Math.ceil(allVendors.length / 2);
   const firstRowVendors = allVendors.slice(0, midPoint);
@@ -320,7 +314,7 @@ const HomeScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Animated.ScrollView
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -372,44 +366,42 @@ const HomeScreen: React.FC = () => {
                 </View>
               </View>
 
-              <View style={[styles.header, { backgroundColor: COLORS.primary, height: 115, flexDirection: 'column', paddingBottom: 10 }]}>
+              <View style={[styles.header, { backgroundColor: '#FFF', height: 115, flexDirection: 'column', paddingBottom: 10 }]}>
                 {/* Upper Row: Location & Profile */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 8 }}>
                   <View style={styles.headerLeft}>
                     <TouchableOpacity 
-                      style={{ backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, flexDirection: 'row', alignItems: 'center' }}
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
                       onPress={() => navigation.navigate('LocationScreen')}
                     >
-                      <Ionicons name="location-sharp" size={14} color="#FFF" />
-                      <Text numberOfLines={1} style={{ color: '#FFF', fontSize: 13, fontWeight: '700', marginHorizontal: 6 }}>{primaryLocation || 'Bangaluru'}</Text>
-                      <Ionicons name="chevron-down" size={12} color="#FFF" style={{ opacity: 0.8 }} />
+                      <Ionicons name="location-sharp" size={14} color={COLORS.primary} />
+                      <Text numberOfLines={1} style={{ color: '#000', fontSize: 13, fontWeight: '700', marginHorizontal: 6 }}>{primaryLocation || 'Bangaluru'}</Text>
+                      <Ionicons name="chevron-down" size={12} color={COLORS.primary} style={{ opacity: 0.8 }} />
                     </TouchableOpacity>
                   </View>
 
                   <View style={styles.headerRight}>
-                    <TouchableOpacity style={{ marginRight: 15 }} onPress={() => navigation.navigate('ZomatoMoneyPage')}>
-                      <Ionicons name="wallet-outline" size={24} color="#FFF" />
+                    <TouchableOpacity style={{ marginRight: 15 }} onPress={() => navigation.navigate('WalletScreen')}>
+                      <Ionicons name="wallet-outline" size={24} color={COLORS.primary} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center' }} onPress={() => navigation.navigate('ProfileScreen')}>
-                      <Text style={{ color: COLORS.primary, fontWeight: '900', fontSize: 13 }}>S</Text>
+                    <TouchableOpacity style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.primary, justifyContent: 'center', alignItems: 'center' }} onPress={() => navigation.navigate('ProfileScreen')}>
+                      <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13 }}>S</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
 
-                {/* Lower Row: Search Bar (Moved UP) */}
-                <View style={{ width: '100%', paddingHorizontal: 4 }}>
+                {/* Lower Row: Search Bar & Wishlist */}
+                <View style={{ width: '100%', paddingHorizontal: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                   <View style={{ 
+                    flex: 1,
                     flexDirection: 'row', 
                     alignItems: 'center', 
                     backgroundColor: '#FFF', 
                     borderRadius: 25, 
                     height: 48, 
                     paddingHorizontal: 15,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 5,
-                    elevation: 5
+                    borderWidth: 1,
+                    borderColor: '#E5E7EB'
                   }}>
                     <Ionicons name="search" size={18} color="#666" style={{ marginRight: 10 }} />
                     <TextInput 
@@ -421,54 +413,68 @@ const HomeScreen: React.FC = () => {
                     <View style={{ width: 1, height: 20, backgroundColor: '#EEE', marginHorizontal: 10 }} />
                     <Ionicons name="mic-outline" size={20} color="#666" />
                   </View>
+                  <TouchableOpacity 
+                    onPress={() => navigation.navigate('WishListScreen')}
+                    style={{ marginLeft: 12, width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center' }}
+                  >
+                    <Ionicons name="heart-outline" size={24} color="#000" />
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
 
-            {/* Categories Section */}
-            <View style={styles.categoriesContainer}>
+            {/* Categories Section - Two Scrollable Rows */}
+            <View style={styles.dualCategoriesContainer}>
               {categoryLoading ? (
                 <ActivityIndicator size="small" color={COLORS.primary} style={{ marginLeft: 20 }} />
               ) : (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {displayCategories.map((c: any, index: number) => (
-                    <TouchableOpacity
-                      key={c.id || index}
-                      style={styles.categoryItem}
-                      onPress={() => {
-                        if (!c.isSpecial) {
-                          setSelectedCategory(c.name);
-                          if (c.id !== 'static_all') {
-                            navigation.navigate('FoodList', { categoryId: c.id, category: c.name });
-                          }
-                        }
-                      }}
-                    >
-                      {c.isSpecial ? (
-                        <TouchableOpacity onPress={() => navigation.navigate('MealsUnderScreen')}>
-                          <View style={styles.specialCategory}>
-                            <Image source={{ uri: c.image?.url }} style={styles.specialCategoryImg} />
-                            <View style={[styles.specialCategoryOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
-                              <Text style={[styles.specialCategoryText, { fontSize: 9, marginBottom: 2, color: 'white' }]}>TOP</Text>
-                              <Text style={[styles.specialCategoryPrice, { fontSize: 13, color: '#FFD700', marginLeft: 4 }]}>BRANDS</Text>
-                              <View style={[styles.exploreSmallBtn, { backgroundColor: '#FFD700' }]}>
-                                <Text style={[styles.exploreSmallText, { color: '#000' }]}>Explore ›</Text>
-                              </View>
-                            </View>
+                <>
+                  {/* Women's Row */}
+                  <View style={{ marginBottom: 15 }}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 12 }}>
+                      {womenCategories.map((c: any, index: number) => (
+                        <TouchableOpacity
+                          key={c.id || index}
+                          style={styles.categoryItem}
+                          onPress={() => {
+                            setSelectedCategory(c.name);
+                            navigation.navigate('CategoryProduct', { categoryId: c.id, category: c.name });
+                          }}
+                        >
+                          <View style={styles.categoryImgWrapper}>
+                            <Image source={{ uri: c.image?.url }} style={styles.categoryImg} resizeMode="cover" />
                           </View>
-                        </TouchableOpacity>
-                      ) : (
-                        <>
-                          <Image source={{ uri: c.image?.url }} style={styles.categoryImg} />
-                          <Text style={[styles.categoryText, selectedCategory === c.name && styles.categoryTextSelected]}>
-                            {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
+                          <Text style={styles.categoryText} numberOfLines={1}>
+                            {c.name}
                           </Text>
-                          {selectedCategory === c.name && <View style={styles.categoryUnderline} />}
-                        </>
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+
+                  {/* Men's Row */}
+                  <View>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingLeft: 12 }}>
+                      {menCategories.map((c: any, index: number) => (
+                        <TouchableOpacity
+                          key={c.id || index}
+                          style={styles.categoryItem}
+                          onPress={() => {
+                            setSelectedCategory(c.name);
+                            navigation.navigate('CategoryProduct', { categoryId: c.id, category: c.name });
+                          }}
+                        >
+                          <View style={styles.categoryImgWrapper}>
+                            <Image source={{ uri: c.image?.url }} style={styles.categoryImg} resizeMode="cover" />
+                          </View>
+                          <Text style={styles.categoryText} numberOfLines={1}>
+                            {c.name}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </>
               )}
             </View>
 
@@ -573,21 +579,24 @@ const HomeScreen: React.FC = () => {
         style={[
           {
             position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100,
-            backgroundColor: COLORS.primary,
+            backgroundColor: '#FFF',
             paddingTop: 10, opacity: stickyHeaderOpacity,
-            transform: [{ translateY: stickyHeaderTranslateY }], elevation: 5,
+            transform: [{ translateY: stickyHeaderTranslateY }], elevation: 0,
             paddingBottom: 15
           }
         ]}
       >
-        <View style={{ paddingHorizontal: 16 }}>
+        <View style={{ paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
            <View style={{ 
+              flex: 1,
               flexDirection: 'row', 
               alignItems: 'center', 
-              backgroundColor: '#FFF', 
-              borderRadius: 12, 
+              backgroundColor: '#F3F4F6', 
+              borderRadius: 10, 
               height: 48, 
-              paddingHorizontal: 15
+              paddingHorizontal: 15,
+              borderWidth: 1,
+              borderColor: '#E5E7EB'
             }}>
               <Ionicons name="search" size={18} color={COLORS.primary} style={{ marginRight: 10 }} />
               <TextInput 
@@ -598,6 +607,12 @@ const HomeScreen: React.FC = () => {
               />
               <Ionicons name="mic-outline" size={18} color={COLORS.primary} />
             </View>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('WishListScreen')}
+              style={{ marginLeft: 12, width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center' }}
+            >
+              <Ionicons name="heart-outline" size={24} color="#000" />
+            </TouchableOpacity>
         </View>
       </Animated.View>
 
@@ -620,7 +635,7 @@ const HomeScreen: React.FC = () => {
                   if (!c.isSpecial) {
                     setSelectedCategory(c.name);
                     if (c.id !== 'static_all') {
-                      navigation.navigate('FoodList', { categoryId: c.id, category: c.name });
+                      navigation.navigate('CategoryProduct', { categoryId: c.id, category: c.name });
                     }
                   } else {
                     navigation.navigate('MealsUnderScreen');
@@ -816,7 +831,7 @@ const HomeScreen: React.FC = () => {
 
       {/* Bottom Navigation */}
       <BottomNavBar hideAnim={navBarTranslateY} />
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -876,9 +891,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden', 
     paddingTop: 120 // Header Height (115) + extra 5px
   },
-  bannerMovingTrack: { width: width * 3, height: 220, flexDirection: 'row' },
-  bannerSlide: { width, height: 220, overflow: 'visible', position: 'relative' },
-  bannerImage: { width: width - 32, height: '100%', marginHorizontal: 16, borderRadius: 24 },
+  bannerMovingTrack: { width: width * 3, height: BANNER_HEIGHT, flexDirection: 'row' },
+  bannerSlide: { width, height: BANNER_HEIGHT, overflow: 'visible', position: 'relative' },
+  bannerImage: { width: width, height: '100%', marginHorizontal: 0, borderRadius: 0 },
   bannerPagination: {
     position: 'absolute',
     bottom: 25,
@@ -894,17 +909,29 @@ const styles = StyleSheet.create({
     marginRight: 8
   },
 
+  dualCategoriesContainer: { marginBottom: 20, marginTop: 15 },
+  rowTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginLeft: 16, marginBottom: 12, letterSpacing: 0.2 },
+  
   categoriesContainer: { paddingLeft: 12, marginBottom: 16, paddingTop: 16 },
-  categoryItem: { alignItems: 'center', marginRight: 16 },
-  specialCategory: { width: 70, height: 80, borderRadius: 12, overflow: 'hidden' },
-  specialCategoryImg: { width: '95%', height: '80%' },
+  categoryItem: { alignItems: 'center', marginRight: 16, width: 75 },
+  categoryImgWrapper: { 
+    width: 70, 
+    height: 70, 
+    backgroundColor: '#F3F4F6', 
+    borderRadius: 18, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    overflow: 'hidden'
+  },
+  categoryImg: { width: '100%', height: '100%' },
+  categoryText: { fontSize: 11, color: '#333', marginTop: 8, fontWeight: '600', textAlign: 'center' },
   specialCategoryOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end', padding: 6 },
   specialCategoryText: { fontSize: 8, color: '#fff', fontWeight: '800', marginLeft: 10 },
   specialCategoryPrice: { fontSize: 16, color: COLORS.white, fontWeight: '900', marginLeft: 5 },
   exploreSmallBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginTop: 4, alignSelf: 'flex-start', marginLeft: 3 },
   exploreSmallText: { fontSize: 8, fontWeight: 'bold', color: '#fff' },
-  categoryImg: { width: 65, height: 60, borderRadius: 50, backgroundColor: '#f0f0f0' },
-  categoryText: { fontSize: 11, color: '#444', marginTop: 6, fontWeight: '900' },
+  specialCategory: { width: 70, height: 80, borderRadius: 12, overflow: 'hidden' },
+  specialCategoryImg: { width: '95%', height: '80%' },
   categoryTextSelected: { color: COLORS.primary, fontWeight: '900' },
   categoryUnderline: { width: 50, height: 3, backgroundColor: COLORS.primary, borderRadius: 2, marginTop: 4 },
 

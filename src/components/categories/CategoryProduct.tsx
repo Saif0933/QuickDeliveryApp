@@ -625,9 +625,9 @@ const ProductGridCard = ({ item, category }: { item: MappedVendor; category: str
   const oldPrice = parseInt(item.price) + 200;
 
   return (
-    <Animated.View style={[styles.productGridCard, { transform: [{ scale: scaleValue }] }]}>
+    <Animated.View style={[styles.newProductCard, { transform: [{ scale: scaleValue }] }]}>
       <TouchableOpacity
-        activeOpacity={1}
+        activeOpacity={0.9}
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         onPress={() => navigation.navigate('ProductScreen', {
@@ -639,32 +639,21 @@ const ProductGridCard = ({ item, category }: { item: MappedVendor; category: str
           description: item.offerSub
         })}
       >
-        <View style={styles.productGridImageContainer}>
-          <Image source={{ uri: item.foodImage }} style={styles.productGridImage} />
-          <View style={styles.productGridBadge}>
-            <Text style={styles.productGridBadgeText}>NEW</Text>
+        <View style={styles.newImageContainer}>
+          <Image source={{ uri: item.foodImage }} style={styles.newProductImage} />
+          
+          <View style={[styles.overlayIconBtn, { left: 8 }]}>
+             <MaterialCommunityIcons name="layers-outline" size={18} color="#444" />
           </View>
-          <TouchableOpacity style={styles.gridFavoriteBtn}>
+          
+          <TouchableOpacity style={[styles.overlayIconBtn, { right: 8 }]}>
              <Ionicons name="heart-outline" size={18} color="#444" />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.productGridInfo}>
-          <View style={styles.brandRow}>
-            <Text style={styles.productGridBrand}>{item.restaurantName}</Text>
-            <View style={styles.productGridRating}>
-              <Text style={styles.gridRatingText}>{item.rating}</Text>
-              <Ionicons name="star" size={8} color="#fff" />
-            </View>
-          </View>
-          
-          <Text style={styles.productGridTitle} numberOfLines={1}>{item.foodName}</Text>
-          
-          <View style={styles.productGridPriceRow}>
-            <Text style={styles.productGridPrice}>₹{item.price}</Text>
-            <Text style={styles.productGridOldPrice}>₹{oldPrice}</Text>
-          </View>
-          <Text style={styles.productGridDiscount}>Save ₹200</Text>
+        <View style={styles.newProductInfo}>
+          <Text style={styles.newProductTitle} numberOfLines={2}>{item.foodName}</Text>
+          <Text style={styles.newProductPrice}>₹{item.price}</Text>
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -735,46 +724,8 @@ export default function FoodList() {
 
   // --- HEADER COMPONENT ---
   const ListHeader = () => {
-    const currentCategoryObj = categoryData?.find((c: any) => c.id === selectedCategory);
-    const categoryImageUrl = currentCategoryObj ? resolveImageUrl(currentCategoryObj.image) : null;
-
     return (
-      <View>
-        {categoryImageUrl ? (
-          <View style={styles.heroContainer}>
-            <View style={styles.bannerWrapper}>
-              <Image source={{ uri: categoryImageUrl }} style={styles.heroImage} resizeMode="cover" />
-              <View style={styles.bannerOverlay} />
-            </View>
-          </View>
-        ) : (
-          <BannerCarousel />
-        )}
-
-        {/* --- DYNAMIC FILTER SECTION IMPLEMENTATION --- */}
-        {/* {categoryLoading ? (
-          <View style={{ height: 100, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="small" color={COLORS.primary} />
-          </View>
-        ) : (
-          <FilterSection
-            categories={[
-              { id: 'static_all', name: 'All', image: { url: 'https://tse1.mm.bing.net/th/id/OIP.y9WHqmBEubDgxpHWqRN9sAHaEO?pid=Api&P=0&h=180' } },
-              ...(categoryData || [])
-            ]}
-            selectedCategory={selectedCategory}
-            onSelectCategory={(id) => {
-              if (id === 'static_all') {
-                navigation.navigate('Home' as never);
-              } else {
-                setSelectedCategory(id);
-              }
-            }}
-          />
-        )} */}
-
-        <Text style={styles.sectionTitle}>Products for You</Text>
-      </View>
+      <View style={{ height: 10 }} />
     );
   };
 
@@ -785,31 +736,31 @@ export default function FoodList() {
       <View style={{ backgroundColor: COLORS.white }}>
 
         {/* --- MODIFIED HEADER: Back Button and Search Bar combined in one row --- */}
-        <View style={styles.header}>
-          {/* Back Button */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
-          </TouchableOpacity>
+        <View style={styles.newHeader}>
+          <View style={styles.headerLeftSection}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.newBackButton}>
+              <Ionicons name="chevron-back" size={24} color="#000" />
+            </TouchableOpacity>
+            <View style={styles.headerTitleContainer}>
+              <Text style={styles.headerTitle}>{route.params?.category || "Women"}</Text>
+              <Text style={styles.headerSubtitle}>{combinedData.length}/12359 Products</Text>
+            </View>
+          </View>
 
-          {/* Search Bar */}
-          <View style={styles.searchBar}>
-            <Ionicons name="search-outline" size={20} color={COLORS.primary} />
-            <TextInput
-              placeholder="Search products..."
-              placeholderTextColor={COLORS.muted}
-              style={styles.searchInput}
-              value={search}
-              onChangeText={setSearch}
-            />
-            <TouchableOpacity onPress={() => setSearch('')}>
-              <Ionicons
-                name={search ? "close-circle-outline" : "mic-outline"}
-                size={18}
-                color={COLORS.primary}
-              />
+          <View style={styles.headerRightSection}>
+            <TouchableOpacity style={styles.headerIconBtn}>
+              <Ionicons name="search-outline" size={22} color="#000" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerIconBtn}>
+              <Ionicons name="heart-outline" size={22} color="#000" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerIconBtn}>
+              <View>
+                <Ionicons name="cart-outline" size={22} color="#000" />
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>1</Text>
+                </View>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -843,139 +794,112 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
 
-  // --- MODIFIED HEADER STYLES ---
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backButton: {
-    marginRight: 12,
-  },
-  // --- MODIFIED SEARCH BAR STYLES ---
-  searchBar: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.white,
+  newHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 12,
-    borderRadius: 8,
-    height: 44,
-    borderWidth: 1,
-    borderColor: '#e0e0e0'
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
-  searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    fontSize: 14,
-    color: COLORS.textPrimary,
+  headerLeftSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  newBackButton: {
+    marginRight: 8,
+  },
+  headerTitleContainer: {
+    marginLeft: 4,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  headerSubtitle: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 1,
+  },
+  headerRightSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerIconBtn: {
+    padding: 8,
+    marginLeft: 4,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#e53935',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cartBadgeText: {
+    color: '#fff',
+    fontSize: 8,
+    fontWeight: 'bold',
   },
 
   gridRow: {
     justifyContent: 'space-between',
     paddingHorizontal: 12,
   },
-  productGridCard: {
-    width: (width - 40) / 2,
+  newProductCard: {
+    width: (width - 36) / 2,
+    marginBottom: 20,
     backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
   },
-  productGridImageContainer: {
+  newImageContainer: {
     width: '100%',
-    height: 180,
-    backgroundColor: '#f9f9f9',
+    height: 240,
+    borderRadius: 15,
+    overflow: 'hidden',
+    backgroundColor: '#f5f5f5',
     position: 'relative',
   },
-  productGridImage: {
+  newProductImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
-  productGridBadge: {
+  overlayIconBtn: {
     position: 'absolute',
-    top: 8,
-    left: 8,
-    backgroundColor: '#000',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  productGridBadgeText: {
-    color: '#fff',
-    fontSize: 9,
-    fontWeight: 'bold',
-  },
-  gridFavoriteBtn: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(255,255,255,0.8)',
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    bottom: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.9)',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  productGridInfo: {
-    padding: 10,
+  newProductInfo: {
+    paddingVertical: 10,
+    paddingHorizontal: 4,
   },
-  brandRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  newProductTitle: {
+    fontSize: 13,
+    color: '#666',
+    lineHeight: 18,
     marginBottom: 4,
   },
-  productGridBrand: {
-    fontSize: 10,
-    color: '#888',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  productGridRating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#388e3c',
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    borderRadius: 3,
-  },
-  gridRatingText: {
-    color: '#fff',
-    fontSize: 9,
-    fontWeight: 'bold',
-    marginRight: 1,
-  },
-  productGridTitle: {
-    fontSize: 13,
-    color: '#333',
-    fontWeight: '500',
-    marginBottom: 6,
-  },
-  productGridPriceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  productGridPrice: {
+  newProductPrice: {
     fontSize: 15,
     fontWeight: 'bold',
     color: '#000',
-  },
-  productGridOldPrice: {
-    fontSize: 11,
-    color: '#999',
-    textDecorationLine: 'line-through',
-    marginLeft: 6,
-  },
-  productGridDiscount: {
-    fontSize: 10,
-    color: '#388e3c',
-    fontWeight: 'bold',
-    marginTop: 2,
   },
 
   heroContainer: {
