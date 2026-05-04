@@ -14,12 +14,34 @@ import {
 
 const { width } = Dimensions.get('window');
 
-const OrderSummary = () => {
+const OrderSummary = ({ route }: any) => {
   const navigation = useNavigation<any>();
-  // State for quantity dropdown
-  const [quantity, setQuantity] = useState(1);
-  // State for selected donation amount
-  const [donationAmount, setDonationAmount] = useState<number | null>(null);
+  const { product } = route?.params || {};
+
+  // If no product is passed, use the hardcoded default (fallback)
+  const displayProduct = product || {
+    title: 'Raymond Men Self Design ...',
+    price: '₹1,338',
+    originalPrice: '₹2,399',
+    discount: '44% OFF',
+    image: 'https://imgs.search.brave.com/Rc3Gc0awy6vo0KcdhFF2Vm-cin9V0itf7kg_VaHB3ZA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2E4Lzkx/LzllL2E4OTE5ZThj/YWU1NTZhMjQ2NGY2/ODY1NjQ3NTM5OGQz/LmpwZw',
+    quantity: 1,
+    brand: 'Raymond',
+    rating: '4.3',
+    reviews: '225'
+  };
+
+  // State for quantity (initialized from passed product or default)
+  const [quantity, setQuantity] = useState(displayProduct.quantity);
+
+  // Parse prices for calculation
+  const getPriceValue = (priceStr: string) => parseInt(priceStr.replace(/[^0-9]/g, '')) || 0;
+  const unitPrice = getPriceValue(displayProduct.price);
+  const unitMrp = getPriceValue(displayProduct.originalPrice);
+  
+  const totalPrice = unitPrice * quantity;
+  const totalMrp = unitMrp * quantity;
+  const totalDiscount = totalMrp - totalPrice;
 
   // --- Header Section ---
   const Header = () => (
@@ -28,36 +50,6 @@ const OrderSummary = () => {
         <Text style={{ fontSize: 24, color: '#333' }}>←</Text>
       </TouchableOpacity>
       <Text style={styles.headerTitle}>Order Summary</Text>
-    </View>
-  );
-
-  // --- Stepper Section ---
-  const Stepper = () => (
-    <View style={styles.stepperContainer}>
-      <View style={styles.stepperWrapper}>
-        <View style={styles.step}>
-          <View style={[styles.stepCircle, styles.stepCircleCompleted]}>
-            <Text style={{ fontSize: 14, color: '#fff' }}>✓</Text>
-          </View>
-          <Text style={[styles.stepLabel, styles.stepLabelCompleted]}>Address</Text>
-        </View>
-        <View style={[styles.stepLine, styles.stepLineCompleted]} />
-
-        <View style={styles.step}>
-          <View style={[styles.stepCircle, styles.stepCircleActive]}>
-            <Text style={{ fontSize: 14, color: '#fff' }}>2</Text>
-          </View>
-          <Text style={[styles.stepLabel, styles.stepLabelActive]}>Order Summary</Text>
-        </View>
-        <View style={styles.stepLine} />
-
-        <View style={styles.step}>
-          <View style={styles.stepCircle}>
-            <Text style={{ fontSize: 14, color: '#999' }}>3</Text>
-          </View>
-          <Text style={styles.stepLabel}>Payment</Text>
-        </View>
-      </View>
     </View>
   );
 
@@ -88,20 +80,20 @@ const OrderSummary = () => {
     <View style={styles.productContainer}>
       <View style={styles.productTop}>
         <Image 
-          source={{ uri: 'https://imgs.search.brave.com/Rc3Gc0awy6vo0KcdhFF2Vm-cin9V0itf7kg_VaHB3ZA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2E4Lzkx/LzllL2E4OTE5ZThj/YWU1NTZhMjQ2NGY2/ODY1NjQ3NTM5OGQz/LmpwZw' }} 
+          source={{ uri: displayProduct.image }} 
           style={styles.productImage} 
         />
         <View style={styles.productDetails}>
-          <Text style={styles.productName} numberOfLines={1}>Raymond Men Self Design ...</Text>
-          <Text style={styles.productSize}>Size: 39, Size: 39</Text>
+          <Text style={styles.productName} numberOfLines={1}>{displayProduct.title}</Text>
+          <Text style={styles.productSize}>Brand: {displayProduct.brand}</Text>
           
           <View style={styles.ratingRow}>
             <View style={styles.starGroup}>
               {[1, 2, 3, 4].map(star => <Text key={star} style={{color: '#388e3c', fontSize: 14}}>★</Text>)}
               <Text style={{color: '#c8e6c9', fontSize: 14}}>★</Text>
             </View>
-            <Text style={styles.ratingValue}>4.3</Text>
-            <Text style={styles.ratingCount}>· (225)</Text>
+            <Text style={styles.ratingValue}>{displayProduct.rating}</Text>
+            <Text style={styles.ratingCount}>· ({displayProduct.reviews})</Text>
             <View style={{flexDirection:'row', alignItems:'center', marginLeft: 8}}>
                 <Text style={{color: '#2874f0', fontSize: 16}}>🔰</Text>
                 <Text style={styles.assuredText}>Assured</Text>
@@ -109,9 +101,9 @@ const OrderSummary = () => {
           </View>
           
           <View style={styles.priceRow}>
-            <Text style={styles.discountText}>↓44%</Text>
-            <Text style={styles.mrpText}>₹2,399</Text>
-            <Text style={styles.finalPriceText}>₹1,338</Text>
+            <Text style={styles.discountText}>{displayProduct.discount}</Text>
+            <Text style={styles.mrpText}>{displayProduct.originalPrice}</Text>
+            <Text style={styles.finalPriceText}>{displayProduct.price}</Text>
           </View>
         </View>
       </View>
@@ -141,12 +133,12 @@ const OrderSummary = () => {
         {/* Price Details */}
         <View style={styles.priceDetailsContainer}>
           <View style={[styles.priceRowItem, { borderTopWidth: 0 }]}>
-            <Text style={styles.priceLabel}>Price (1 item)</Text>
-            <Text style={styles.priceLabel}>₹2,399</Text>
+            <Text style={styles.priceLabel}>Price ({quantity} item{quantity > 1 ? 's' : ''})</Text>
+            <Text style={styles.priceLabel}>₹{totalMrp.toLocaleString()}</Text>
           </View>
           <View style={styles.priceRowItem}>
             <Text style={styles.discountLabel}>Discount</Text>
-            <Text style={styles.discountLabel}>- ₹1,061</Text>
+            <Text style={styles.discountLabel}>- ₹{totalDiscount.toLocaleString()}</Text>
           </View>
           <View style={styles.priceRowItem}>
             <Text style={styles.priceLabel}>Delivery Charges</Text>
@@ -154,22 +146,27 @@ const OrderSummary = () => {
           </View>
           <View style={[styles.priceRowItem, styles.totalRow]}>
             <Text style={styles.totalLabel}>Total Amount</Text>
-            <Text style={styles.totalLabel}>₹1,338</Text>
+            <Text style={styles.totalLabel}>₹{totalPrice.toLocaleString()}</Text>
           </View>
         </View>
         
-
       </ScrollView>
       
       {/* Footer */}
       <View style={styles.footerContainer}>
         <View style={styles.footerPriceDetails}>
-            <Text style={styles.footerMrp}>₹2,399</Text>
-            <Text style={styles.footerFinalPrice}>₹1,338</Text>
+            <Text style={styles.footerMrp}>₹{totalMrp.toLocaleString()}</Text>
+            <Text style={styles.footerFinalPrice}>₹{totalPrice.toLocaleString()}</Text>
         </View>
         <TouchableOpacity 
           style={styles.continueButton}
-          onPress={() => navigation.navigate('PaymentScreen')}
+          onPress={() => navigation.navigate('PaymentScreen', {
+            orderData: {
+              product: displayProduct,
+              totalAmount: totalPrice,
+              quantity: quantity
+            }
+          })}
         >
           <Text style={styles.continueButtonText}>Continue</Text>
         </TouchableOpacity>

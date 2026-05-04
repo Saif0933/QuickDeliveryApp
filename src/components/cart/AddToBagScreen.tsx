@@ -1,18 +1,20 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import {
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    Image,
+  Image,
+  Modal,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import SuggestedForYou from '../../screen/SuggestedForYou';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCart, CartItem } from '../../Context/CartContext';
-import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { CartItem, useCart } from '../../Context/CartContext';
+import SuggestedForYou from '../../screen/SuggestedForYou';
 
 // --- Types ---
 interface ProductProps extends CartItem {
@@ -20,11 +22,35 @@ interface ProductProps extends CartItem {
   outOfStock?: boolean;
   deliveryDate?: string;
   onRemove: (id: string) => void;
+  onQtyPress: () => void;
 }
 
 const CartScreen: React.FC = () => {
-  const { cartItems, removeFromCart } = useCart();
+  const { cartItems, removeFromCart, updateQuantity } = useCart();
   const navigation = useNavigation<any>();
+
+  // Qty selection state
+  const [qtyModalVisible, setQtyModalVisible] = React.useState(false);
+  const [customQtyVisible, setCustomQtyVisible] = React.useState(false);
+  const [selectedItem, setSelectedItem] = React.useState<CartItem | null>(null);
+  const [tempQty, setTempQty] = React.useState('');
+
+  const handleQtySelect = (qty: number) => {
+    if (selectedItem) {
+      updateQuantity(selectedItem.id, qty);
+      setQtyModalVisible(false);
+    }
+  };
+
+  const handleCustomQtyApply = () => {
+    const qty = parseInt(tempQty);
+    if (selectedItem && !isNaN(qty) && qty > 0) {
+      updateQuantity(selectedItem.id, qty);
+      setCustomQtyVisible(false);
+      setQtyModalVisible(false);
+      setTempQty('');
+    }
+  };
 
   const calculateMRP = () => {
     return cartItems.reduce((acc, item) => {
@@ -45,6 +71,8 @@ const CartScreen: React.FC = () => {
   const discounts = mrp - total;
   const fees = cartItems.length > 0 ? 7 : 0;
 
+  const totalItems = cartItems.length;
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
@@ -54,7 +82,7 @@ const CartScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-left" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Cart ({cartItems.length})</Text>
+        <Text style={styles.headerTitle}>My Cart ({totalItems})</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -82,6 +110,10 @@ const CartScreen: React.FC = () => {
               key={item.id}
               {...item}
               onRemove={removeFromCart}
+              onQtyPress={() => {
+                setSelectedItem(item);
+                setQtyModalVisible(true);
+              }}
               deliveryDate="Delivery by May 7, Thu"
             />
           ))
@@ -104,7 +136,7 @@ const CartScreen: React.FC = () => {
             <View style={styles.priceDetailsCard}>
               <Text style={styles.priceTitle}>Price Details</Text>
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>MRP ({cartItems.length} items)</Text>
+                <Text style={styles.priceLabel}>MRP ({totalItems} items)</Text>
                 <Text style={styles.priceValue}>₹{mrp.toLocaleString()}</Text>
               </View>
               <View style={styles.priceRow}>
@@ -134,48 +166,135 @@ const CartScreen: React.FC = () => {
         {/* Suggested For You Section */}
         <SuggestedForYou />
       </ScrollView>
+
+      {/* Quick Qty Modal */}
+      <Modal
+        visible={qtyModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setQtyModalVisible(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setQtyModalVisible(false)}
+        >
+          <View style={styles.qtyMenuContainer}>
+            <Text style={styles.qtyMenuTitle}>Select Quantity</Text>
+            {[1, 2, 3].map((num) => (
+              <TouchableOpacity 
+                key={num} 
+                style={styles.qtyOption} 
+                onPress={() => handleQtySelect(num)}
+              >
+                <Text style={styles.qtyOptionText}>{num}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity 
+              style={styles.qtyOption} 
+              onPress={() => setCustomQtyVisible(true)}
+            >
+              <Text style={styles.qtyOptionText}>More</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Custom Qty Modal */}
+      <Modal
+        visible={customQtyVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setCustomQtyVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.customQtyContainer}>
+            <Text style={styles.customQtyTitle}>Enter Quantity</Text>
+            <TextInput
+              style={styles.customQtyInput}
+              keyboardType="number-pad"
+              value={tempQty}
+              onChangeText={setTempQty}
+              autoFocus={true}
+              placeholder="e.g. 5"
+            />
+            <View style={styles.customQtyActions}>
+              <TouchableOpacity 
+                style={[styles.customQtyBtn, styles.cancelBtn]} 
+                onPress={() => setCustomQtyVisible(false)}
+              >
+                <Text style={styles.cancelBtnText}>CANCEL</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.customQtyBtn, styles.applyBtn]} 
+                onPress={handleCustomQtyApply}
+              >
+                <Text style={styles.applyBtnText}>APPLY</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
 // --- Sub Components ---
 
-const ProductItem: React.FC<ProductProps> = ({ id, isHotDeal, outOfStock, title, price, originalPrice, discount, deliveryDate, image, quantity, onRemove }) => (
-  <View style={styles.productCard}>
-    {isHotDeal && <Text style={styles.hotDealLabel}>Hot Deal</Text>}
-    <View style={styles.productMain}>
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: image }}
-          style={styles.productImg}
-          resizeMode="cover"
-        />
-        {!outOfStock && (
-          <View style={styles.qtyPicker}>
-            <Text style={styles.qtyText}>Qty: {quantity}</Text>
-            <Icon name="menu-down" size={20} color="#000" />
-          </View>
-        )}
-      </View>
-      <View style={styles.productInfo}>
-        <Text style={styles.productTitle} numberOfLines={2}>{title}</Text>
-        <Text style={styles.ratingText}><Icon name="star" color="green" size={12}/> 4.2 (12,450)</Text>
+const ProductItem: React.FC<ProductProps> = ({ id, isHotDeal, outOfStock, title, price, originalPrice, discount, deliveryDate, image, quantity, onRemove, brand, onQtyPress }) => {
+  const navigation = useNavigation<any>();
 
-        {outOfStock ? (
-          <View style={styles.oosContainer}>
-            <Text style={styles.oosText}>Out Of Stock</Text>
-            <TouchableOpacity><Text style={styles.findSimilar}>Find Similar</Text></TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.priceContainer}>
-            <Text style={styles.discountText}>{discount}</Text>
-            <Text style={styles.strikePrice}>{originalPrice}</Text>
-            <Text style={styles.mainPrice}>{price}</Text>
-          </View>
-        )}
-      </View>
-    </View>
-    {deliveryDate && <Text style={styles.deliveryText}>{deliveryDate}</Text>}
+  return (
+    <View style={styles.productCard}>
+      {isHotDeal && <Text style={styles.hotDealLabel}>Hot Deal</Text>}
+      <TouchableOpacity 
+        style={styles.productMain}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('ProductScreen', {
+          productName: title,
+          vendorName: brand || "Premium Brand",
+          vendorImage: image,
+          id: id
+        })}
+      >
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: image }}
+            style={styles.productImg}
+            resizeMode="cover"
+          />
+          {!outOfStock && (
+            <TouchableOpacity 
+              style={styles.qtyPicker}
+              onPress={(e) => {
+                e.stopPropagation();
+                onQtyPress();
+              }}
+            >
+              <Text style={styles.qtyText}>Qty: {quantity}</Text>
+              <Icon name="menu-down" size={20} color="#000" />
+            </TouchableOpacity>
+          )}
+        </View>
+        <View style={styles.productInfo}>
+          <Text style={styles.productTitle} numberOfLines={2}>{title}</Text>
+          <Text style={styles.ratingText}><Icon name="star" color="green" size={12}/> 4.2 (12,450)</Text>
+  
+          {outOfStock ? (
+            <View style={styles.oosContainer}>
+              <Text style={styles.oosText}>Out Of Stock</Text>
+              <TouchableOpacity><Text style={styles.findSimilar}>Find Similar</Text></TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.priceContainer}>
+              <Text style={styles.discountText}>{discount}</Text>
+              <Text style={styles.strikePrice}>{originalPrice}</Text>
+              <Text style={styles.mainPrice}>{price}</Text>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+      {deliveryDate && <Text style={styles.deliveryText}>{deliveryDate}</Text>}
 
     <View style={styles.actionRow}>
       <TouchableOpacity style={styles.actionBtn} onPress={() => onRemove(id)}>
@@ -184,9 +303,10 @@ const ProductItem: React.FC<ProductProps> = ({ id, isHotDeal, outOfStock, title,
       </TouchableOpacity>
       <ActionButton icon="heart-outline" label="Save for later" />
       <ActionButton icon="lightning-bolt" label="Buy this now" />
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 const ActionButton = ({ icon, label }: any) => (
   <TouchableOpacity style={styles.actionBtn}>
@@ -258,7 +378,74 @@ const styles = StyleSheet.create({
   emptyCart: { padding: 40, alignItems: 'center', justifyContent: 'center' },
   emptyCartText: { fontSize: 18, color: '#878787', marginTop: 10, fontWeight: '500' },
   shopNowBtn: { marginTop: 20, backgroundColor: '#2874F0', paddingHorizontal: 30, paddingVertical: 12, borderRadius: 4 },
-  shopNowText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 }
+  shopNowText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  qtyMenuContainer: {
+    backgroundColor: '#FFF',
+    width: '80%',
+    borderRadius: 8,
+    padding: 10,
+  },
+  qtyMenuTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEE',
+  },
+  qtyOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  qtyOptionText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  customQtyContainer: {
+    backgroundColor: '#FFF',
+    width: '85%',
+    borderRadius: 8,
+    padding: 20,
+  },
+  customQtyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+  customQtyInput: {
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 4,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  customQtyActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  customQtyBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginLeft: 10,
+  },
+  cancelBtn: {},
+  applyBtn: {},
+  cancelBtnText: {
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  applyBtnText: {
+    color: '#2874F0',
+    fontWeight: 'bold',
+  },
 });
 
 export default CartScreen;

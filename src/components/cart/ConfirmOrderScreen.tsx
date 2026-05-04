@@ -1,14 +1,14 @@
 import React from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Modal,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 // Standard vector icon sets
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface ConfirmOrderScreenProps {
   visible: boolean;

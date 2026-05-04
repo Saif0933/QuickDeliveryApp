@@ -14,11 +14,10 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { Vendor } from "../types/Vender.types";
 import { useGetAllVendors } from "../api/hooks/useVender";
 import { COLORS } from "../theme/color";
 import { RootStack } from "../types/types";
+import { Vendor } from "../types/Vender.types";
 
 interface FoodItem {
   id: string;
@@ -56,17 +55,28 @@ const mapVendorToFoodItem = (vendor: Vendor): FoodItem => {
   };
 };
 
+import { useWishlist } from "../Context/WishlistContext";
+
 // --- COMPONENT: FoodCard ---
 const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStack>>();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [index, setIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const [isFavorite, setIsFavorite] = useState(false);
+  const isFavorite = isInWishlist(item.id);
 
   const handleFavorite = () => {
-    setIsFavorite(!isFavorite);
+    toggleWishlist({
+      id: item.id,
+      title: item.dish,
+      price: item.price,
+      image: (typeof item.images[0] === 'object' && 'uri' in item.images[0] ? item.images[0].uri ?? "" : ""),
+      brand: item.name,
+      rating: parseFloat(item.rating)
+    });
+    
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.8,
@@ -80,6 +90,7 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
       }),
     ]).start();
   };
+
 
   // Carousel Animation Logic
   useEffect(() => {
@@ -126,20 +137,21 @@ const FoodCard: React.FC<{ item: FoodItem }> = ({ item }) => {
           resizeMode="cover"
         />
 
-        {/* Favorite Button */}
+        {/* Wishlist Button */}
         <TouchableOpacity
-          style={styles.bookmarkWrapper}
+          style={styles.wishlistWrapper}
           onPress={handleFavorite}
           activeOpacity={0.8}
         >
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
             <Ionicons
-              name={isFavorite ? "bookmark" : "bookmark-outline"}
-              size={20}
-              color={isFavorite ? COLORS.primary : "#1C1C1C"}
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={18}
+              color={isFavorite ? "#E91E63" : "#666"}
             />
           </Animated.View>
         </TouchableOpacity>
+
 
         {/* Pagination Dots */}
         {item.images.length > 1 && (
@@ -195,6 +207,7 @@ interface FoodListProps {
   scrollEventThrottle?: number;
   refreshControl?: React.ReactElement<RefreshControlProps>;
   contentContainerStyle?: any;
+  vendors?: Vendor[];
 }
 
 const FoodList: React.FC<FoodListProps> = ({
@@ -202,7 +215,8 @@ const FoodList: React.FC<FoodListProps> = ({
   onScroll,
   scrollEventThrottle,
   refreshControl,
-  contentContainerStyle
+  contentContainerStyle,
+  vendors
 }) => {
   // 1. Fetch Data with Infinite Query
   const {
@@ -256,16 +270,18 @@ const FoodList: React.FC<FoodListProps> = ({
 
   const foodItems = useMemo(() => {
     let items = [...staticItems];
-    if (data) {
+    
+    // If vendors are passed via props, use them. Otherwise use data from API.
+    const vendorsToDisplay = vendors || (data ? data.pages.flatMap((page) => page.vendors) : []);
+    
+    if (vendorsToDisplay.length > 0) {
       items = [
         ...items,
-        ...data.pages.flatMap((page) =>
-          page.vendors.map((vendor) => mapVendorToFoodItem(vendor))
-        )
+        ...vendorsToDisplay.map((vendor) => mapVendorToFoodItem(vendor))
       ];
     }
     return items;
-  }, [data]);
+  }, [data, vendors]);
 
   // 3. Render Footer Loader
   const renderFooter = () => {
@@ -278,7 +294,7 @@ const FoodList: React.FC<FoodListProps> = ({
   };
 
   // 4. Handle Empty State
-  if (isLoading) {
+  if (isLoading && !vendors) {
     return (
       <View style={{ padding: 20, alignItems: 'center' }}>
         <ActivityIndicator size="large" color={COLORS.primary} />
@@ -287,7 +303,7 @@ const FoodList: React.FC<FoodListProps> = ({
     );
   }
 
-  if (isError) {
+  if (isError && !vendors) {
     return (
       <View style={{ padding: 20, alignItems: 'center' }}>
         <Text style={{ color: 'red' }}>Failed to load stores.</Text>
@@ -353,20 +369,21 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  bookmarkWrapper: {
+  wishlistWrapper: {
     position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "#fff",
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    top: 10,
+    right: 10,
+    backgroundColor: "#FFFFFF",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
+    elevation: 4,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
   dotContainer: {
     position: "absolute",

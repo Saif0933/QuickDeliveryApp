@@ -513,16 +513,16 @@ import { useRoute } from "@react-navigation/native";
 import { AxiosError } from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Animated,
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Animated,
+    Dimensions,
+    Pressable,
+    StyleSheet,
+    Text,
+    TextInput,
+    ToastAndroid,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import api from "../api/api";

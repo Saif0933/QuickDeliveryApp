@@ -4,18 +4,18 @@ import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Dimensions,
-  Image,
-  Modal,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    Image,
+    Modal,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    ToastAndroid,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import MapView, { Region } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,11 +23,11 @@ import api from '../api/api';
 import { Address, useAddresses } from '../api/hooks/address';
 import { COLORS } from '../theme/color';
 import {
-  checkLocationPermission,
-  getAddressFromCoords,
-  getCurrentLocation,
-  requestLocationPermission,
-  turnOnLocation,
+    checkLocationPermission,
+    getAddressFromCoords,
+    getCurrentLocation,
+    requestLocationPermission,
+    turnOnLocation,
 } from '../utils/location';
 
 const { height, width } = Dimensions.get('window');

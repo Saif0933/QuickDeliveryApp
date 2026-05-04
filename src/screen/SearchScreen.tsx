@@ -2,20 +2,20 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { COLORS } from "../theme/color";
 // Make sure this path is correct
-import { useGetAllCategory } from "../api/hooks/getAllCategory";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useGetAllCategory } from "../api/hooks/getAllCategory";
 
 const initialTags = ["Shirts", "Jeans", "Sneakers", "Jackets"];
 

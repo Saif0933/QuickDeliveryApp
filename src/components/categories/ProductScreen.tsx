@@ -9,6 +9,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
@@ -27,11 +28,36 @@ const ProductScreen = ({ route, navigation }: any) => {
     productName = "Product Name"
   } = (route?.params || {}) as any;
 
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+
+  // Header cart count (number of unique products)
+  const cartCount = cartItems.length;
 
   const [selectedSize, setSelectedSize] = useState('M');
   const [selectedColor, setSelectedColor] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  
+  // Qty selection state (Ported from Cart)
+  const [qtyModalVisible, setQtyModalVisible] = useState(false);
+  const [customQtyVisible, setCustomQtyVisible] = useState(false);
+  const [tempQty, setTempQty] = useState('');
+
+  const handleQtySelect = (qty: number) => {
+    setQuantity(qty);
+    setQtyModalVisible(false);
+  };
+
+  const handleCustomQtyApply = () => {
+    const qty = parseInt(tempQty);
+    if (!isNaN(qty) && qty > 0) {
+      setQuantity(qty);
+      setCustomQtyVisible(false);
+      setQtyModalVisible(false);
+      setTempQty('');
+    }
+  };
+
   // Removed local isFavorite state to use global WishlistContext
   const [showPolicy, setShowPolicy] = useState(false);
   const [expandedLink, setExpandedLink] = useState<string | null>(null);
@@ -140,12 +166,26 @@ const ProductScreen = ({ route, navigation }: any) => {
           <TouchableOpacity style={styles.headerIcon}>
             <Ionicons name="heart-outline" size={24} color="#000" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIcon}>
+          <TouchableOpacity 
+            style={styles.headerIcon} 
+            onPress={() => addToCart({
+              id: currentProductId,
+              title: productData.title,
+              price: productData.price,
+              originalPrice: productData.mrp,
+              discount: productData.discount,
+              image: vendorImage,
+              quantity: quantity,
+              brand: vendorName,
+            })}
+          >
             <View>
               <Ionicons name="cart-outline" size={24} color="#000" />
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>1</Text>
-              </View>
+              {cartCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{cartCount}</Text>
+                </View>
+              )}
             </View>
           </TouchableOpacity>
         </View>
@@ -233,6 +273,17 @@ const ProductScreen = ({ route, navigation }: any) => {
               </TouchableOpacity>
             ))}
           </ScrollView>
+        </View>
+
+        <View style={styles.selectionBlock}>
+          <Text style={styles.blockTitle}>Select Quantity</Text>
+          <TouchableOpacity 
+            style={styles.qtySelectorBtn}
+            onPress={() => setQtyModalVisible(true)}
+          >
+            <Text style={styles.qtySelectorText}>Qty: {quantity}</Text>
+            <Ionicons name="chevron-down" size={16} color="#000" />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.deliveryBlock}>
@@ -378,6 +429,75 @@ const ProductScreen = ({ route, navigation }: any) => {
         </View>
       </ScrollView>
 
+      {/* --- QUICK QTY MODAL --- */}
+      <Modal
+        visible={qtyModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setQtyModalVisible(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setQtyModalVisible(false)}
+        >
+          <View style={styles.qtyMenuContainer}>
+            <Text style={styles.qtyMenuTitle}>Select Quantity</Text>
+            {[1, 2, 3].map((num) => (
+              <TouchableOpacity 
+                key={num} 
+                style={styles.qtyOption} 
+                onPress={() => handleQtySelect(num)}
+              >
+                <Text style={styles.qtyOptionText}>{num}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity 
+              style={styles.qtyOption} 
+              onPress={() => setCustomQtyVisible(true)}
+            >
+              <Text style={styles.qtyOptionText}>More</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* --- CUSTOM QTY MODAL --- */}
+      <Modal
+        visible={customQtyVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setCustomQtyVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.customQtyContainer}>
+            <Text style={styles.customQtyTitle}>Enter Quantity</Text>
+            <TextInput
+              style={styles.customQtyInput}
+              keyboardType="number-pad"
+              value={tempQty}
+              onChangeText={setTempQty}
+              autoFocus={true}
+              placeholder="e.g. 5"
+            />
+            <View style={styles.customQtyActions}>
+              <TouchableOpacity 
+                style={[styles.customQtyBtn, styles.cancelBtn]} 
+                onPress={() => setCustomQtyVisible(false)}
+              >
+                <Text style={styles.cancelBtnText}>CANCEL</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.customQtyBtn, styles.applyBtn]} 
+                onPress={handleCustomQtyApply}
+              >
+                <Text style={styles.applyBtnText}>APPLY</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* --- FOOTER BUTTONS --- */}
       <View style={styles.newFooter}>
         <TouchableOpacity style={styles.footerIconBtn}>
@@ -406,15 +526,29 @@ const ProductScreen = ({ route, navigation }: any) => {
           style={styles.addToBagBtn}
           onPress={() => {
             addToCart({
-              id: Math.random().toString(36).substr(2, 9),
+              id: currentProductId,
               title: productData.title,
               price: productData.price,
               originalPrice: productData.mrp,
               discount: productData.discount,
               image: vendorImage,
-              quantity: 1,
+              quantity: quantity,
+              brand: vendorName,
             });
-            navigation.navigate('OrderSummary');
+            navigation.navigate('OrderSummary', {
+              product: {
+                id: currentProductId,
+                title: productData.title,
+                price: productData.price,
+                originalPrice: productData.mrp,
+                discount: productData.discount,
+                image: vendorImage,
+                quantity: quantity,
+                brand: vendorName,
+                rating: productData.rating,
+                reviews: productData.reviews
+              }
+            });
           }}
         >
           <Ionicons name="cart-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
@@ -825,6 +959,90 @@ const styles = StyleSheet.create({
     color: '#cc0c39',
     fontWeight: 'bold',
   },
+  qtySelectorBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#eee',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 15,
+    borderRadius: 4,
+    width: 100,
+  },
+  qtySelectorText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  qtyMenuContainer: {
+    backgroundColor: '#FFF',
+    width: '80%',
+    borderRadius: 8,
+    padding: 10,
+  },
+  qtyMenuTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEE',
+  },
+  qtyOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  qtyOptionText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  customQtyContainer: {
+    backgroundColor: '#FFF',
+    width: '85%',
+    borderRadius: 8,
+    padding: 20,
+  },
+  customQtyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+  customQtyInput: {
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 4,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  customQtyActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  customQtyBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginLeft: 10,
+  },
+  cancelBtn: {},
+  applyBtn: {},
+  cancelBtnText: {
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  applyBtnText: {
+    color: '#2874F0',
+    fontWeight: 'bold',
+  },
 });
 
-export default ProductScreen;
+export default ProductScreen; 

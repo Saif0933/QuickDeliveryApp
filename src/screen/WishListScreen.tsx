@@ -12,8 +12,8 @@ import {
     View
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useWishlist } from '../Context/WishlistContext';
 import { useCart } from '../Context/CartContext';
+import { useWishlist } from '../Context/WishlistContext';
 import { COLORS } from '../theme/color';
 
 const { width } = Dimensions.get('window');
@@ -119,7 +119,7 @@ const WishListScreen: React.FC = () => {
             <Text style={styles.emptySubtitle}>Save items that you like in your wishlist. Review them anytime and easily move them to bag.</Text>
             <TouchableOpacity 
                 style={styles.shopNowBtn}
-                onPress={() => navigation.navigate('HomeScreen')}
+                onPress={() => navigation.navigate('Home')}
             >
                 <Text style={styles.shopNowText}>SHOP NOW</Text>
             </TouchableOpacity>

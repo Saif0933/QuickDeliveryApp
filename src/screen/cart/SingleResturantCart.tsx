@@ -1,14 +1,14 @@
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { useGetCartByVendorId } from "../../api/hooks/allCart";

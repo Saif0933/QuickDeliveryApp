@@ -96,49 +96,70 @@ const staticSuggestedProducts = [
   }
 ];
 
+import { useWishlist } from '../Context/WishlistContext';
+
 const SuggestedForYou = () => {
   const navigation = useNavigation<any>();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
-  const renderProduct = ({ item }: { item: typeof staticSuggestedProducts[0] }) => (
-    <TouchableOpacity 
-      style={styles.card}
-      activeOpacity={0.9}
-      onPress={() => navigation.navigate('ProductScreen', {
-        productName: item.name,
-        vendorName: item.brand,
-        vendorImage: item.image,
-        description: item.description
-      })}
-    >
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: item.image }} style={styles.image} resizeMode="cover" />
-        <View style={styles.tagBadge}>
-          <Text style={styles.tagText}>{item.tag}</Text>
+  const renderProduct = ({ item }: { item: typeof staticSuggestedProducts[0] }) => {
+    const isAdded = isInWishlist(item.id);
+
+    return (
+      <TouchableOpacity 
+        style={styles.card}
+        activeOpacity={0.9}
+        onPress={() => navigation.navigate('ProductScreen', {
+          productName: item.name,
+          vendorName: item.brand,
+          vendorImage: item.image,
+          description: item.description
+        })}
+      >
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: item.image }} style={styles.image} resizeMode="cover" />
+          <View style={styles.tagBadge}>
+            <Text style={styles.tagText}>{item.tag}</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.bookmarkWrapper}
+            onPress={() => toggleWishlist({
+              id: item.id,
+              title: item.name,
+              price: item.price,
+              image: item.image,
+              brand: item.brand,
+              rating: parseFloat(item.rating)
+            })}
+          >
+            <Ionicons 
+              name={isAdded ? "heart" : "heart-outline"} 
+              size={18} 
+              color={isAdded ? "#E91E63" : "#999"} 
+            />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.bookmarkWrapper}>
-          <Ionicons name="heart-outline" size={18} color="#999" />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.contentContainer}>
-        <Text style={styles.brandName}>{item.brand}</Text>
-        <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
         
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>{item.price}</Text>
-          <Text style={styles.originalPrice}>{item.originalPrice}</Text>
-          <Text style={styles.discount}>{item.discount}</Text>
-        </View>
-
-        <View style={styles.ratingRow}>
-          <View style={styles.ratingBadge}>
-            <Text style={styles.ratingText}>{item.rating}</Text>
-            <Ionicons name="star" size={10} color="#fff" />
+        <View style={styles.contentContainer}>
+          <Text style={styles.brandName}>{item.brand}</Text>
+          <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
+          
+          <View style={styles.priceRow}>
+            <Text style={styles.price}>{item.price}</Text>
+            <Text style={styles.originalPrice}>{item.originalPrice}</Text>
+            <Text style={styles.discount}>{item.discount}</Text>
+          </View>
+  
+          <View style={styles.ratingRow}>
+            <View style={styles.ratingBadge}>
+              <Text style={styles.ratingText}>{item.rating}</Text>
+              <Ionicons name="star" size={10} color="#fff" />
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>

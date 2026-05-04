@@ -38,9 +38,9 @@ import SuggestedForYou from '../screen/SuggestedForYou';
 import SupportScreen from '../screen/SupportScreen';
 import TopCollectionsScreen from '../screen/TopCollectionsScreen';
 import WalletScreen from '../screen/WalletScreen';
+import WishListScreen from '../screen/WishListScreen';
 import YourOrder from '../screen/YourOrder';
 import YourProfile from '../screen/YourProfile';
-import WishListScreen from '../screen/WishListScreen';
 
 const Stack = createNativeStackNavigator();
 

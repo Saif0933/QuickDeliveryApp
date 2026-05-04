@@ -8,13 +8,10 @@ import {
   FlatList,
   Image,
   Modal,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View
 } from "react-native";
@@ -22,9 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useGetAllCategory } from "../../api/hooks/getAllCategory";
-import { useGetAllVendors } from "../../api/hooks/useVender";
 import { useGetInventoryByCategory } from "../../api/hooks/inventory";
-import { useCart } from "../../Context/CartContext";
 import { useWishlist } from "../../Context/WishlistContext";
 import { COLORS } from "../../theme/color";
 
