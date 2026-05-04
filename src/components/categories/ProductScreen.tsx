@@ -15,6 +15,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useCart } from '../../Context/CartContext';
+import { useWishlist } from '../../Context/WishlistContext';
 import CancellationPolicy from '../cart/CancellationPolicy';
 
 const { width } = Dimensions.get('window');
@@ -27,12 +28,16 @@ const ProductScreen = ({ route, navigation }: any) => {
   } = (route?.params || {}) as any;
 
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [selectedSize, setSelectedSize] = useState('M');
   const [selectedColor, setSelectedColor] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
+  // Removed local isFavorite state to use global WishlistContext
   const [showPolicy, setShowPolicy] = useState(false);
   const [expandedLink, setExpandedLink] = useState<string | null>(null);
+
+  // Generate a unique ID for the product based on title/brand if ID is not passed
+  const currentProductId = route?.params?.id || `prod_${vendorName}_${productName}`;
 
   const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -378,8 +383,24 @@ const ProductScreen = ({ route, navigation }: any) => {
         <TouchableOpacity style={styles.footerIconBtn}>
           <Ionicons name="share-social-outline" size={22} color="#333" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footerIconBtn} onPress={() => setIsFavorite(!isFavorite)}>
-          <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={22} color={isFavorite ? "#e53935" : "#333"} />
+        <TouchableOpacity 
+          style={styles.footerIconBtn} 
+          onPress={() => toggleWishlist({
+            id: currentProductId,
+            title: productName || productData.title,
+            price: productData.price,
+            image: currentGallery[0],
+            brand: vendorName,
+            originalPrice: productData.mrp,
+            rating: parseFloat(productData.rating),
+            reviews: productData.reviews
+          })}
+        >
+          <Ionicons 
+            name={isInWishlist(currentProductId) ? "heart" : "heart-outline"} 
+            size={22} 
+            color={isInWishlist(currentProductId) ? "#e53935" : "#333"} 
+          />
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.addToBagBtn}

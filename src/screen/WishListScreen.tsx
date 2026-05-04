@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Dimensions,
     FlatList,
@@ -12,94 +12,74 @@ import {
     View
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useWishlist } from '../Context/WishlistContext';
+import { useCart } from '../Context/CartContext';
 import { COLORS } from '../theme/color';
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 48) / 2;
 
-const INITIAL_WISHLIST = [
-  {
-    id: '1',
-    name: 'Floral Print Maxi Dress',
-    brand: 'Zara',
-    price: '₹1,299',
-    mrp: '₹2,499',
-    discount: '48% OFF',
-    image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500&q=80',
-    rating: '4.2',
-  },
-  {
-    id: '2',
-    name: 'Slim Fit Cotton Shirt',
-    brand: 'H&M',
-    price: '₹899',
-    mrp: '₹1,599',
-    discount: '43% OFF',
-    image: 'https://images.unsplash.com/photo-1596755094514-f87e32f6b717?w=500&q=80',
-    rating: '4.5',
-  },
-  {
-    id: '3',
-    name: 'High-Rise Skinny Jeans',
-    brand: 'Levi\'s',
-    price: '₹2,499',
-    mrp: '₹3,999',
-    discount: '37% OFF',
-    image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=500&q=80',
-    rating: '4.0',
-  },
-  {
-    id: '4',
-    name: 'Oversized Graphic T-shirt',
-    brand: 'Nike',
-    price: '₹799',
-    mrp: '₹1,299',
-    discount: '38% OFF',
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80',
-    rating: '4.8',
-  }
-];
-
 const WishListScreen: React.FC = () => {
   const navigation = useNavigation<any>();
-  const [wishlist, setWishlist] = useState(INITIAL_WISHLIST);
+  const { wishlistItems, removeFromWishlist } = useWishlist();
+  const { addToCart } = useCart();
 
-  const removeItem = (id: string) => {
-    setWishlist(prev => prev.filter(item => item.id !== id));
+  const handleMoveToBag = (item: any) => {
+    addToCart({
+      id: item.id,
+      title: item.title,
+      price: item.price,
+      originalPrice: item.originalPrice || item.price,
+      discount: '0%',
+      image: item.image,
+      quantity: 1
+    });
+    removeFromWishlist(item.id);
   };
 
-  const renderItem = ({ item }: { item: typeof INITIAL_WISHLIST[0] }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <View style={styles.card}>
       <TouchableOpacity 
         style={styles.imageContainer}
         activeOpacity={0.9}
-        onPress={() => navigation.navigate('ProductScreen', { productName: item.name, vendorName: item.brand, vendorImage: item.image })}
+        onPress={() => navigation.navigate('ProductScreen', { 
+            productName: item.title, 
+            vendorName: item.brand, 
+            vendorImage: item.image,
+            id: item.id
+        })}
       >
         <Image source={{ uri: item.image }} style={styles.productImage} resizeMode="cover" />
         <TouchableOpacity 
           style={styles.removeIcon} 
-          onPress={() => removeItem(item.id)}
+          onPress={() => removeFromWishlist(item.id)}
         >
           <Ionicons name="close" size={20} color="#666" />
         </TouchableOpacity>
-        <View style={styles.ratingBadge}>
-          <Text style={styles.ratingText}>{item.rating}</Text>
-          <Ionicons name="star" size={10} color="#fff" style={{ marginLeft: 2 }} />
-        </View>
+        {item.rating && (
+            <View style={styles.ratingBadge}>
+            <Text style={styles.ratingText}>{item.rating}</Text>
+            <Ionicons name="star" size={10} color="#fff" style={{ marginLeft: 2 }} />
+            </View>
+        )}
       </TouchableOpacity>
 
       <View style={styles.detailsContainer}>
-        <Text style={styles.brandName}>{item.brand}</Text>
-        <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
+        <Text style={styles.brandName}>{item.brand || 'Premium Brand'}</Text>
+        <Text style={styles.productName} numberOfLines={1}>{item.title}</Text>
         
         <View style={styles.priceRow}>
           <Text style={styles.priceText}>{item.price}</Text>
-          <Text style={styles.mrpText}>{item.mrp}</Text>
-          <Text style={styles.discountText}>{item.discount}</Text>
+          {item.originalPrice && (
+              <Text style={styles.mrpText}>{item.originalPrice}</Text>
+          )}
         </View>
 
-        <TouchableOpacity style={styles.addToBagBtn} activeOpacity={0.8}>
-          <Text style={styles.addToBagText}>MOVE TO BAG</Text>
+        <TouchableOpacity 
+            style={styles.moveToBagBtn}
+            onPress={() => handleMoveToBag(item)}
+        >
+          <Text style={styles.moveToBagText}>MOVE TO BAG</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -111,43 +91,39 @@ const WishListScreen: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <View>
-            <Text style={styles.headerTitle}>Wishlist</Text>
-            <Text style={styles.itemCount}>{wishlist.length} Items</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.shareBtn}>
-          <Ionicons name="share-social-outline" size={22} color="#000" />
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
+        <View>
+            <Text style={styles.headerTitle}>My Wishlist</Text>
+            <Text style={styles.itemCount}>{wishlistItems.length} Items</Text>
+        </View>
       </View>
 
-      {wishlist.length > 0 ? (
-        <FlatList
-          data={wishlist}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          numColumns={2}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+      {wishlistItems.length > 0 ? (
+          <FlatList
+            data={wishlistItems}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            contentContainerStyle={styles.listContent}
+            columnWrapperStyle={styles.columnWrapper}
+            showsVerticalScrollIndicator={false}
+          />
       ) : (
-        <View style={styles.emptyContainer}>
-          <View style={styles.emptyIconCircle}>
-            <Ionicons name="heart-outline" size={60} color="#ccc" />
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+                <Ionicons name="heart-outline" size={60} color="#ccc" />
+            </View>
+            <Text style={styles.emptyTitle}>Your Wishlist is Empty</Text>
+            <Text style={styles.emptySubtitle}>Save items that you like in your wishlist. Review them anytime and easily move them to bag.</Text>
+            <TouchableOpacity 
+                style={styles.shopNowBtn}
+                onPress={() => navigation.navigate('HomeScreen')}
+            >
+                <Text style={styles.shopNowText}>SHOP NOW</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.emptyTitle}>Your Wishlist is empty</Text>
-          <Text style={styles.emptySubtitle}>Save items that you like in your wishlist. Review them anytime and easily move them to bag.</Text>
-          <TouchableOpacity 
-            style={styles.shopNowBtn}
-            onPress={() => navigation.navigate('Home')}
-          >
-            <Text style={styles.shopNowText}>SHOP NOW</Text>
-          </TouchableOpacity>
-        </View>
       )}
     </SafeAreaView>
   );
@@ -161,50 +137,48 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    borderBottomColor: '#f5f5f5',
   },
   backBtn: {
-    paddingRight: 16,
+    marginRight: 16,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#333',
   },
   itemCount: {
     fontSize: 12,
-    color: '#666',
-    marginTop: -2,
-  },
-  shareBtn: {
-    padding: 8,
+    color: '#999',
+    fontWeight: '600',
   },
   listContent: {
     padding: 16,
   },
+  columnWrapper: {
+    justifyContent: 'space-between',
+  },
   card: {
     width: COLUMN_WIDTH,
-    marginBottom: 20,
-    marginRight: 16,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    overflow: 'hidden',
+    borderRadius: 12,
+    marginBottom: 24,
     borderWidth: 1,
     borderColor: '#f0f0f0',
+    overflow: 'hidden',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
   },
   imageContainer: {
-    width: '100%',
-    height: 200,
+    height: 220,
     position: 'relative',
   },
   productImage: {
@@ -213,24 +187,19 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   ratingBadge: {
     position: 'absolute',
-    bottom: 8,
-    left: 8,
+    bottom: 10,
+    left: 10,
     backgroundColor: 'rgba(255,255,255,0.9)',
     flexDirection: 'row',
     alignItems: 'center',
@@ -247,9 +216,10 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   brandName: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#333',
+    textTransform: 'uppercase',
   },
   productName: {
     fontSize: 12,
@@ -260,12 +230,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 6,
-    flexWrap: 'wrap',
+    marginBottom: 10,
   },
   priceText: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#333',
   },
   mrpText: {
     fontSize: 11,
@@ -273,24 +243,16 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     marginLeft: 6,
   },
-  discountText: {
-    fontSize: 11,
-    color: '#ff4d4d',
-    fontWeight: 'bold',
-    marginLeft: 6,
-  },
-  addToBagBtn: {
-    marginTop: 12,
+  moveToBagBtn: {
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#f5f5f5',
     paddingTop: 10,
     alignItems: 'center',
   },
-  addToBagText: {
+  moveToBagText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.primary || '#ff4d4d',
-    letterSpacing: 0.5,
+    fontWeight: '800',
+    color: COLORS.primary,
   },
   emptyContainer: {
     flex: 1,
@@ -309,19 +271,19 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '800',
     color: '#333',
     marginBottom: 12,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: '#888',
+    color: '#999',
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 32,
   },
   shopNowBtn: {
-    backgroundColor: '#000',
+    backgroundColor: '#333',
     paddingHorizontal: 40,
     paddingVertical: 14,
     borderRadius: 4,
@@ -329,7 +291,7 @@ const styles = StyleSheet.create({
   shopNowText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 1,
   },
 });
