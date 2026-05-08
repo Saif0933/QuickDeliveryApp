@@ -9,9 +9,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import AntIcon from 'react-native-vector-icons/AntDesign';
-import EntypoIcon from 'react-native-vector-icons/Entypo';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // You can use other icon sets too
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { COLORS } from '../../theme/color';
 
 import { useNavigation } from '@react-navigation/native';
 import ConfirmOrderScreen from './ConfirmOrderScreen';
@@ -21,34 +22,40 @@ const PaymentScreen = () => {
   const [selectedPayment, setSelectedPayment] = useState<string | null>('COD');
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
-  const renderPaymentOption = (id: string, iconName: string, label: string, subtitle: string | null = null, discount: string | null = null, cashback: string | null = null, isSelected: boolean = selectedPayment === id, IconComponent: any = Icon) => (
-    <View style={styles.paymentOption}>
-      {/* Only the header row is tappable — fixes event bubbling with Place Order button */}
+  const renderPaymentOption = (id: string, iconName: string, label: string, subtitle: string | null = null, discount: string | null = null, cashback: string | null = null, isSelected: boolean = selectedPayment === id, IconComponent: any = MaterialCommunityIcons) => (
+    <View style={[styles.paymentOption, isSelected && styles.paymentOptionSelected]}>
       <TouchableOpacity
         style={styles.paymentOptionHeader}
         onPress={() => setSelectedPayment(isSelected ? null : id)}
         activeOpacity={0.7}
       >
         <View style={styles.paymentOptionLabel}>
-          <IconComponent name={iconName} size={24} color="#555" style={styles.paymentIcon} />
-          <Text style={styles.paymentLabelText}>{label}</Text>
+          <View style={[styles.iconWrapper, isSelected && styles.iconWrapperActive]}>
+            <IconComponent name={iconName} size={22} color={isSelected ? COLORS.primary : COLORS.textSecondary} />
+          </View>
+          <View style={styles.labelTextWrapper}>
+            <Text style={[styles.paymentLabelText, isSelected && styles.paymentLabelTextActive]}>{label}</Text>
+            {subtitle && !isSelected && <Text style={styles.paymentSubtitleSmall}>{subtitle}</Text>}
+          </View>
         </View>
-        <Icon name={isSelected ? 'chevron-up' : 'chevron-down'} size={24} color="#555" />
+        <Ionicons name="chevron-forward" size={18} color={COLORS.muted} style={{marginRight: 5}} />
       </TouchableOpacity>
 
       {isSelected && (
         <View style={styles.paymentOptionDetails}>
-          {subtitle && <Text style={styles.paymentSubtitle}>{subtitle}</Text>}
-          {discount && <Text style={styles.discountText}>{discount}</Text>}
-          {cashback && <Text style={styles.cashbackText}>{cashback}</Text>}
+          <View style={{paddingLeft: 52}}>
+            {subtitle && <Text style={styles.paymentSubtitle}>{subtitle}</Text>}
+            {discount && <View style={styles.offerBadge}><Text style={styles.discountText}>{discount}</Text></View>}
+            {cashback && <View style={styles.cashbackBadge}><Text style={styles.cashbackText}>{cashback}</Text></View>}
 
-          <View style={styles.optionMessageContainer}>
-             <Text style={styles.optionMessageText}>
-               {id === 'UPI' && "Pay directly from your bank account using any UPI app."}
-               {id === 'CARD' && "All major credit and debit cards are supported. 100% Secure."}
-               {id === 'EMI' && "Easy monthly installments available on select bank cards."}
-               {id === 'COD' && "Pay by Cash or QR code at the time of delivery."}
-             </Text>
+            <View style={styles.optionMessageContainer}>
+               <Text style={styles.optionMessageText}>
+                 {id === 'UPI' && "Pay directly from your bank account using any UPI app like PhonePe, GPay, or Paytm."}
+                 {id === 'CARD' && "All major credit and debit cards are supported. Securely encrypted payments."}
+                 {id === 'EMI' && "Easy monthly installments available on select bank cards with flexible tenures."}
+                 {id === 'COD' && "Pay by Cash or QR code at the time of delivery. Safe and contactless."}
+               </Text>
+            </View>
           </View>
 
           <TouchableOpacity
@@ -65,69 +72,62 @@ const PaymentScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        {/* Status Bar Section (Simulated) */}
-        {/* <View style={styles.statusBar}>
-          <Text style={styles.statusBarText}>11:59</Text>
-          <View style={styles.statusBarIcons}>
-            <EntypoIcon name="signal" size={16} color="black" />
-            <Text style={styles.statusBarText}> VoLTE </Text>
-            <EntypoIcon name="battery" size={16} color="black" />
-          </View>
-        </View> */}
-
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.headerTitleContainer}>
-            <TouchableOpacity>
-              <AntIcon name="arrowleft" size={24} color="black" />
-            </TouchableOpacity>
-            <View>
-              <Text style={styles.headerTitle}>Payments</Text>
-            </View>
-          </View>
-          <View style={styles.secureContainer}>
-            <Icon name="lock-outline" size={16} color="#555" />
-            <Text style={styles.secureText}>100% Secure</Text>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Payment Options</Text>
+          <View style={styles.secureBadge}>
+            <MaterialIcons name="security" size={14} color={COLORS.muted} />
+            <Text style={styles.secureText}>SECURE</Text>
           </View>
         </View>
 
         {/* Total Amount */}
-        <View style={styles.totalAmountContainer}>
-          <Text style={styles.totalAmountLabel}>Total Amount <EntypoIcon name="chevron-small-down" size={16} color="#1A0DAB" /></Text>
+        <View style={styles.totalAmountSection}>
+          <Text style={styles.totalAmountLabel}>Amount to Pay</Text>
           <Text style={styles.totalAmountValue}>₹1,355</Text>
         </View>
 
         {/* Discount Section */}
-        <View style={styles.discountSection}>
-          <Text style={styles.discountTitle}>10% instant discount</Text>
-          <Text style={styles.discountSubtitle}>Claim now with payment offers</Text>
-          <View style={styles.offerIcons}>
-            <View style={styles.offerIconContainer}>
-               <Text style={styles.offerIconText}>%</Text>
+        <View style={styles.discountBanner}>
+          <View style={styles.discountInfo}>
+            <MaterialCommunityIcons name="label-percent" size={24} color="#388e3c" />
+            <View style={{marginLeft: 12}}>
+              <Text style={styles.discountTitle}>10% Instant Discount</Text>
+              <Text style={styles.discountSubtitle}>Applicable on major bank offers</Text>
             </View>
-            <Image source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png' }} style={styles.visaIcon} />
-            <Text style={styles.moreOffers}>+3</Text>
           </View>
+          <Ionicons name="chevron-forward" size={18} color="#388e3c" style={{marginRight: 5}} />
         </View>
 
-        {/* Payment Options */}
-        {renderPaymentOption('UPI', 'bank-transfer', 'UPI', 'Pay by any UPI app', 'Save upto ₹35 • 14 offers available')}
-        {renderPaymentOption('CARD', 'credit-card-outline', 'Credit / Debit / ATM Card', 'Add and secure cards as per RBI guidelines', 'Get upto 5% cashback • 2 offers available')}
-        {renderPaymentOption('EMI', 'calendar-clock', 'EMI', 'Credit Card EMI')}
-        {renderPaymentOption('COD', 'cash-register', 'Cash on Delivery', null, null, null, selectedPayment === 'COD', Icon)}
+        <View style={styles.sectionDivider} />
 
-        {/* Flipkart Gift Card */}
-        <TouchableOpacity style={styles.giftCardContainer}>
-          <Icon name="gift-outline" size={24} color="#555" />
-          <Text style={styles.giftCardText}>Have a Gift Card?</Text>
-          <Text style={styles.addText}>Add</Text>
+        {/* Payment Options */}
+        {renderPaymentOption('UPI', 'bank-transfer', 'UPI / Google Pay / PhonePe', 'Pay using any UPI app', 'Save upto ₹35')}
+        {renderPaymentOption('CARD', 'credit-card-outline', 'Credit / Debit / ATM Card', 'Add and secure cards', '5% Cashback')}
+        {renderPaymentOption('EMI', 'calendar-clock', 'Easy EMI', 'Credit Card EMI')}
+        {renderPaymentOption('COD', 'cash-register', 'Cash on Delivery', 'Pay at your doorstep', null, null, selectedPayment === 'COD', MaterialCommunityIcons)}
+
+        <View style={styles.sectionDivider} />
+
+        {/* Gift Card */}
+        <TouchableOpacity style={styles.giftCardSection}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Ionicons name="gift-outline" size={22} color={COLORS.textSecondary} />
+            <Text style={styles.giftCardText}>Have a Gift Card?</Text>
+          </View>
+          <Text style={styles.addLink}>Add</Text>
         </TouchableOpacity>
 
+        <View style={styles.sectionDivider} />
+
         {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>35 Crore happy customers and counting!</Text>
-          <AntIcon name="smileo" size={32} color="#888" style={styles.smileyIcon} />
+        <View style={styles.footerSection}>
+          <Ionicons name="happy-outline" size={32} color={COLORS.muted} />
+          <Text style={styles.footerText}>Over 35 Crore happy customers trust us for secure payments.</Text>
         </View>
       </ScrollView>
 
@@ -141,227 +141,100 @@ const PaymentScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  statusBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingTop: 5,
-    paddingBottom: 5,
-  },
-  statusBarText: {
-    fontSize: 12,
-    color: 'black',
-  },
-  statusBarIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  container: { flex: 1, backgroundColor: COLORS.white },
   header: {
+    height: 60,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#f0f0f0',
   },
-  headerTitleContainer: {
+  backButton: { padding: 4 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary, flex: 1, marginLeft: 12 },
+  secureBadge: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    backgroundColor: '#f8f9fa',
   },
-  stepText: {
-    fontSize: 12,
-    color: '#555',
-    marginLeft: 15,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginLeft: 15,
-  },
-  secureContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#eee',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
-  },
-  secureText: {
-    fontSize: 12,
-    marginLeft: 5,
-    color: '#555',
-  },
-  totalAmountContainer: {
+  secureText: { fontSize: 10, fontWeight: '800', color: COLORS.muted, marginLeft: 4 },
+  totalAmountSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    backgroundColor: '#F8F9FD',
+    padding: 16,
+    backgroundColor: COLORS.white,
   },
-  totalAmountLabel: {
-    fontSize: 16,
-    color: '#1A0DAB',
-  },
-  totalAmountValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1A0DAB',
-  },
-  discountSection: {
-    backgroundColor: '#E7F9EE',
-    margin: 15,
-    padding: 15,
+  totalAmountLabel: { fontSize: 15, color: COLORS.textSecondary, fontWeight: '500' },
+  totalAmountValue: { fontSize: 20, fontWeight: '800', color: COLORS.textPrimary },
+  discountBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: COLORS.SOFT_GREEN,
+    margin: 16,
+    padding: 14,
     borderRadius: 8,
   },
-  discountTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2E7D32',
-  },
-  discountSubtitle: {
-    fontSize: 14,
-    color: '#2E7D32',
-    marginTop: 5,
-  },
-  offerIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  offerIconContainer: {
-    backgroundColor: '#2E7D32',
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+  discountInfo: { flexDirection: 'row', alignItems: 'center' },
+  discountTitle: { fontSize: 15, fontWeight: '700', color: '#1b5e20' },
+  discountSubtitle: { fontSize: 12, color: '#1b5e20', marginTop: 2 },
+  sectionDivider: { height: 8, backgroundColor: '#f8f9fa', borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#f0f0f0' },
+  paymentOption: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  paymentOptionSelected: { backgroundColor: '#fff' },
+  paymentOptionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  paymentOptionLabel: { flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: 12 },
+  iconWrapper: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f8f9fa',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: 12,
   },
-  offerIconText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+  iconWrapperActive: { backgroundColor: COLORS.SOFT_BLUE },
+  labelTextWrapper: { flex: 1 },
+  paymentLabelText: { fontSize: 15, fontWeight: '600', color: COLORS.textPrimary },
+  paymentLabelTextActive: { color: COLORS.primary, fontWeight: '700' },
+  paymentSubtitleSmall: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
+  paymentOptionDetails: { marginTop: 16 },
+  paymentSubtitle: { fontSize: 14, color: COLORS.textSecondary, marginBottom: 8 },
+  offerBadge: { backgroundColor: COLORS.SOFT_GREEN, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4, marginBottom: 8 },
+  discountText: { fontSize: 12, color: '#2e7d32', fontWeight: '600' },
+  cashbackBadge: { backgroundColor: '#fff3e0', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4, marginBottom: 8 },
+  cashbackText: { fontSize: 12, color: '#e65100', fontWeight: '600' },
+  optionMessageContainer: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary,
   },
-  visaIcon: {
-    width: 40,
-    height: 20,
-    resizeMode: 'contain',
-    marginRight: 10,
+  optionMessageText: { fontSize: 12, color: COLORS.textSecondary, lineHeight: 18 },
+  placeOrderButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
   },
-  moreOffers: {
-    fontSize: 14,
-    color: '#555',
-  },
-  paymentOption: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  paymentOptionHeader: {
+  placeOrderText: { fontSize: 16, fontWeight: '700', color: COLORS.white },
+  giftCardSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    padding: 16,
+    backgroundColor: COLORS.white,
   },
-  paymentOptionLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  paymentIcon: {
-    marginRight: 15,
-  },
-  paymentLabelText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  paymentOptionDetails: {
-    marginTop: 10,
-    marginLeft: 39, // Aligns with the label text
-  },
-  paymentSubtitle: {
-    fontSize: 14,
-    color: '#555',
-  },
-  discountText: {
-    fontSize: 14,
-    color: '#2E7D32',
-    marginTop: 5,
-  },
-  cashbackText: {
-    fontSize: 14,
-    color: '#E65100',
-    marginTop: 5,
-  },
-  codDetails: {
-    marginTop: 15,
-    backgroundColor: '#F9F9F9',
-    padding: 15,
-    borderRadius: 8,
-  },
-  codText: {
-    fontSize: 14,
-    color: '#555',
-    lineHeight: 20,
-  },
-  placeOrderButton: {
-    backgroundColor: '#000',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 15,
-    alignItems: 'center',
-  },
-  placeOrderText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  giftCardContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    marginTop: 10,
-  },
-  giftCardText: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: 15,
-  },
-  addText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1A0DAB',
-  },
-  footer: {
-    marginTop: 40,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 16,
-    color: '#888',
-    textAlign: 'center',
-    paddingHorizontal: 20,
-  },
-  smileyIcon: {
-    marginTop: 15,
-  },
-  optionMessageContainer: {
-    backgroundColor: '#f8f9fa',
-    padding: 10,
-    borderRadius: 6,
-    marginTop: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: '#000',
-  },
-  optionMessageText: {
-    fontSize: 12,
-    color: '#666',
-    lineHeight: 18,
-  },
+  giftCardText: { fontSize: 15, fontWeight: '600', color: COLORS.textPrimary, marginLeft: 12 },
+  addLink: { fontSize: 14, fontWeight: '700', color: COLORS.primary },
+  footerSection: { paddingVertical: 40, paddingHorizontal: 40, alignItems: 'center' },
+  footerText: { fontSize: 14, color: COLORS.muted, textAlign: 'center', marginTop: 12, lineHeight: 20 },
 });
 
 export default PaymentScreen;

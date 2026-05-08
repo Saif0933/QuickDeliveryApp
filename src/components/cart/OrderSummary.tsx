@@ -118,7 +118,7 @@ const OrderSummary = ({ route }: any) => {
       <View style={styles.qtyAndDeliveryRow}>
         <TouchableOpacity style={styles.qtySelector}>
           <Text style={styles.qtyLabel}>Qty: {quantity}</Text>
-          <Ionicons name="chevron-down" size={14} color={COLORS.textPrimary} />
+          <Ionicons name="chevron-down" size={14} color={COLORS.textPrimary} style={{marginLeft: 6, marginRight: 5}} />
         </TouchableOpacity>
         <Text style={styles.deliveryDate}>Delivery by Apr 3, Fri</Text>
       </View>
