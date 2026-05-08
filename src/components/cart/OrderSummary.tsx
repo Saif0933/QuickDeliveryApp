@@ -11,6 +11,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { COLORS } from '../../theme/color';
 
 const { width } = Dimensions.get('window');
 
@@ -47,7 +50,7 @@ const OrderSummary = ({ route }: any) => {
   const Header = () => (
     <View style={styles.header}>
       <TouchableOpacity style={styles.headerBack} onPress={() => navigation.goBack()}>
-        <Text style={{ fontSize: 24, color: '#333' }}>←</Text>
+        <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
       </TouchableOpacity>
       <Text style={styles.headerTitle}>Order Summary</Text>
     </View>
@@ -55,67 +58,70 @@ const OrderSummary = ({ route }: any) => {
 
   // --- Deliver To Section ---
   const DeliverTo = () => (
-    <View style={styles.deliverToContainer}>
+    <View style={styles.deliverToCard}>
       <View style={styles.deliverToHeader}>
-        <Text style={styles.sectionTitle}>Deliver to:</Text>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <MaterialIcons name="location-on" size={20} color={COLORS.primary} style={{marginRight: 4}} />
+          <Text style={styles.sectionTitle}>Deliver to:</Text>
+        </View>
         <TouchableOpacity style={styles.changeButton}>
           <Text style={styles.changeButtonText}>Change</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.addressNameWrapper}>
-        <Text style={styles.deliverToName}>Md Saif</Text>
-        <View style={styles.homeTag}>
-          <Text style={styles.homeTagText}>HOME</Text>
+      <View style={styles.addressInfoWrapper}>
+        <View style={styles.addressNameWrapper}>
+          <Text style={styles.deliverToName}>Md Saif</Text>
+          <View style={styles.homeTag}>
+            <Text style={styles.homeTagText}>HOME</Text>
+          </View>
         </View>
+        <Text style={styles.deliverToAddress}>
+          Harmu housing colony basant vihar , Delatoli, Basant Vihar Road Number 1/B, Harmu Housing Colony , Ranchi 834002
+        </Text>
+        <Text style={styles.deliverToPhone}>9334804356</Text>
       </View>
-      <Text style={styles.deliverToAddress}>
-        Harmu housing colony basant vihar , Delatoli, Basant Vihar Road Number 1/B, Harmu Housing Colony , Ranchi 834002
-      </Text>
-      <Text style={styles.deliverToPhone}>9334804356</Text>
     </View>
   );
 
   // --- Product Item Section ---
   const ProductItem = () => (
-    <View style={styles.productContainer}>
+    <View style={styles.productCard}>
       <View style={styles.productTop}>
         <Image 
           source={{ uri: displayProduct.image }} 
           style={styles.productImage} 
         />
         <View style={styles.productDetails}>
-          <Text style={styles.productName} numberOfLines={1}>{displayProduct.title}</Text>
-          <Text style={styles.productSize}>Brand: {displayProduct.brand}</Text>
+          <Text style={styles.productBrand}>{displayProduct.brand}</Text>
+          <Text style={styles.productName} numberOfLines={2}>{displayProduct.title}</Text>
           
           <View style={styles.ratingRow}>
-            <View style={styles.starGroup}>
-              {[1, 2, 3, 4].map(star => <Text key={star} style={{color: '#388e3c', fontSize: 14}}>★</Text>)}
-              <Text style={{color: '#c8e6c9', fontSize: 14}}>★</Text>
+            <View style={styles.ratingBadge}>
+              <Text style={styles.ratingValue}>{displayProduct.rating}</Text>
+              <Ionicons name="star" size={10} color="#fff" style={{marginLeft: 2}} />
             </View>
-            <Text style={styles.ratingValue}>{displayProduct.rating}</Text>
-            <Text style={styles.ratingCount}>· ({displayProduct.reviews})</Text>
-            <View style={{flexDirection:'row', alignItems:'center', marginLeft: 8}}>
-                <Text style={{color: '#2874f0', fontSize: 16}}>🔰</Text>
+            <Text style={styles.ratingCount}>({displayProduct.reviews})</Text>
+            <View style={styles.assuredBadge}>
+                <Ionicons name="checkmark-circle" size={12} color="#fff" />
                 <Text style={styles.assuredText}>Assured</Text>
             </View>
           </View>
           
           <View style={styles.priceRow}>
-            <Text style={styles.discountText}>{displayProduct.discount}</Text>
-            <Text style={styles.mrpText}>{displayProduct.originalPrice}</Text>
             <Text style={styles.finalPriceText}>{displayProduct.price}</Text>
+            <Text style={styles.mrpText}>{displayProduct.originalPrice}</Text>
+            <Text style={styles.discountText}>{displayProduct.discount}</Text>
           </View>
         </View>
       </View>
       
-      <View style={styles.qtyRow}>
+      <View style={styles.qtyAndDeliveryRow}>
         <TouchableOpacity style={styles.qtySelector}>
           <Text style={styles.qtyLabel}>Qty: {quantity}</Text>
-          <Text style={{fontSize: 10, color: '#333'}}>▼</Text>
+          <Ionicons name="chevron-down" size={14} color={COLORS.textPrimary} />
         </TouchableOpacity>
+        <Text style={styles.deliveryDate}>Delivery by Apr 3, Fri</Text>
       </View>
-
-      <Text style={styles.deliveryDate}>Delivery by Apr 3, Fri</Text>
     </View>
   );
 
@@ -155,11 +161,14 @@ const OrderSummary = ({ route }: any) => {
       {/* Footer */}
       <View style={styles.footerContainer}>
         <View style={styles.footerPriceDetails}>
-            <Text style={styles.footerMrp}>₹{totalMrp.toLocaleString()}</Text>
             <Text style={styles.footerFinalPrice}>₹{totalPrice.toLocaleString()}</Text>
+            <TouchableOpacity onPress={() => {/* Show price detail modal or scroll */}}>
+              <Text style={styles.viewDetailsText}>View Details</Text>
+            </TouchableOpacity>
         </View>
         <TouchableOpacity 
           style={styles.continueButton}
+          activeOpacity={0.8}
           onPress={() => navigation.navigate('PaymentScreen', {
             orderData: {
               product: displayProduct,
@@ -176,154 +185,149 @@ const OrderSummary = ({ route }: any) => {
 };
 
 const styles = StyleSheet.create({
-  mainContainer: { flex: 1, backgroundColor: '#f1f3f6' },
+  mainContainer: { flex: 1, backgroundColor: COLORS.white },
   contentContainer: { flex: 1 },
-  separator: { height: 10, backgroundColor: '#f1f3f6' },
+  separator: { 
+    height: 8, 
+    backgroundColor: '#f8f9fa', 
+    borderTopWidth: 1, 
+    borderBottomWidth: 1, 
+    borderColor: '#f0f0f0' 
+  },
   header: {
-    height: 56,
-    backgroundColor: '#fff',
+    height: 60,
+    backgroundColor: COLORS.white,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    elevation: 3,
-  },
-  headerBack: { paddingRight: 16 },
-  headerTitle: { fontSize: 18, fontWeight: '500', color: '#212121' },
-  stepperContainer: {
-    backgroundColor: '#fff',
-    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  stepperWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: width * 0.1,
-  },
-  step: { alignItems: 'center', width: width * 0.22 },
-  stepCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepCircleActive: {
-    backgroundColor: '#2874f0',
-    borderColor: '#2874f0',
-  },
-  stepCircleCompleted: {
-    backgroundColor: '#f1f3f6',
-    borderColor: '#e0e0e0',
-  },
-  stepLabel: { fontSize: 10, color: '#999', marginTop: 4, textAlign: 'center' },
-  stepLabelActive: { color: '#212121', fontWeight: '500' },
-  stepLabelCompleted: { color: '#878787' },
-  stepLine: {
-    height: 1,
-    flex: 1,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 8,
-    marginBottom: 16,
-  },
-  stepLineCompleted: { backgroundColor: '#878787' },
-  deliverToContainer: {
-    backgroundColor: '#fff',
+  headerBack: { padding: 4 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary, marginLeft: 12 },
+  deliverToCard: {
+    backgroundColor: COLORS.white,
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
-  deliverToHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  sectionTitle: { fontSize: 16, fontWeight: '500', color: '#212121' },
+  deliverToHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 12,
+  },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary },
   changeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: '#d6d6d6',
-    borderRadius: 2,
+    borderColor: COLORS.primary,
+    borderRadius: 4,
   },
-  changeButtonText: { fontSize: 14, color: '#2874f0', fontWeight: '500' },
-  addressNameWrapper: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
-  deliverToName: { fontSize: 16, fontWeight: 'bold', color: '#212121', marginRight: 8 },
-  homeTag: { backgroundColor: '#f0f0f0', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 2 },
-  homeTagText: { fontSize: 10, color: '#878787', fontWeight: 'bold' },
-  deliverToAddress: { fontSize: 14, color: '#333', lineHeight: 20, marginBottom: 4 },
-  deliverToPhone: { fontSize: 14, color: '#333', fontWeight: '500' },
-  productContainer: { backgroundColor: '#fff', padding: 16 },
+  changeButtonText: { fontSize: 13, color: COLORS.primary, fontWeight: '600' },
+  addressInfoWrapper: { },
+  addressNameWrapper: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  deliverToName: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary, marginRight: 8 },
+  homeTag: { backgroundColor: COLORS.SOFT_BLUE, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
+  homeTagText: { fontSize: 10, color: COLORS.primary, fontWeight: '800' },
+  deliverToAddress: { fontSize: 14, color: COLORS.textSecondary, lineHeight: 20, marginBottom: 8 },
+  deliverToPhone: { fontSize: 14, color: COLORS.textPrimary, fontWeight: '600' },
+  productCard: { 
+    backgroundColor: COLORS.white, 
+    padding: 16,
+  },
   productTop: { flexDirection: 'row' },
-  productImage: { width: 64, height: 64, marginRight: 16, resizeMode: 'cover' },
+  productImage: { width: 90, height: 110, borderRadius: 4, marginRight: 16, backgroundColor: '#f9f9f9' },
   productDetails: { flex: 1 },
-  productName: { fontSize: 16, color: '#212121', marginBottom: 2 },
-  productSize: { fontSize: 12, color: '#878787', marginBottom: 4 },
-  ratingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
-  starGroup: { flexDirection: 'row', marginRight: 4 },
-  ratingValue: { fontSize: 12, color: '#388e3c', fontWeight: 'bold' },
-  ratingCount: { fontSize: 12, color: '#878787', marginLeft: 2 },
-  assuredText: { fontSize: 10, color: '#878787', marginLeft: 2, fontStyle: 'italic' },
-  priceRow: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 4 },
-  discountText: { fontSize: 16, color: '#388e3c', fontWeight: 'bold', marginRight: 8 },
-  mrpText: { fontSize: 14, color: '#878787', textDecorationLine: 'line-through', marginRight: 8 },
-  finalPriceText: { fontSize: 18, color: '#212121', fontWeight: 'bold' },
-  qtyRow: { marginTop: 12 },
+  productBrand: { fontSize: 12, color: COLORS.muted, fontWeight: '700', textTransform: 'uppercase', marginBottom: 2 },
+  productName: { fontSize: 15, color: COLORS.textPrimary, fontWeight: '500', marginBottom: 8, lineHeight: 20 },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  ratingBadge: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#388e3c', 
+    paddingHorizontal: 6, 
+    paddingVertical: 2, 
+    borderRadius: 4,
+    marginRight: 6
+  },
+  ratingValue: { fontSize: 12, color: COLORS.white, fontWeight: '700' },
+  ratingCount: { fontSize: 12, color: COLORS.muted, marginRight: 12 },
+  assuredBadge: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: COLORS.primary, 
+    paddingHorizontal: 6, 
+    paddingVertical: 2, 
+    borderRadius: 4 
+  },
+  assuredText: { fontSize: 10, color: COLORS.white, fontWeight: '700', marginLeft: 2 },
+  priceRow: { flexDirection: 'row', alignItems: 'center' },
+  finalPriceText: { fontSize: 18, color: COLORS.textPrimary, fontWeight: '800', marginRight: 8 },
+  mrpText: { fontSize: 13, color: COLORS.muted, textDecorationLine: 'line-through', marginRight: 8 },
+  discountText: { fontSize: 13, color: '#388e3c', fontWeight: '700' },
+  qtyAndDeliveryRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f5f5f5',
+  },
   qtySelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 2,
-    width: 60,
+    paddingHorizontal: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 6,
   },
-  qtyLabel: { fontSize: 14, color: '#212121', fontWeight: '500' },
-  deliveryDate: { marginTop: 16, fontSize: 14, color: '#212121', fontWeight: '500' },
-  priceDetailsContainer: { backgroundColor: '#fff', padding: 16 },
-  priceRowItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12 },
-  priceLabel: { fontSize: 15, color: '#212121' },
-  discountLabel: { fontSize: 15, color: '#388e3c' },
-  totalRow: { borderTopWidth: 1, borderTopColor: '#f0f0f0', marginTop: 10, paddingTop: 16 },
-  totalLabel: { fontSize: 18, fontWeight: 'bold', color: '#212121' },
+  qtyLabel: { fontSize: 14, color: COLORS.textPrimary, fontWeight: '600', marginRight: 4 },
+  deliveryDate: { fontSize: 13, color: COLORS.textPrimary, fontWeight: '500' },
+  priceDetailsContainer: { 
+    backgroundColor: COLORS.white, 
+    padding: 16,
+    paddingBottom: 30,
+  },
+  priceRowItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10 },
+  priceLabel: { fontSize: 14, color: COLORS.textSecondary },
+  discountLabel: { fontSize: 14, color: '#388e3c', fontWeight: '600' },
+  totalRow: { borderTopWidth: 1, borderTopColor: '#f5f5f5', marginTop: 8, paddingTop: 14 },
+  totalLabel: { fontSize: 18, fontWeight: '800', color: COLORS.textPrimary },
   footerContainer: {
-    height: 72,
-    backgroundColor: '#fff',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    backgroundColor: COLORS.white,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    justifyContent: 'space-between',
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
-    elevation: 8,
   },
   footerPriceDetails: {
     flex: 1,
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  footerMrp: {
-    fontSize: 12,
-    color: '#878787',
-    textDecorationLine: 'line-through',
   },
   footerFinalPrice: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#212121',
+    fontSize: 20,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+  },
+  viewDetailsText: {
+    fontSize: 12,
+    color: COLORS.primary,
+    fontWeight: '600',
+    marginTop: 2,
   },
   continueButton: {
-    width: 160,
-    height: 44,
-    backgroundColor: '#000',
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 40,
+    paddingVertical: 14,
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   continueButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '700',
+    color: COLORS.white,
   },
 });
 
