@@ -10,210 +10,320 @@ import {
   Dimensions,
   SafeAreaView,
   StatusBar,
-  FlatList,
+  Platform,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const { width } = Dimensions.get('window');
 
-// Mock data for categories
-const categories = [
-  { id: '1', name: 'Men', icon: '👔', color: '#e0f2fe' },
-  { id: '2', name: 'Women', icon: '👗', color: '#fce7f3' },
-  { id: '3', name: 'Kids', icon: '👶', color: '#fef3c7' },
-  { id: '4', name: 'Laundry', icon: '🧺', color: '#dcfce7' },
-  { id: '5', name: 'Dry Clean', icon: '✨', color: '#fae8ff' },
-  { id: '6', name: 'Alteration', icon: '🪡', color: '#ffedd5' },
-];
-
-// Mock data for featured clothing items
-const featuredItems = [
+// Mock data for recommended items
+const recommendedItems = [
   {
     id: '1',
-    name: 'Casual Slim Fit Shirt',
-    price: '₹1,299',
-    rating: 4.8,
-    image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    time: '25 min delivery',
+    name: 'Casual Green Shirt',
     category: 'Men',
+    price: '₹1,299',
+    image: 'https://images.unsplash.com/photo-1607345366928-199ea26cfe3e?w=400&auto=format&fit=crop&q=80',
+    liked: true,
   },
   {
     id: '2',
-    name: 'Floral Summer Dress',
-    price: '₹1,899',
-    rating: 4.9,
-    image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    time: '30 min delivery',
+    name: 'Floral Pink Dress',
     category: 'Women',
+    price: '₹1,899',
+    image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&auto=format&fit=crop&q=80',
+    liked: false,
   },
   {
     id: '3',
-    name: 'Classic Denim Jacket',
-    price: '₹2,499',
-    rating: 4.7,
-    image: 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    time: '20 min delivery',
+    name: 'Classic Denim Shirt',
     category: 'Men',
+    price: '₹1,699',
+    image: 'https://images.unsplash.com/photo-1551537482-f2075a1d41f2?w=400&auto=format&fit=crop&q=80',
+    liked: false,
   },
   {
     id: '4',
-    name: 'Knitted Kids Sweater',
-    price: '₹899',
-    rating: 4.6,
-    image: 'https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    time: '30 min delivery',
+    name: 'Kids Striped Tee',
     category: 'Kids',
+    price: '₹799',
+    image: 'https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=400&auto=format&fit=crop&q=80',
+    liked: true,
   },
 ];
 
+// Mock data for brand logos (using reliable Wikimedia Commons PNG URLs with User-Agent header to prevent 403 blocks)
+const brandLogos: { [key: string]: { uri: string, headers: { 'User-Agent': string } } } = {
+  nike: {
+    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/250px-Logo_NIKE.svg.png',
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
+  },
+  adidas: {
+    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Adidas_Logo.svg/250px-Adidas_Logo.svg.png',
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
+  },
+  zara: {
+    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Zara_Logo.svg/250px-Zara_Logo.svg.png',
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
+  },
+  levis: {
+    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Levi%27s_logo.svg/250px-Levi%27s_logo.svg.png',
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
+  },
+  hm: {
+    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/H%26M-Logo.svg/250px-H%26M-Logo.svg.png',
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
+  },
+  puma: {
+    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Puma_Logo.svg/250px-Puma_Logo.svg.png',
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
+  },
+};
+
 export default function HomeScreen({ navigation }: any) {
-  const [activeTab, setActiveTab] = useState('Home');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const renderCategoryItem = ({ item }: { item: typeof categories[0] }) => (
-    <TouchableOpacity style={styles.categoryCard} activeOpacity={0.8}>
-      <View style={[styles.categoryIconContainer, { backgroundColor: item.color }]}>
-        <Text style={styles.categoryEmoji}>{item.icon}</Text>
-      </View>
-      <Text style={styles.categoryName}>{item.name}</Text>
-    </TouchableOpacity>
-  );
-
-  const renderProductItem = ({ item }: { item: typeof featuredItems[0] }) => (
-    <TouchableOpacity style={styles.productCard} activeOpacity={0.95}>
-      <Image source={{ uri: item.image }} style={styles.productImage} />
-      <View style={styles.timeTag}>
-        <MaterialIcons name="bolt" size={12} color="#3b82f6" />
-        <Text style={styles.timeTagText}>{item.time}</Text>
-      </View>
-      <View style={styles.productInfo}>
-        <Text style={styles.productCategory}>{item.category}</Text>
-        <Text style={styles.productName} numberOfLines={1}>
-          {item.name}
-        </Text>
-        <View style={styles.productFooter}>
-          <Text style={styles.productPrice}>{item.price}</Text>
-          <View style={styles.ratingContainer}>
-            <MaterialIcons name="star" size={14} color="#f59e0b" />
-            <Text style={styles.ratingText}>{item.rating}</Text>
-          </View>
-        </View>
-      </View>
-      <TouchableOpacity style={styles.addButton} activeOpacity={0.8}>
-        <MaterialIcons name="add" size={20} color="#ffffff" />
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
-      
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+
       {/* Top Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarEmoji}>🧔</Text>
-          </View>
-          <View style={styles.locationContainer}>
-            <View style={styles.locationTitleRow}>
-              <Text style={styles.locationTitle}>Deliver to</Text>
-              <MaterialIcons name="keyboard-arrow-down" size={18} color="#64748b" />
-            </View>
-            <Text style={styles.locationText} numberOfLines={1}>
-              Sector 62, Noida, UP - 201301
-            </Text>
-          </View>
+        <TouchableOpacity style={styles.menuButton} activeOpacity={0.8}>
+          <MaterialIcons name="menu" size={24} color="#0f172a" />
+        </TouchableOpacity>
+
+        <View style={styles.searchContainer}>
+          <MaterialIcons name="search" size={20} color="#64748b" style={{ marginRight: 6 }} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search for products, brands & more"
+            placeholderTextColor="#64748b"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
         </View>
-        <TouchableOpacity style={styles.notificationButton} activeOpacity={0.8}>
-          <MaterialIcons name="notifications-none" size={24} color="#0f172a" />
-          <View style={styles.notificationBadge} />
+
+        <TouchableOpacity style={styles.headerIconButton} activeOpacity={0.8}>
+          <MaterialIcons name="favorite-border" size={22} color="#0f172a" />
+          <View style={styles.badgeCount}>
+            <Text style={styles.badgeText}>2</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.headerIconButton} 
+          activeOpacity={0.8} 
+          onPress={() => navigation.navigate('Cart')}
+        >
+          <MaterialIcons name="shopping-bag" size={22} color="#0f172a" />
+          <View style={styles.badgeCount}>
+            <Text style={styles.badgeText}>3</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchInputWrapper}>
-            <MaterialIcons name="search" size={22} color="#64748b" />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search clothes, services, brands..."
-              placeholderTextColor="#64748b"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
+        {/* Main Hero Banner */}
+        <View style={styles.heroBannerContainer}>
+          <View style={styles.heroBanner}>
+            <View style={styles.heroTextSection}>
+              <Text style={styles.heroLabel}>NEW COLLECTION</Text>
+              <Text style={styles.heroTitle}>Spring{"\n"}Summer '24</Text>
+              <Text style={styles.heroSubtitle}>Fresh styles for every{"\n"}moment of your day.</Text>
+              <TouchableOpacity style={styles.heroButton} activeOpacity={0.8}>
+                <Text style={styles.heroButtonText}>SHOP NOW</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.heroImageWrapper}>
+              <Image 
+                source={{ uri: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&auto=format&fit=crop&q=80' }} 
+                style={styles.heroImage} 
+                resizeMode="cover"
+              />
+            </View>
           </View>
-          <TouchableOpacity style={styles.filterButton} activeOpacity={0.8}>
-            <MaterialIcons name="tune" size={22} color="#ffffff" />
-          </TouchableOpacity>
+          {/* Carousel Dots */}
+          <View style={styles.carouselDots}>
+            <View style={[styles.dot, styles.activeDot]} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+          </View>
         </View>
 
-        {/* Active Order / Delivery Tracker */}
-        <LinearGradient
-          colors={['#3b82f6', '#1d4ed8']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.trackerCard}
+        {/* Horizontal Category Cards */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.categoryBannersContainer}
         >
-          <View style={styles.trackerHeader}>
-            <View style={styles.trackerStatusContainer}>
-              <Text style={styles.trackerStatusEmoji}>🧺</Text>
-              <View>
-                <Text style={styles.trackerTitle}>Order Out for Delivery</Text>
-                <Text style={styles.trackerSubtitle}>Premium Laundry & Dry Cleaning</Text>
+          {/* Men Banner */}
+          <TouchableOpacity style={[styles.categoryBannerCard, { backgroundColor: '#E3ECE7' }]} activeOpacity={0.9}>
+            <View style={styles.categoryBannerText}>
+              <Text style={styles.categoryBannerTitle}>MEN</Text>
+              <Text style={styles.categoryBannerSubtitle}>Explore Now</Text>
+              <View style={styles.categoryBannerButton}>
+                <MaterialIcons name="arrow-forward" size={14} color="#0f172a" />
               </View>
             </View>
-            <View style={styles.etaContainer}>
-              <Text style={styles.etaLabel}>Arriving in</Text>
-              <Text style={styles.etaTime}>18 mins</Text>
-            </View>
-          </View>
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBarBackground}>
-              <View style={styles.progressBarFill} />
-            </View>
-            <View style={styles.progressSteps}>
-              <Text style={styles.progressStepTextActive}>Picked</Text>
-              <Text style={styles.progressStepTextActive}>Processed</Text>
-              <Text style={styles.progressStepTextActive}>Delivering</Text>
-            </View>
-          </View>
-        </LinearGradient>
+            <Image 
+              source={{ uri: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&auto=format&fit=crop&q=80' }} 
+              style={styles.categoryBannerImage} 
+            />
+          </TouchableOpacity>
 
-        {/* Categories Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Quick Services</Text>
-          <TouchableOpacity>
-            <Text style={styles.seeAllText}>See All</Text>
+          {/* Women Banner */}
+          <TouchableOpacity style={[styles.categoryBannerCard, { backgroundColor: '#FCEAE8' }]} activeOpacity={0.9}>
+            <View style={styles.categoryBannerText}>
+              <Text style={styles.categoryBannerTitle}>WOMEN</Text>
+              <Text style={styles.categoryBannerSubtitle}>Explore Now</Text>
+              <View style={styles.categoryBannerButton}>
+                <MaterialIcons name="arrow-forward" size={14} color="#0f172a" />
+              </View>
+            </View>
+            <Image 
+              source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80' }} 
+              style={styles.categoryBannerImage} 
+            />
+          </TouchableOpacity>
+
+          {/* Kids Banner */}
+          <TouchableOpacity style={[styles.categoryBannerCard, { backgroundColor: '#F8F0DD' }]} activeOpacity={0.9}>
+            <View style={styles.categoryBannerText}>
+              <Text style={styles.categoryBannerTitle}>KIDS</Text>
+              <Text style={styles.categoryBannerSubtitle}>Explore Now</Text>
+              <View style={styles.categoryBannerButton}>
+                <MaterialIcons name="arrow-forward" size={14} color="#0f172a" />
+              </View>
+            </View>
+            <Image 
+              source={{ uri: 'https://images.unsplash.com/photo-1503919545889-aef636e10ad4?w=400&auto=format&fit=crop&q=80' }} 
+              style={styles.categoryBannerImage} 
+            />
+          </TouchableOpacity>
+        </ScrollView>
+
+        {/* Circular Category Grid */}
+        <View style={styles.iconCategoryGrid}>
+          <TouchableOpacity style={styles.iconCategoryCard}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.iconCategoryEmoji}>👕</Text>
+            </View>
+            <Text style={styles.iconCategoryLabel}>T-Shirts</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.iconCategoryCard}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.iconCategoryEmoji}>👔</Text>
+            </View>
+            <Text style={styles.iconCategoryLabel}>Shirts</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.iconCategoryCard}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.iconCategoryEmoji}>👖</Text>
+            </View>
+            <Text style={styles.iconCategoryLabel}>Jeans</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.iconCategoryCard}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.iconCategoryEmoji}>👗</Text>
+            </View>
+            <Text style={styles.iconCategoryLabel}>Dresses</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.iconCategoryCard}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.iconCategoryEmoji}>👟</Text>
+            </View>
+            <Text style={styles.iconCategoryLabel}>Shoes</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.iconCategoryCard}>
+            <View style={styles.iconCircle}>
+              <MaterialIcons name="grid-view" size={22} color="#0f172a" />
+            </View>
+            <Text style={styles.iconCategoryLabel}>View All</Text>
           </TouchableOpacity>
         </View>
-        <FlatList
-          data={categories}
-          renderItem={renderCategoryItem}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryList}
-        />
 
-        {/* Featured Products Grid */}
+        {/* Brand Fest Banner */}
+        <View style={styles.brandFestCard}>
+          <View style={styles.brandFestLeft}>
+            <Text style={styles.brandFestTitle}>BRAND{"\n"}FEST</Text>
+            <Text style={styles.brandFestSubtitle}>
+              Up to <Text style={{ color: '#FFC72C', fontWeight: '900' }}>60%</Text> Off
+            </Text>
+            <TouchableOpacity style={styles.brandFestButton} activeOpacity={0.8}>
+              <Text style={styles.brandFestButtonText}>SHOP NOW</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.brandFestRight}>
+            {/* Tilted overlapping cards containing brand logos */}
+            <TouchableOpacity style={[styles.tiltedCard, styles.cardNike]} onPress={() => navigation.navigate('Brand', { brandName: 'nike' })}>
+              <Image source={brandLogos.nike} style={styles.tiltedLogo} resizeMode="contain" />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.tiltedCard, styles.cardAdidas]} onPress={() => navigation.navigate('Brand', { brandName: 'adidas' })}>
+              <Image source={brandLogos.adidas} style={styles.tiltedLogo} resizeMode="contain" />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.tiltedCard, styles.cardZara]} onPress={() => navigation.navigate('Brand', { brandName: 'zara' })}>
+              <Image source={brandLogos.zara} style={styles.tiltedLogo} resizeMode="contain" />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.tiltedCard, styles.cardHM]} onPress={() => navigation.navigate('Brand', { brandName: 'hm' })}>
+              <Image source={brandLogos.hm} style={styles.tiltedLogo} resizeMode="contain" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Top Brands Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Express Store</Text>
-          <TouchableOpacity>
-            <Text style={styles.seeAllText}>See All</Text>
+          <Text style={styles.sectionTitle}>Top Brands</Text>
+          <TouchableOpacity style={styles.viewAllButton}>
+            <Text style={styles.seeAllText}>View All</Text>
+            <MaterialIcons name="arrow-forward" size={14} color="#64748b" style={{ marginLeft: 2 }} />
           </TouchableOpacity>
         </View>
-        <FlatList
-          data={featuredItems}
-          renderItem={renderProductItem}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          scrollEnabled={false}
-          contentContainerStyle={styles.productGrid}
-          columnWrapperStyle={styles.productRow}
-        />
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.brandsScrollContainer}
+        >
+          {['nike', 'adidas', 'zara', 'levis', 'hm', 'puma'].map((brand, index) => (
+            <TouchableOpacity key={index} style={styles.brandLogoCard} onPress={() => navigation.navigate('Brand', { brandName: brand })}>
+              <Image source={brandLogos[brand]} style={styles.brandLogoImage} resizeMode="contain" />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Recommended For You Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recommended For You</Text>
+          <TouchableOpacity style={styles.viewAllButton}>
+            <Text style={styles.seeAllText}>View All</Text>
+            <MaterialIcons name="arrow-forward" size={14} color="#64748b" style={{ marginLeft: 2 }} />
+          </TouchableOpacity>
+        </View>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.recommendedScrollContainer}
+        >
+          {recommendedItems.map((item) => (
+            <TouchableOpacity key={item.id} style={styles.recProductCard} activeOpacity={0.9}>
+              <Image source={{ uri: item.image }} style={styles.recProductImage} />
+              <TouchableOpacity style={styles.heartButton} activeOpacity={0.8}>
+                <MaterialIcons name="favorite" size={16} color={item.liked ? "#ef4444" : "#cbd5e1"} />
+              </TouchableOpacity>
+              <View style={styles.recProductInfo}>
+                <Text style={styles.recProductCategory}>{item.category}</Text>
+                <Text style={styles.recProductName} numberOfLines={1}>{item.name}</Text>
+                <Text style={styles.recProductPrice}>{item.price}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </ScrollView>
     </SafeAreaView>
   );
@@ -222,263 +332,393 @@ export default function HomeScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#ffffff',
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.04)',
+    borderColor: '#f1f5f9',
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  avatarContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
-  },
-  avatarEmoji: {
-    fontSize: 24,
-  },
-  locationContainer: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  locationTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationTitle: {
-    fontSize: 12,
-    color: '#64748b',
-    marginRight: 2,
-    fontWeight: '600',
-  },
-  locationText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0f172a',
-    marginTop: 2,
-  },
-  notificationButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ef4444',
-  },
-  scrollContent: {
-    paddingBottom: 110,
+  menuButton: {
+    marginRight: 12,
   },
   searchContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  searchInputWrapper: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
+    backgroundColor: '#f8fafc',
+    borderRadius: 25,
     paddingHorizontal: 16,
-    height: 52,
+    height: 44,
+    marginRight: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
   searchInput: {
     flex: 1,
+    fontSize: 13,
     color: '#0f172a',
-    fontSize: 15,
-    marginLeft: 10,
+    padding: 0,
     fontWeight: '500',
   },
-  filterButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: '#3b82f6',
+  headerIconButton: {
+    position: 'relative',
+    padding: 4,
+    marginLeft: 8,
+  },
+  badgeCount: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#0f172a',
+    borderRadius: 8,
+    width: 15,
+    height: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12,
   },
-  trackerCard: {
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    elevation: 8,
-  },
-  trackerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  trackerStatusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  trackerStatusEmoji: {
-    fontSize: 32,
-    marginRight: 12,
-  },
-  trackerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+  badgeText: {
     color: '#ffffff',
+    fontSize: 9,
+    fontWeight: '800',
   },
-  trackerSubtitle: {
+  scrollContent: {
+    paddingBottom: 60,
+    backgroundColor: '#fcfcfc',
+  },
+  heroBannerContainer: {
+    marginHorizontal: 16,
+    marginTop: 16,
+  },
+  heroBanner: {
+    backgroundColor: '#FAF6F0',
+    borderRadius: 24,
+    height: 200,
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  heroTextSection: {
+    flex: 1.1,
+    paddingLeft: 20,
+    justifyContent: 'center',
+  },
+  heroLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#8C6E5A',
+    letterSpacing: 2,
+  },
+  heroTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1E1E1E',
+    marginTop: 6,
+    lineHeight: 28,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  heroSubtitle: {
+    fontSize: 11,
+    color: '#6E6E6E',
+    marginTop: 6,
+    lineHeight: 15,
+  },
+  heroButton: {
+    backgroundColor: '#1E1E1E',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    marginTop: 14,
+  },
+  heroButtonText: {
+    color: '#ffffff',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  heroImageWrapper: {
+    flex: 0.9,
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  carouselDots: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#e2e8f0',
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    backgroundColor: '#1E1E1E',
+    width: 8,
+    height: 8,
+  },
+  categoryBannersContainer: {
+    paddingLeft: 16,
+    paddingRight: 8,
+    marginTop: 20,
+  },
+  categoryBannerCard: {
+    width: 145,
+    height: 100,
+    borderRadius: 20,
+    flexDirection: 'row',
+    marginRight: 12,
+    overflow: 'hidden',
+  },
+  categoryBannerText: {
+    flex: 1.1,
+    paddingLeft: 14,
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  categoryBannerTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1e2022',
+  },
+  categoryBannerSubtitle: {
+    fontSize: 9,
+    color: '#64748b',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  categoryBannerButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  categoryBannerImage: {
+    width: 70,
+    height: '100%',
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+  },
+  iconCategoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 8,
+    marginTop: 24,
+    justifyContent: 'space-between',
+  },
+  iconCategoryCard: {
+    width: (width - 16) / 6 - 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  iconCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  iconCategoryEmoji: {
+    fontSize: 22,
+  },
+  iconCategoryLabel: {
+    fontSize: 10,
+    color: '#475569',
+    fontWeight: '600',
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  brandFestCard: {
+    backgroundColor: '#161819',
+    marginHorizontal: 16,
+    borderRadius: 24,
+    height: 130,
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginTop: 12,
+    overflow: 'hidden',
+  },
+  brandFestLeft: {
+    flex: 1.1,
+    justifyContent: 'center',
+  },
+  brandFestTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#ffffff',
+    lineHeight: 22,
+    letterSpacing: 0.5,
+  },
+  brandFestSubtitle: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.8)',
-    marginTop: 2,
+    marginTop: 4,
   },
-  etaContainer: {
-    alignItems: 'flex-end',
-  },
-  etaLabel: {
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  etaTime: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#ffffff',
-    marginTop: 2,
-  },
-  progressContainer: {
-    marginTop: 20,
-  },
-  progressBarBackground: {
-    height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 3,
-  },
-  progressBarFill: {
-    width: '75%',
-    height: '100%',
+  brandFestButton: {
     backgroundColor: '#ffffff',
-    borderRadius: 3,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 14,
+    marginTop: 12,
   },
-  progressSteps: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
+  brandFestButtonText: {
+    color: '#161819',
+    fontSize: 9,
+    fontWeight: '800',
   },
-  progressStepTextActive: {
-    fontSize: 11,
-    color: '#ffffff',
-    fontWeight: '600',
+  brandFestRight: {
+    flex: 0.9,
+    height: '100%',
+    position: 'relative',
+  },
+  tiltedCard: {
+    position: 'absolute',
+    width: 48,
+    height: 64,
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  tiltedLogo: {
+    width: 32,
+    height: 32,
+  },
+  cardNike: {
+    left: -12,
+    bottom: 30,
+    transform: [{ rotate: '-18deg' }],
+    zIndex: 4,
+  },
+  cardAdidas: {
+    left: 18,
+    bottom: 40,
+    transform: [{ rotate: '-6deg' }],
+    zIndex: 3,
+  },
+  cardZara: {
+    left: 48,
+    bottom: 35,
+    transform: [{ rotate: '12deg' }],
+    zIndex: 2,
+  },
+  cardHM: {
+    left: 78,
+    bottom: 20,
+    transform: [{ rotate: '24deg' }],
+    zIndex: 1,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: 25,
-    marginBottom: 15,
+    paddingHorizontal: 16,
+    marginTop: 28,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
     color: '#0f172a',
-    letterSpacing: 0.5,
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   seeAllText: {
-    fontSize: 14,
-    color: '#3b82f6',
+    fontSize: 12,
+    color: '#64748b',
     fontWeight: '600',
   },
-  categoryList: {
-    paddingLeft: 20,
-    paddingRight: 10,
+  brandsScrollContainer: {
+    paddingLeft: 16,
+    paddingRight: 8,
   },
-  categoryCard: {
-    alignItems: 'center',
-    marginRight: 18,
-  },
-  categoryIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 18,
+  brandLogoCard: {
+    width: 70,
+    height: 50,
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  categoryEmoji: {
-    fontSize: 28,
+  brandLogoImage: {
+    width: 44,
+    height: 30,
   },
-  categoryName: {
-    fontSize: 12,
-    color: '#475569',
-    fontWeight: '600',
-    marginTop: 8,
+  recommendedScrollContainer: {
+    paddingLeft: 16,
+    paddingRight: 8,
+    paddingBottom: 20,
   },
-  productGrid: {
-    paddingHorizontal: 15,
-  },
-  productRow: {
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  productCard: {
+  recProductCard: {
+    width: 140,
     backgroundColor: '#ffffff',
     borderRadius: 20,
-    width: (width - 50) / 2,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.04)',
+    marginRight: 12,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.02,
     shadowRadius: 8,
     elevation: 2,
   },
-  productImage: {
+  recProductImage: {
     width: '100%',
-    height: 140,
+    height: 155,
     backgroundColor: '#f8fafc',
   },
-  timeTag: {
+  heartButton: {
     position: 'absolute',
     top: 10,
-    left: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    flexDirection: 'row',
+    right: 10,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -486,62 +726,26 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  timeTagText: {
-    fontSize: 10,
+  recProductInfo: {
+    padding: 10,
+  },
+  recProductCategory: {
+    fontSize: 8,
     fontWeight: '700',
-    color: '#3b82f6',
-    marginLeft: 3,
-  },
-  productInfo: {
-    padding: 12,
-  },
-  productCategory: {
-    fontSize: 10,
-    fontWeight: '600',
     color: '#64748b',
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  productName: {
-    fontSize: 14,
+  recProductName: {
+    fontSize: 12,
     fontWeight: '700',
     color: '#0f172a',
-    marginTop: 4,
+    marginTop: 2,
   },
-  productFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  productPrice: {
-    fontSize: 15,
+  recProductPrice: {
+    fontSize: 13,
     fontWeight: '800',
     color: '#0f172a',
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    fontSize: 12,
-    color: '#475569',
-    fontWeight: '600',
-    marginLeft: 3,
-  },
-  addButton: {
-    position: 'absolute',
-    bottom: 52,
-    right: 12,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#3b82f6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
+    marginTop: 4,
   },
 });

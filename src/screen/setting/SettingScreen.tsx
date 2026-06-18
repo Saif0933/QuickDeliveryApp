@@ -86,18 +86,17 @@ export default function SettingScreen({ navigation }: any) {
       
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <MaterialIcons name="arrow-back" size={24} color="#0f172a" />
+        <Text style={styles.headerTitle}>Account</Text>
+        <TouchableOpacity style={styles.logoutIconButton} onPress={handleLogout}>
+          <MaterialIcons name="logout" size={22} color="#ef4444" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
-        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>🧔</Text>
+            <Text style={styles.avatarText}>{(user?.name || 'Customer').charAt(0).toUpperCase()}</Text>
           </View>
           <Text style={styles.userName}>{user?.name || 'Customer'}</Text>
           <Text style={styles.userPhone}>{user?.phoneNumber || ''}</Text>
@@ -144,21 +143,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.04)',
+    borderColor: '#f1f5f9',
+    backgroundColor: '#ffffff',
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  logoutIconButton: {
+    padding: 4,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
     color: '#0f172a',
   },
   scrollContent: {
@@ -171,18 +166,20 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 0, 0, 0.04)',
   },
   avatarContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#eff6ff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
-    borderWidth: 2,
-    borderColor: '#3b82f6',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
   },
   avatarText: {
-    fontSize: 50,
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#1d4ed8',
   },
   userName: {
     fontSize: 20,

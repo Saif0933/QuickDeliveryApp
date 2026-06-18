@@ -78,85 +78,96 @@ export default function CartScreen({ navigation }: any) {
       </View>
 
       {cartItems.length > 0 ? (
-        <View style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            {/* Cart Items List */}
-            <View style={styles.itemsSection}>
-              {cartItems.map((item) => (
-                <View key={item.id} style={styles.cartCard}>
-                  <Image source={{ uri: item.image }} style={styles.itemImage} />
-                  <View style={styles.itemDetails}>
-                    <Text style={styles.itemCategory}>{item.category}</Text>
-                    <Text style={styles.itemName} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                    <Text style={styles.itemPrice}>₹{item.price}</Text>
-                    
-                    <View style={styles.quantityControls}>
-                      <TouchableOpacity
-                        style={styles.quantityButton}
-                        onPress={() => updateQuantity(item.id, 'decrease')}
-                      >
-                        <MaterialIcons name="remove" size={16} color="#0f172a" />
-                      </TouchableOpacity>
-                      <Text style={styles.quantityText}>{item.quantity}</Text>
-                      <TouchableOpacity
-                        style={styles.quantityButton}
-                        onPress={() => updateQuantity(item.id, 'increase')}
-                      >
-                        <MaterialIcons name="add" size={16} color="#0f172a" />
-                      </TouchableOpacity>
-                    </View>
+        <ScrollView 
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent} 
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Cart Items List */}
+          <View style={styles.itemsSection}>
+            {cartItems.map((item) => (
+              <View key={item.id} style={styles.cartCard}>
+                <Image source={{ uri: item.image }} style={styles.itemImage} />
+                <View style={styles.itemDetails}>
+                  <Text style={styles.itemCategory}>{item.category}</Text>
+                  <Text style={styles.itemName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.itemPrice}>₹{item.price}</Text>
+                  
+                  <View style={styles.quantityControls}>
+                    <TouchableOpacity
+                      style={styles.quantityButton}
+                      onPress={() => updateQuantity(item.id, 'decrease')}
+                    >
+                      <MaterialIcons name="remove" size={16} color="#0f172a" />
+                    </TouchableOpacity>
+                    <Text style={styles.quantityText}>{item.quantity}</Text>
+                    <TouchableOpacity
+                      style={styles.quantityButton}
+                      onPress={() => updateQuantity(item.id, 'increase')}
+                    >
+                      <MaterialIcons name="add" size={16} color="#0f172a" />
+                    </TouchableOpacity>
                   </View>
                 </View>
-              ))}
-            </View>
-
-            {/* Bill Details */}
-            <View style={styles.billSection}>
-              <Text style={styles.sectionTitle}>Bill Details</Text>
-              
-              <View style={styles.billRow}>
-                <Text style={styles.billLabel}>Item Subtotal</Text>
-                <Text style={styles.billValue}>₹{getSubtotal()}</Text>
               </View>
-              <View style={styles.billRow}>
-                <Text style={styles.billLabel}>Delivery Fee</Text>
-                <Text style={styles.billValue}>₹{deliveryFee}</Text>
-              </View>
-              <View style={styles.billRow}>
-                <Text style={styles.billLabel}>First-order Discount</Text>
-                <Text style={[styles.billValue, { color: '#10b981' }]}>-₹{discount}</Text>
-              </View>
-              <View style={[styles.billRow, styles.totalRow]}>
-                <Text style={styles.totalLabel}>Total Amount</Text>
-                <Text style={styles.totalValue}>₹{total}</Text>
-              </View>
-            </View>
-          </ScrollView>
-
-          {/* Checkout Bar */}
-          <View style={styles.checkoutFooter}>
-            <View>
-              <Text style={styles.footerPriceLabel}>Total</Text>
-              <Text style={styles.footerPriceValue}>₹{total}</Text>
-            </View>
-            <TouchableOpacity style={styles.checkoutButton} activeOpacity={0.8} onPress={handleCheckout}>
-              <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
-              <MaterialIcons name="arrow-forward" size={18} color="#ffffff" style={{ marginLeft: 6 }} />
-            </TouchableOpacity>
+            ))}
           </View>
-        </View>
+
+          {/* Bill Details */}
+          <View style={styles.billSection}>
+            <Text style={styles.sectionTitle}>Bill Details</Text>
+            
+            <View style={styles.billRow}>
+              <Text style={styles.billLabel}>Item Subtotal</Text>
+              <Text style={styles.billValue}>₹{getSubtotal()}</Text>
+            </View>
+            <View style={styles.billRow}>
+              <Text style={styles.billLabel}>Delivery Fee</Text>
+              <Text style={styles.billValue}>₹{deliveryFee}</Text>
+            </View>
+            <View style={styles.billRow}>
+              <Text style={styles.billLabel}>First-order Discount</Text>
+              <Text style={[styles.billValue, { color: '#10b981' }]}>-₹{discount}</Text>
+            </View>
+            <View style={[styles.billRow, styles.totalRow]}>
+              <Text style={styles.totalLabel}>Total Amount</Text>
+              <Text style={styles.totalValue}>₹{total}</Text>
+            </View>
+          </View>
+
+          {/* Checkout Button */}
+          <TouchableOpacity 
+            style={styles.checkoutButton} 
+            activeOpacity={0.8} 
+            onPress={handleCheckout}
+          >
+            <View style={styles.checkoutButtonLeft}>
+              <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+              <Text style={styles.checkoutButtonPrice}>Total: ₹{total}</Text>
+            </View>
+            <View style={styles.checkoutButtonRight}>
+              <MaterialIcons name="arrow-forward" size={20} color="#ffffff" />
+            </View>
+          </TouchableOpacity>
+        </ScrollView>
       ) : (
         /* Empty Cart View */
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>🛒</Text>
-          <Text style={styles.emptyTitle}>Your Cart is Empty</Text>
-          <Text style={styles.emptySubtitle}>Looks like you haven't added anything to your cart yet.</Text>
-          <TouchableOpacity style={styles.shopNowButton} onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.shopNowText}>Shop Now</Text>
-          </TouchableOpacity>
-        </View>
+        <ScrollView 
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.emptyScrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>🛒</Text>
+            <Text style={styles.emptyTitle}>Your Cart is Empty</Text>
+            <Text style={styles.emptySubtitle}>Looks like you haven't added anything to your cart yet.</Text>
+            <TouchableOpacity style={styles.shopNowButton} onPress={() => navigation.navigate('Home')}>
+              <Text style={styles.shopNowText}>Shop Now</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -192,7 +203,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 100,
+    paddingBottom: 120,
+  },
+  emptyScrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   itemsSection: {
     marginBottom: 20,
@@ -308,53 +323,47 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#3b82f6',
   },
-  checkoutFooter: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  footerPriceLabel: {
-    fontSize: 12,
-    color: '#64748b',
-  },
-  footerPriceValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0f172a',
-    marginTop: 2,
-  },
   checkoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#3b82f6',
-    paddingHorizontal: 20,
-    height: 48,
-    borderRadius: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 18,
+    marginTop: 24,
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  checkoutButtonLeft: {
+    flexDirection: 'column',
   },
   checkoutButtonText: {
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '700',
   },
-  emptyContainer: {
-    flex: 1,
+  checkoutButtonPrice: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  checkoutButtonRight: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyContainer: {
+    alignItems: 'center',
     paddingHorizontal: 40,
+    paddingVertical: 40,
   },
   emptyIcon: {
     fontSize: 60,
