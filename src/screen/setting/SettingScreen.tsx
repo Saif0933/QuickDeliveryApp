@@ -108,6 +108,7 @@ export default function SettingScreen({ navigation }: any) {
           {renderSettingItem('person', 'Edit Profile', 'Change your name, email, and photo', () => navigation.navigate('EditProfile'))}
           {renderSettingItem('location-on', 'Saved Addresses', 'Manage home, office, and other locations', () => navigation.navigate('SavedAddresses'))}
           {renderSettingItem('payment', 'Payment Methods', 'Manage cards, UPI, and wallets')}
+          {renderSettingItem('local-mall', 'My Orders', 'Track and view your past orders', () => navigation.navigate('Orders'))}
         </View>
 
         <View style={styles.section}>
