@@ -311,7 +311,12 @@ export default function HomeScreen({ navigation }: any) {
           contentContainerStyle={styles.recommendedScrollContainer}
         >
           {recommendedItems.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.recProductCard} activeOpacity={0.9}>
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.recProductCard} 
+              activeOpacity={0.9}
+              onPress={() => navigation.navigate('ProductDetail')}
+            >
               <Image source={{ uri: item.image }} style={styles.recProductImage} />
               <TouchableOpacity style={styles.heartButton} activeOpacity={0.8}>
                 <MaterialIcons name="favorite" size={16} color={item.liked ? "#ef4444" : "#cbd5e1"} />

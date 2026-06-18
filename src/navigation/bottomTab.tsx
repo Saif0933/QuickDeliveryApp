@@ -15,7 +15,7 @@ export default function BottomTabNavigator({ navigation }: any) {
       case 'Home':
         return <HomeScreen navigation={navigation} />;
       case 'Categories':
-        return <CategoriesScreen />;
+        return <CategoriesScreen navigation={navigation} />;
       case 'Brands':
         return <BrandsTabScreen navigation={navigation} />;
       case 'Wishlist':

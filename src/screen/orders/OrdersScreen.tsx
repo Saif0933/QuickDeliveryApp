@@ -68,7 +68,11 @@ export default function OrdersScreen({ navigation }: any) {
           <Text style={styles.totalLabel}>Total Amount</Text>
           <Text style={styles.totalValue}>{order.total}</Text>
         </View>
-        <TouchableOpacity style={styles.trackButton} activeOpacity={0.8}>
+        <TouchableOpacity 
+          style={styles.trackButton} 
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('OrderTracking')}
+        >
           <Text style={styles.trackButtonText}>Track Order</Text>
         </TouchableOpacity>
       </View>

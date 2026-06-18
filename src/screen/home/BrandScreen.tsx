@@ -304,7 +304,12 @@ export default function BrandScreen({ route, navigation }: any) {
           {data.topPicks.map((item) => {
             const isLiked = likes[item.id] !== undefined ? likes[item.id] : item.liked;
             return (
-              <TouchableOpacity key={item.id} style={styles.productCard} activeOpacity={0.9}>
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.productCard} 
+                activeOpacity={0.9}
+                onPress={() => navigation.navigate('ProductDetail')}
+              >
                 <Image source={{ uri: item.image }} style={styles.productImage} />
                 <TouchableOpacity 
                   style={styles.heartButton} 
@@ -388,7 +393,12 @@ export default function BrandScreen({ route, navigation }: any) {
           {data.bestSellers.map((item) => {
             const isLiked = likes[item.id] !== undefined ? likes[item.id] : item.liked;
             return (
-              <TouchableOpacity key={item.id} style={styles.productCard} activeOpacity={0.9}>
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.productCard} 
+                activeOpacity={0.9}
+                onPress={() => navigation.navigate('ProductDetail')}
+              >
                 <Image source={{ uri: item.image }} style={styles.productImage} />
                 <TouchableOpacity 
                   style={styles.heartButton} 
