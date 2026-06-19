@@ -14,6 +14,9 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
+import { BackHandler } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+
 const { width } = Dimensions.get('window');
 
 const orderItemsList = [
@@ -49,7 +52,34 @@ const orderItemsList = [
   },
 ];
 
-export default function OrderTrackingScreen({ navigation }: any) {
+export default function OrderTrackingScreen({ route, navigation }: any) {
+  const { fromCheckout, order } = route?.params || {};
+  const displayItems = order?.items && order.items.length > 0 ? order.items : orderItemsList;
+  const trackingOrderId = order?.id || 'ORD12548765';
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (fromCheckout) {
+          navigation.navigate('Orders');
+          return true;
+        }
+        return false;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => subscription.remove();
+    }, [fromCheckout, navigation])
+  );
+
+  const handleBack = () => {
+    if (fromCheckout) {
+      navigation.navigate('Orders');
+    } else {
+      navigation.goBack();
+    }
+  };
   
   const handleCopyTrackingId = () => {
     Alert.alert('Copied', 'Tracking ID copied to clipboard!');
@@ -65,12 +95,12 @@ export default function OrderTrackingScreen({ navigation }: any) {
 
       {/* Header matching mockup */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBack} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.headerBack} onPress={handleBack}>
           <MaterialIcons name="chevron-left" size={28} color="#0f172a" />
         </TouchableOpacity>
         <View style={styles.headerTitleWrapper}>
           <Text style={styles.headerTitle}>Order Tracking</Text>
-          <Text style={styles.headerSubtitle}>Order ID: #ORD12548765</Text>
+          <Text style={styles.headerSubtitle}>Order ID: #{trackingOrderId}</Text>
         </View>
         <TouchableOpacity style={styles.helpButton}>
           <MaterialIcons name="headset-mic" size={20} color="#0f172a" />
@@ -209,9 +239,9 @@ export default function OrderTrackingScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* Order Items (3) */}
+        {/* Order Items */}
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Order Items (3)</Text>
+          <Text style={styles.sectionTitle}>Order Items ({displayItems.length})</Text>
           <TouchableOpacity style={styles.viewDetailsLink}>
             <Text style={styles.viewDetailsLinkText}>View Details</Text>
             <MaterialIcons name="chevron-right" size={14} color="#0f172a" />
@@ -219,23 +249,33 @@ export default function OrderTrackingScreen({ navigation }: any) {
         </View>
 
         <View style={styles.itemsCardBox}>
-          {orderItemsList.map((item, index) => (
-            <View key={item.id}>
-              <View style={styles.itemRow}>
-                <Image source={{ uri: item.image }} style={styles.itemImage} />
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemBrand}>{item.brand}</Text>
-                  <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.itemVariant}>Size: {item.size}  •  Qty: {item.qty}</Text>
+          {displayItems.map((item: any, index: number) => {
+            const itemPrice = typeof item.price === 'number' 
+              ? `₹${item.price.toLocaleString('en-IN')}` 
+              : item.price;
+            const itemQuantity = item.quantity || item.qty || 1;
+            const itemBrand = item.brand || 'Clothing';
+            const itemSize = item.size || 'M';
+            const itemStatus = item.status || 'Paid';
+
+            return (
+              <View key={item.id}>
+                <View style={styles.itemRow}>
+                  <Image source={{ uri: item.image }} style={styles.itemImage} />
+                  <View style={styles.itemInfo}>
+                    <Text style={styles.itemBrand}>{itemBrand}</Text>
+                    <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+                    <Text style={styles.itemVariant}>Size: {itemSize}  •  Qty: {itemQuantity}</Text>
+                  </View>
+                  <View style={styles.itemRightPrice}>
+                    <Text style={styles.itemPrice}>{itemPrice}</Text>
+                    <Text style={styles.itemPaidStatus}>{itemStatus}</Text>
+                  </View>
                 </View>
-                <View style={styles.itemRightPrice}>
-                  <Text style={styles.itemPrice}>{item.price}</Text>
-                  <Text style={styles.itemPaidStatus}>{item.status}</Text>
-                </View>
+                {index < displayItems.length - 1 && <View style={styles.divider} />}
               </View>
-              {index < orderItemsList.length - 1 && <View style={styles.divider} />}
-            </View>
-          ))}
+            );
+          })}
         </View>
 
         {/* Delivery Address Card */}

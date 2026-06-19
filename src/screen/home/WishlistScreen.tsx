@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,50 +10,30 @@ import {
   Dimensions,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useWishlistStore } from '../../store/useWishlistStore';
+import { useCartStore } from '../../store/useCartStore';
 
 const { width } = Dimensions.get('window');
 
-const initialWishlistItems = [
-  {
-    id: '1',
-    name: 'Casual Green Shirt',
-    category: 'Men',
-    price: '₹1,299',
-    image: 'https://images.unsplash.com/photo-1607345366928-199ea26cfe3e?w=400&auto=format&fit=crop&q=80',
-  },
-  {
-    id: '2',
-    name: 'Nike Air Max 270',
-    category: "Men's Shoes",
-    price: '₹12,995',
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=80',
-  },
-  {
-    id: '3',
-    name: 'Floral Pink Dress',
-    category: 'Women',
-    price: '₹1,899',
-    image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&auto=format&fit=crop&q=80',
-  },
-];
-
 export default function WishlistScreen({ navigation }: any) {
-  const [wishlist, setWishlist] = useState(initialWishlistItems);
+  const { wishlistItems, removeWishlist } = useWishlistStore();
+  const addItem = useCartStore((state) => state.addItem);
 
-  const removeItem = (id: string) => {
-    setWishlist(prev => prev.filter(item => item.id !== id));
+  const handleMoveToCart = (item: any) => {
+    addItem(item, 'M', 'Green');
+    removeWishlist(item.id);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Wishlist ({wishlist.length})</Text>
+        <Text style={styles.headerTitle}>Wishlist ({wishlistItems.length})</Text>
         <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate('Cart')}>
           <MaterialIcons name="shopping-bag" size={24} color="#0f172a" />
         </TouchableOpacity>
       </View>
 
-      {wishlist.length === 0 ? (
+      {wishlistItems.length === 0 ? (
         <View style={styles.emptyContainer}>
           <View style={styles.emptyIconContainer}>
             <MaterialIcons name="favorite-border" size={48} color="#94a3b8" />
@@ -73,24 +53,28 @@ export default function WishlistScreen({ navigation }: any) {
           contentContainerStyle={styles.scrollContent}
         >
           <View style={styles.gridContainer}>
-            {wishlist.map((item) => (
+            {wishlistItems.map((item) => (
               <View key={item.id} style={styles.productCard}>
                 <Image source={{ uri: item.image }} style={styles.productImage} />
                 <TouchableOpacity 
                   style={styles.deleteButton} 
                   activeOpacity={0.8}
-                  onPress={() => removeItem(item.id)}
+                  onPress={() => removeWishlist(item.id)}
                 >
                   <MaterialIcons name="delete-outline" size={18} color="#ef4444" />
                 </TouchableOpacity>
 
                 <View style={styles.productInfo}>
                   <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.productCategory}>{item.category}</Text>
-                  <Text style={styles.productPrice}>{item.price}</Text>
+                  <Text style={styles.productCategory}>{item.category || 'Clothing'}</Text>
+                  <Text style={styles.productPrice}>{typeof item.price === 'number' ? `₹${item.price.toLocaleString('en-IN')}` : item.price}</Text>
                 </View>
 
-                <TouchableOpacity style={styles.addToCartButton} activeOpacity={0.8}>
+                <TouchableOpacity 
+                  style={styles.addToCartButton} 
+                  activeOpacity={0.8}
+                  onPress={() => handleMoveToCart(item)}
+                >
                   <MaterialIcons name="add-shopping-cart" size={16} color="#ffffff" style={{ marginRight: 4 }} />
                   <Text style={styles.addToCartText}>Move To Cart</Text>
                 </TouchableOpacity>

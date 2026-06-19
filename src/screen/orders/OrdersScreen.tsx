@@ -10,9 +10,12 @@ import {
   Dimensions,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useOrderStore } from '../../store/useOrderStore';
 
 export default function OrdersScreen({ navigation }: any) {
-  const activeOrders = [
+  const { orders } = useOrderStore();
+
+  const staticActiveOrders = [
     {
       id: 'QD-8742',
       date: 'Today, 10:14 AM',
@@ -24,7 +27,7 @@ export default function OrdersScreen({ navigation }: any) {
     },
   ];
 
-  const pastOrders = [
+  const staticPastOrders = [
     {
       id: 'QD-7612',
       date: '14 June 2026, 04:30 PM',
@@ -45,39 +48,56 @@ export default function OrdersScreen({ navigation }: any) {
     },
   ];
 
-  const renderOrderCard = (order: typeof activeOrders[0]) => (
-    <View key={order.id} style={styles.orderCard}>
-      <View style={styles.cardHeader}>
-        <View style={styles.orderIdContainer}>
-          <Text style={styles.orderLabel}>Order ID</Text>
-          <Text style={styles.orderId}>{order.id}</Text>
+  const activeOrders = orders.filter(o => o.status === 'Delivering').length > 0
+    ? orders.filter(o => o.status === 'Delivering')
+    : staticActiveOrders;
+
+  const pastOrders = orders.filter(o => o.status === 'Delivered').length > 0
+    ? [
+        ...orders.filter(o => o.status === 'Delivered'),
+        ...staticPastOrders
+      ]
+    : staticPastOrders;
+
+  const renderOrderCard = (order: any) => {
+    const itemsText = Array.isArray(order.items)
+      ? order.items.map((item: any) => item.name).join(', ')
+      : order.items;
+
+    return (
+      <View key={order.id} style={styles.orderCard}>
+        <View style={styles.cardHeader}>
+          <View style={styles.orderIdContainer}>
+            <Text style={styles.orderLabel}>Order ID</Text>
+            <Text style={styles.orderId}>{order.id}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: order.statusColor + '20' }]}>
+            <MaterialIcons name={order.icon} size={14} color={order.statusColor} />
+            <Text style={[styles.statusText, { color: order.statusColor }]}>{order.status}</Text>
+          </View>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: order.statusColor + '20' }]}>
-          <MaterialIcons name={order.icon} size={14} color={order.statusColor} />
-          <Text style={[styles.statusText, { color: order.statusColor }]}>{order.status}</Text>
+
+        <Text style={styles.orderDate}>{order.date}</Text>
+        <Text style={styles.orderItems} numberOfLines={2}>
+          {itemsText}
+        </Text>
+
+        <View style={styles.cardFooter}>
+          <View>
+            <Text style={styles.totalLabel}>Total Amount</Text>
+            <Text style={styles.totalValue}>{order.total}</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.trackButton} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('OrderTracking', { order })}
+          >
+            <Text style={styles.trackButtonText}>Track Order</Text>
+          </TouchableOpacity>
         </View>
       </View>
-
-      <Text style={styles.orderDate}>{order.date}</Text>
-      <Text style={styles.orderItems} numberOfLines={2}>
-        {order.items}
-      </Text>
-
-      <View style={styles.cardFooter}>
-        <View>
-          <Text style={styles.totalLabel}>Total Amount</Text>
-          <Text style={styles.totalValue}>{order.total}</Text>
-        </View>
-        <TouchableOpacity 
-          style={styles.trackButton} 
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('OrderTracking')}
-        >
-          <Text style={styles.trackButtonText}>Track Order</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -119,7 +139,9 @@ export default function OrdersScreen({ navigation }: any) {
 
               <Text style={styles.orderDate}>{order.date}</Text>
               <Text style={styles.orderItems} numberOfLines={2}>
-                {order.items}
+                {Array.isArray(order.items)
+                  ? order.items.map((item: any) => item.name).join(', ')
+                  : order.items}
               </Text>
 
               <View style={styles.cardFooter}>

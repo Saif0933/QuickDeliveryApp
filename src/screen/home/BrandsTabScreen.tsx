@@ -13,6 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useCartStore } from '../../store/useCartStore';
 
 const { width } = Dimensions.get('window');
 
@@ -134,6 +135,7 @@ export default function BrandsTabScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLetter, setSelectedLetter] = useState('All');
   const [sliderIndex, setSliderIndex] = useState(0);
+  const { cartItems } = useCartStore();
 
   const handleBrandClick = (brandId: string) => {
     navigation.navigate('Brand', { brandName: brandId });
@@ -156,7 +158,9 @@ export default function BrandsTabScreen({ navigation }: any) {
           <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('Cart')}>
             <View style={styles.badgeWrapper}>
               <MaterialIcons name="shopping-bag" size={24} color="#0f172a" />
-              <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
+              {cartItems.length > 0 && (
+                <View style={styles.badge}><Text style={styles.badgeText}>{cartItems.length}</Text></View>
+              )}
             </View>
           </TouchableOpacity>
         </View>

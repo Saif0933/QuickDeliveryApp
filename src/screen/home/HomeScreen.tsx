@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useCartStore } from '../../store/useCartStore';
+import { useWishlistStore } from '../../store/useWishlistStore';
 
 const { width } = Dimensions.get('window');
 
@@ -84,6 +85,7 @@ const brandLogos: { [key: string]: { uri: string, headers: { 'User-Agent': strin
 export default function HomeScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState('');
   const { cartItems } = useCartStore();
+  const { toggleWishlist, isInWishlist } = useWishlistStore();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -337,8 +339,12 @@ export default function HomeScreen({ navigation }: any) {
               onPress={() => navigation.navigate('ProductDetail', { product: item })}
             >
               <Image source={{ uri: item.image }} style={styles.recProductImage} />
-              <TouchableOpacity style={styles.heartButton} activeOpacity={0.8}>
-                <MaterialIcons name="favorite" size={16} color={item.liked ? "#ef4444" : "#cbd5e1"} />
+              <TouchableOpacity 
+                style={styles.heartButton} 
+                activeOpacity={0.8}
+                onPress={() => toggleWishlist(item)}
+              >
+                <MaterialIcons name="favorite" size={16} color={isInWishlist(item.id) ? "#ef4444" : "#cbd5e1"} />
               </TouchableOpacity>
               <View style={styles.recProductInfo}>
                 <Text style={styles.recProductCategory}>{item.category}</Text>

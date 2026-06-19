@@ -132,12 +132,6 @@ export default function CartScreen({ navigation }: any) {
                       </TouchableOpacity>
                     </View>
 
-                    {/* Save for later button */}
-                    <TouchableOpacity style={styles.outlineActionBtn}>
-                      <MaterialIcons name="bookmark-border" size={16} color="#0f172a" style={{ marginRight: 4 }} />
-                      <Text style={styles.outlineActionText}>Save for Later</Text>
-                    </TouchableOpacity>
-
                     {/* Remove button */}
                     <TouchableOpacity 
                       style={styles.outlineActionBtn}

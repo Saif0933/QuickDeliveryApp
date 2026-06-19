@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useCartStore } from '../../store/useCartStore';
+import { useWishlistStore } from '../../store/useWishlistStore';
 
 const { width } = Dimensions.get('window');
 
@@ -32,11 +33,13 @@ export default function ProductDetailScreen({ route, navigation }: any) {
   const [selectedColor, setSelectedColor] = useState('green');
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [activeThumb, setActiveThumb] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   // Retrieve cart store functions and state
   const addItem = useCartStore((state) => state.addItem);
   const cartItems = useCartStore((state) => state.cartItems);
+
+  // Retrieve wishlist store functions and state
+  const { toggleWishlist, isInWishlist } = useWishlistStore();
 
   // Read dynamic product param from route
   const product = route?.params?.product;
@@ -54,6 +57,7 @@ export default function ProductDetailScreen({ route, navigation }: any) {
   };
 
   const currentProduct = product || defaultProduct;
+  const isWishlisted = isInWishlist(currentProduct.id);
 
   // Generate dynamic thumbnails using the item's main image, and fallback previews
   const thumbnails = [
@@ -74,7 +78,7 @@ export default function ProductDetailScreen({ route, navigation }: any) {
         </TouchableOpacity>
         <View style={{ flex: 1 }} />
         <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => setIsWishlisted(!isWishlisted)}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => toggleWishlist(currentProduct)}>
             <MaterialIcons 
               name={isWishlisted ? "favorite" : "favorite-border"} 
               size={26} 

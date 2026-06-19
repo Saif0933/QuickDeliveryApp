@@ -14,12 +14,17 @@ import {
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useCartStore } from '../../store/useCartStore';
+import { useOrderStore } from '../../store/useOrderStore';
 
 const { width } = Dimensions.get('window');
 
 export default function CheckoutScreen({ navigation }: any) {
-  const { cartItems } = useCartStore();
-  const cartPreviewItems = cartItems;
+  const { cartItems, clearCart } = useCartStore();
+  const [checkoutItems] = useState([...cartItems]);
+  const cartPreviewItems = checkoutItems;
+
+  const { addOrder } = useOrderStore();
+  const [orderId, setOrderId] = useState('');
 
   // Stepper state: 1 = Address, 2 = Payment, 3 = Review, 4 = Order Placed
   const [currentStep, setCurrentStep] = useState(1);
@@ -33,6 +38,30 @@ export default function CheckoutScreen({ navigation }: any) {
   const [cardCvv, setCardCvv] = useState('');
 
   const nextStep = () => {
+    if (currentStep === 3) {
+      const generatedId = `QD-${Math.floor(1000 + Math.random() * 9000)}`;
+      setOrderId(generatedId);
+      
+      const newOrder = {
+        id: generatedId,
+        date: new Date().toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        }) + ', ' + new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        items: checkoutItems,
+        total: `₹${totalAmount.toLocaleString('en-IN')}`,
+        status: 'Delivering',
+        statusColor: '#3b82f6',
+        icon: 'local-shipping',
+      };
+      
+      addOrder(newOrder);
+      clearCart();
+    }
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
@@ -49,7 +78,13 @@ export default function CheckoutScreen({ navigation }: any) {
   };
 
   const handleGoOrders = () => {
-    navigation.navigate('OrderTracking');
+    navigation.navigate('OrderTracking', { 
+      fromCheckout: true,
+      order: {
+        id: orderId,
+        items: checkoutItems
+      }
+    });
   };
 
   // Step calculations
@@ -475,7 +510,7 @@ export default function CheckoutScreen({ navigation }: any) {
             
             <View style={styles.orderIdCard}>
               <Text style={styles.orderIdLabel}>Order ID</Text>
-              <Text style={styles.orderIdVal}>ORD-908354089</Text>
+              <Text style={styles.orderIdVal}>{orderId}</Text>
             </View>
 
             <Text style={styles.deliveryEstimateText}>

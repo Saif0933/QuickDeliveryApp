@@ -11,6 +11,8 @@ import {
   StatusBar,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useCartStore } from '../../store/useCartStore';
+import { useWishlistStore } from '../../store/useWishlistStore';
 
 const { width } = Dimensions.get('window');
 
@@ -106,13 +108,10 @@ const productsData = [
 
 export default function ProductListScreen({ route, navigation }: any) {
   const [activeSubcat, setActiveSubcat] = useState('all');
-  const [likes, setLikes] = useState<{ [key: string]: boolean }>({});
+  const { cartItems } = useCartStore();
+  const { wishlistItems, toggleWishlist, isInWishlist } = useWishlistStore();
 
   const categoryName = route?.params?.categoryName || 'T-Shirts';
-
-  const toggleLike = (id: string) => {
-    setLikes((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -131,13 +130,17 @@ export default function ProductListScreen({ route, navigation }: any) {
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Wishlist')}>
             <View style={styles.badgeWrapper}>
               <MaterialIcons name="favorite-border" size={26} color="#0f172a" />
-              <View style={styles.badge}><Text style={styles.badgeText}>2</Text></View>
+              {wishlistItems.length > 0 && (
+                <View style={styles.badge}><Text style={styles.badgeText}>{wishlistItems.length}</Text></View>
+              )}
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Cart')}>
             <View style={styles.badgeWrapper}>
               <MaterialIcons name="shopping-bag" size={26} color="#0f172a" />
-              <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
+              {cartItems.length > 0 && (
+                <View style={styles.badge}><Text style={styles.badgeText}>{cartItems.length}</Text></View>
+              )}
             </View>
           </TouchableOpacity>
         </View>
@@ -207,7 +210,7 @@ export default function ProductListScreen({ route, navigation }: any) {
         {/* Products 2-Column Grid */}
         <View style={styles.productsGrid}>
           {productsData.map((item) => {
-            const isLiked = likes[item.id] !== undefined ? likes[item.id] : item.liked;
+            const isLiked = isInWishlist(item.id);
             return (
               <TouchableOpacity 
                 key={item.id} 
@@ -223,7 +226,7 @@ export default function ProductListScreen({ route, navigation }: any) {
                   <TouchableOpacity 
                     style={styles.heartCircle} 
                     activeOpacity={0.8}
-                    onPress={() => toggleLike(item.id)}
+                    onPress={() => toggleWishlist(item)}
                   >
                     <MaterialIcons 
                       name={isLiked ? "favorite" : "favorite-border"} 

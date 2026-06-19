@@ -12,6 +12,8 @@ import {
   Platform,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useCartStore } from '../../store/useCartStore';
+import { useWishlistStore } from '../../store/useWishlistStore';
 
 const { width } = Dimensions.get('window');
 
@@ -203,11 +205,7 @@ export default function BrandScreen({ route, navigation }: any) {
   const [activeTab, setActiveTab] = useState('All');
   const tabs = ['All', 'Men', 'Women', 'Kids', 'Shoes', 'Clothing', 'Accessories'];
 
-  const [likes, setLikes] = useState<{ [key: string]: boolean }>({});
-
-  const toggleLike = (id: string) => {
-    setLikes((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  const { toggleWishlist, isInWishlist } = useWishlistStore();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -236,7 +234,7 @@ export default function BrandScreen({ route, navigation }: any) {
         </View>
 
         <View style={styles.headerRightIcons}>
-          <TouchableOpacity style={styles.headerIconButton}>
+          <TouchableOpacity style={styles.headerIconButton} onPress={() => navigation.navigate('Wishlist')}>
             <MaterialIcons name="favorite-border" size={24} color="#0f172a" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerIconButton}>
@@ -302,7 +300,7 @@ export default function BrandScreen({ route, navigation }: any) {
           contentContainerStyle={styles.productsScrollContainer}
         >
           {data.topPicks.map((item) => {
-            const isLiked = likes[item.id] !== undefined ? likes[item.id] : item.liked;
+            const isLiked = isInWishlist(item.id);
             return (
               <TouchableOpacity 
                 key={item.id} 
@@ -314,7 +312,7 @@ export default function BrandScreen({ route, navigation }: any) {
                 <TouchableOpacity 
                   style={styles.heartButton} 
                   activeOpacity={0.8}
-                  onPress={() => toggleLike(item.id)}
+                  onPress={() => toggleWishlist(item)}
                 >
                   <MaterialIcons 
                     name={isLiked ? "favorite" : "favorite-border"} 
@@ -391,7 +389,7 @@ export default function BrandScreen({ route, navigation }: any) {
           contentContainerStyle={styles.productsScrollContainer}
         >
           {data.bestSellers.map((item) => {
-            const isLiked = likes[item.id] !== undefined ? likes[item.id] : item.liked;
+            const isLiked = isInWishlist(item.id);
             return (
               <TouchableOpacity 
                 key={item.id} 
@@ -403,7 +401,7 @@ export default function BrandScreen({ route, navigation }: any) {
                 <TouchableOpacity 
                   style={styles.heartButton} 
                   activeOpacity={0.8}
-                  onPress={() => toggleLike(item.id)}
+                  onPress={() => toggleWishlist(item)}
                 >
                   <MaterialIcons 
                     name={isLiked ? "favorite" : "favorite-border"} 
