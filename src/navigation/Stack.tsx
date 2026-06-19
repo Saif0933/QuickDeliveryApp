@@ -7,6 +7,7 @@ import OtpScreen from '../screen/login/OtpScreen';
 import HomeScreen from '../screen/home/HomeScreen';
 import BrandScreen from '../screen/home/BrandScreen';
 import ProductDetailScreen from '../screen/home/ProductDetailScreen';
+import ProductListScreen from '../screen/home/ProductListScreen';
 import SettingScreen from '../screen/setting/SettingScreen';
 import CartScreen from '../screen/cart/CartScreen';
 import CheckoutScreen from '../screen/cart/CheckoutScreen';
@@ -30,6 +31,7 @@ export type RootStackParamList = {
   SavedAddresses: undefined;
   Brand: { brandName: string };
   ProductDetail: undefined;
+  ProductList: { categoryName?: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -49,6 +51,7 @@ export default function MyStack() {
         <Stack.Screen name="Home" component={BottomTabNavigator} />
         <Stack.Screen name="Brand" component={BrandScreen} />
         <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+        <Stack.Screen name="ProductList" component={ProductListScreen} />
         <Stack.Screen name="Setting" component={SettingScreen} />
         <Stack.Screen name="Cart" component={CartScreen} />
         <Stack.Screen name="Checkout" component={CheckoutScreen} />

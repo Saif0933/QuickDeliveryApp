@@ -13,6 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useCartStore } from '../../store/useCartStore';
 
 const { width } = Dimensions.get('window');
 
@@ -82,6 +83,7 @@ const brandLogos: { [key: string]: { uri: string, headers: { 'User-Agent': strin
 
 export default function HomeScreen({ navigation }: any) {
   const [searchQuery, setSearchQuery] = useState('');
+  const { cartItems } = useCartStore();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -117,9 +119,11 @@ export default function HomeScreen({ navigation }: any) {
           onPress={() => navigation.navigate('Cart')}
         >
           <MaterialIcons name="shopping-bag" size={22} color="#0f172a" />
-          <View style={styles.badgeCount}>
-            <Text style={styles.badgeText}>3</Text>
-          </View>
+          {cartItems.length > 0 && (
+            <View style={styles.badgeCount}>
+              <Text style={styles.badgeText}>{cartItems.length}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -206,44 +210,59 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Circular Category Grid */}
         <View style={styles.iconCategoryGrid}>
-          <TouchableOpacity style={styles.iconCategoryCard}>
-            <View style={styles.iconCircle}>
-              <Text style={styles.iconCategoryEmoji}>👕</Text>
+          <TouchableOpacity style={styles.iconCategoryCard} onPress={() => navigation.navigate('ProductList', { categoryName: 'T-Shirts' })}>
+            <View style={[styles.iconCircle, { backgroundColor: '#e0f2fe', borderColor: '#bae6fd' }]}>
+              <Image 
+                source={{ uri: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150&auto=format&fit=crop&q=80' }} 
+                style={styles.iconCategoryImage} 
+              />
             </View>
             <Text style={styles.iconCategoryLabel}>T-Shirts</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconCategoryCard}>
-            <View style={styles.iconCircle}>
-              <Text style={styles.iconCategoryEmoji}>👔</Text>
+          <TouchableOpacity style={styles.iconCategoryCard} onPress={() => navigation.navigate('ProductList', { categoryName: 'Shirts' })}>
+            <View style={[styles.iconCircle, { backgroundColor: '#faf5ff', borderColor: '#e9d5ff' }]}>
+              <Image 
+                source={{ uri: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=150&auto=format&fit=crop&q=80' }} 
+                style={styles.iconCategoryImage} 
+              />
             </View>
             <Text style={styles.iconCategoryLabel}>Shirts</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconCategoryCard}>
-            <View style={styles.iconCircle}>
-              <Text style={styles.iconCategoryEmoji}>👖</Text>
+          <TouchableOpacity style={styles.iconCategoryCard} onPress={() => navigation.navigate('ProductList', { categoryName: 'Jeans' })}>
+            <View style={[styles.iconCircle, { backgroundColor: '#eef2ff', borderColor: '#c7d2fe' }]}>
+              <Image 
+                source={{ uri: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=150&auto=format&fit=crop&q=80' }} 
+                style={styles.iconCategoryImage} 
+              />
             </View>
             <Text style={styles.iconCategoryLabel}>Jeans</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconCategoryCard}>
-            <View style={styles.iconCircle}>
-              <Text style={styles.iconCategoryEmoji}>👗</Text>
+          <TouchableOpacity style={styles.iconCategoryCard} onPress={() => navigation.navigate('ProductList', { categoryName: 'Dresses' })}>
+            <View style={[styles.iconCircle, { backgroundColor: '#fff1f2', borderColor: '#fecdd3' }]}>
+              <Image 
+                source={{ uri: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=150&auto=format&fit=crop&q=80' }} 
+                style={styles.iconCategoryImage} 
+              />
             </View>
             <Text style={styles.iconCategoryLabel}>Dresses</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconCategoryCard}>
-            <View style={styles.iconCircle}>
-              <Text style={styles.iconCategoryEmoji}>👟</Text>
+          <TouchableOpacity style={styles.iconCategoryCard} onPress={() => navigation.navigate('ProductList', { categoryName: 'Shoes' })}>
+            <View style={[styles.iconCircle, { backgroundColor: '#fef3c7', borderColor: '#fde68a' }]}>
+              <Image 
+                source={{ uri: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&auto=format&fit=crop&q=80' }} 
+                style={styles.iconCategoryImage} 
+              />
             </View>
             <Text style={styles.iconCategoryLabel}>Shoes</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconCategoryCard}>
-            <View style={styles.iconCircle}>
-              <MaterialIcons name="grid-view" size={22} color="#0f172a" />
+          <TouchableOpacity style={styles.iconCategoryCard} onPress={() => navigation.navigate('Categories')}>
+            <View style={[styles.iconCircle, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }]}>
+              <MaterialIcons name="grid-view" size={20} color="#16a34a" />
             </View>
             <Text style={styles.iconCategoryLabel}>View All</Text>
           </TouchableOpacity>
@@ -315,7 +334,7 @@ export default function HomeScreen({ navigation }: any) {
               key={item.id} 
               style={styles.recProductCard} 
               activeOpacity={0.9}
-              onPress={() => navigation.navigate('ProductDetail')}
+              onPress={() => navigation.navigate('ProductDetail', { product: item })}
             >
               <Image source={{ uri: item.image }} style={styles.recProductImage} />
               <TouchableOpacity style={styles.heartButton} activeOpacity={0.8}>
@@ -534,28 +553,32 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   iconCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#ffffff',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     borderWidth: 1,
-    borderColor: '#f1f5f9',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
     shadowRadius: 6,
-    elevation: 2,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  iconCategoryImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   iconCategoryEmoji: {
-    fontSize: 22,
+    fontSize: 24,
   },
   iconCategoryLabel: {
     fontSize: 10,
-    color: '#475569',
-    fontWeight: '600',
-    marginTop: 6,
+    color: '#0f172a',
+    fontWeight: '700',
+    marginTop: 8,
     textAlign: 'center',
   },
   brandFestCard: {

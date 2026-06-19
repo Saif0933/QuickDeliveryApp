@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -12,77 +12,26 @@ import {
   Alert,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useCartStore } from '../../store/useCartStore';
 
 export default function CartScreen({ navigation }: any) {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: '1',
-      brand: 'Roadster',
-      name: 'Men Olive Green Casual Shirt',
-      size: 'M',
-      color: 'Olive Green',
-      price: 1499,
-      originalPrice: 2499,
-      discount: '40% OFF',
-      deliveryDate: '22 May',
-      quantity: 1,
-      image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&auto=format&fit=crop&q=80',
-    },
-    {
-      id: '2',
-      brand: 'HRX by Hrithik Roshan',
-      name: 'Men Slim Fit Jeans',
-      size: '32',
-      color: 'Blue',
-      price: 1999,
-      originalPrice: 3299,
-      discount: '39% OFF',
-      deliveryDate: '24 May',
-      quantity: 1,
-      image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&auto=format&fit=crop&q=80',
-    },
-    {
-      id: '3',
-      brand: 'Nike',
-      name: 'Men Black Hoodie',
-      size: 'M',
-      color: 'Black',
-      price: 2699,
-      originalPrice: 4499,
-      discount: '40% OFF',
-      deliveryDate: '23 May',
-      quantity: 1,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&auto=format&fit=crop&q=80',
-    },
-  ]);
-
-  const updateQuantity = (id: string, action: 'increase' | 'decrease') => {
-    const updated = cartItems
-      .map((item) => {
-        if (item.id === id) {
-          const qty = action === 'increase' ? item.quantity + 1 : item.quantity - 1;
-          return { ...item, quantity: qty };
-        }
-        return item;
-      })
-      .filter((item) => item.quantity > 0);
-    setCartItems(updated);
-  };
+  const { cartItems, updateQuantity, clearCart } = useCartStore();
 
   const getSubtotal = () => cartItems.reduce((acc, curr) => acc + curr.price * curr.quantity, 0);
-  const getOriginalSubtotal = () => cartItems.reduce((acc, curr) => acc + curr.originalPrice * curr.quantity, 0);
+  const getOriginalSubtotal = () => cartItems.reduce((acc, curr) => acc + (curr.originalPrice || curr.price) * curr.quantity, 0);
   
-  // Calculate discount to match mockup: sum of items is 6,197, we want total amount to be 3,999, so discount is 2,198
-  const discountAmount = cartItems.length > 0 ? 2198 : 0;
-  const totalAmount = Math.max(0, getSubtotal() - discountAmount);
+  const subtotal = getSubtotal();
+  const originalSubtotal = getOriginalSubtotal();
+  const discountAmount = Math.max(0, originalSubtotal - subtotal);
+  const totalAmount = subtotal;
 
   const handleCheckout = () => {
     navigation.navigate('Checkout');
   };
 
-  const clearCart = () => {
+  const handleClearCart = () => {
     Alert.alert('Clear Cart', 'Do you want to remove all items from your cart?', [
-      { text: 'Yes', onPress: () => setCartItems([]) },
+      { text: 'Yes', onPress: () => clearCart() },
       { text: 'No', style: 'cancel' },
     ]);
   };
@@ -104,7 +53,7 @@ export default function CartScreen({ navigation }: any) {
           <TouchableOpacity style={styles.headerIconButton} onPress={() => navigation.navigate('Home')}>
             <MaterialIcons name="favorite-border" size={24} color="#0f172a" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIconButton} onPress={clearCart}>
+          <TouchableOpacity style={styles.headerIconButton} onPress={handleClearCart}>
             <MaterialIcons name="delete-outline" size={24} color="#0f172a" />
           </TouchableOpacity>
         </View>
@@ -128,20 +77,20 @@ export default function CartScreen({ navigation }: any) {
                   <Text style={styles.deliveryBannerSub}>Add items worth ₹501 more to get extra 5% OFF</Text>
                 </View>
                 <View style={styles.progressStatusBox}>
-                  <Text style={styles.progressStatusText}>₹499 to go</Text>
+                  <Text style={styles.progressStatusText}>₹0 to go</Text>
                   <MaterialIcons name="chevron-right" size={14} color="#0f172a" />
                 </View>
               </View>
               {/* Progress bar */}
               <View style={styles.progressBarBg}>
-                <View style={[styles.progressBarFill, { width: '65%' }]} />
+                <View style={[styles.progressBarFill, { width: '100%' }]} />
               </View>
             </View>
 
             {/* Cart Items List */}
             <View style={styles.itemsSection}>
               {cartItems.map((item) => (
-                <View key={item.id} style={styles.cartCard}>
+                <View key={`${item.id}-${item.size}-${item.color}`} style={styles.cartCard}>
                   {/* Left Column Image */}
                   <Image source={{ uri: item.image }} style={styles.itemImage} />
 
@@ -153,12 +102,14 @@ export default function CartScreen({ navigation }: any) {
                     
                     <View style={styles.priceRow}>
                       <Text style={styles.itemPrice}>₹{item.price.toLocaleString('en-IN')}</Text>
-                      <Text style={styles.itemOriginalPrice}>₹{item.originalPrice.toLocaleString('en-IN')}</Text>
+                      {item.originalPrice ? (
+                        <Text style={styles.itemOriginalPrice}>₹{item.originalPrice.toLocaleString('en-IN')}</Text>
+                      ) : null}
                       <Text style={styles.itemDiscount}>{item.discount}</Text>
                     </View>
 
                     <Text style={styles.deliveryDateText}>
-                      Delivery by {item.deliveryDate}  •  <Text style={{ color: '#16a34a', fontWeight: '700' }}>Free</Text>
+                      Delivery by 2-3 Days  •  <Text style={{ color: '#16a34a', fontWeight: '700' }}>Free</Text>
                     </Text>
                   </View>
 
@@ -248,13 +199,15 @@ export default function CartScreen({ navigation }: any) {
             <View style={styles.priceDetailsCard}>
               <View style={styles.priceRowItem}>
                 <Text style={styles.priceLabel}>Price ({cartItems.length} items)</Text>
-                <Text style={styles.priceValue}>₹{getSubtotal().toLocaleString('en-IN')}</Text>
+                <Text style={styles.priceValue}>₹{originalSubtotal.toLocaleString('en-IN')}</Text>
               </View>
 
-              <View style={styles.priceRowItem}>
-                <Text style={styles.priceLabel}>Discount</Text>
-                <Text style={[styles.priceValue, { color: '#16a34a' }]}>- ₹{discountAmount.toLocaleString('en-IN')}</Text>
-              </View>
+              {discountAmount > 0 ? (
+                <View style={styles.priceRowItem}>
+                  <Text style={styles.priceLabel}>Discount</Text>
+                  <Text style={[styles.priceValue, { color: '#16a34a' }]}>- ₹{discountAmount.toLocaleString('en-IN')}</Text>
+                </View>
+              ) : null}
 
               <View style={styles.priceRowItem}>
                 <Text style={styles.priceLabel}>Delivery Charges</Text>
@@ -276,10 +229,12 @@ export default function CartScreen({ navigation }: any) {
             </View>
 
             {/* Saving alert bar */}
-            <View style={styles.savingAlertBar}>
-              <MaterialIcons name="check-circle" size={16} color="#16a34a" />
-              <Text style={styles.savingAlertText}>You are saving <Text style={{ fontWeight: '700' }}>₹{discountAmount.toLocaleString('en-IN')}</Text> on this order</Text>
-            </View>
+            {discountAmount > 0 ? (
+              <View style={styles.savingAlertBar}>
+                <MaterialIcons name="check-circle" size={16} color="#16a34a" />
+                <Text style={styles.savingAlertText}>You are saving <Text style={{ fontWeight: '700' }}>₹{discountAmount.toLocaleString('en-IN')}</Text> on this order</Text>
+              </View>
+            ) : null}
 
           </ScrollView>
 

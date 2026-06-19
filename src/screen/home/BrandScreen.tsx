@@ -308,7 +308,7 @@ export default function BrandScreen({ route, navigation }: any) {
                 key={item.id} 
                 style={styles.productCard} 
                 activeOpacity={0.9}
-                onPress={() => navigation.navigate('ProductDetail')}
+                onPress={() => navigation.navigate('ProductDetail', { product: item })}
               >
                 <Image source={{ uri: item.image }} style={styles.productImage} />
                 <TouchableOpacity 
@@ -397,7 +397,7 @@ export default function BrandScreen({ route, navigation }: any) {
                 key={item.id} 
                 style={styles.productCard} 
                 activeOpacity={0.9}
-                onPress={() => navigation.navigate('ProductDetail')}
+                onPress={() => navigation.navigate('ProductDetail', { product: item })}
               >
                 <Image source={{ uri: item.image }} style={styles.productImage} />
                 <TouchableOpacity 

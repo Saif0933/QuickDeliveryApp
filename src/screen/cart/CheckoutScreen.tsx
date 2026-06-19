@@ -13,40 +13,14 @@ import {
   TextInput,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useCartStore } from '../../store/useCartStore';
 
 const { width } = Dimensions.get('window');
 
-const cartPreviewItems = [
-  {
-    id: '1',
-    brand: 'Roadster',
-    name: 'Men Olive Green Casual Shirt',
-    size: 'M',
-    color: 'Olive Green',
-    price: 1499,
-    image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&auto=format&fit=crop&q=80',
-  },
-  {
-    id: '2',
-    brand: 'HRX by Hrithik Roshan',
-    name: 'Men Slim Fit Jeans',
-    size: '32',
-    color: 'Blue',
-    price: 1999,
-    image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&auto=format&fit=crop&q=80',
-  },
-  {
-    id: '3',
-    brand: 'Nike',
-    name: 'Men Black Hoodie',
-    size: 'M',
-    color: 'Black',
-    price: 2699,
-    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&auto=format&fit=crop&q=80',
-  },
-];
-
 export default function CheckoutScreen({ navigation }: any) {
+  const { cartItems } = useCartStore();
+  const cartPreviewItems = cartItems;
+
   // Stepper state: 1 = Address, 2 = Payment, 3 = Review, 4 = Order Placed
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedDelivery, setSelectedDelivery] = useState('standard');
@@ -79,10 +53,14 @@ export default function CheckoutScreen({ navigation }: any) {
   };
 
   // Step calculations
-  const subtotal = 6197;
-  const discount = 2198;
+  const getSubtotal = () => cartItems.reduce((acc, curr) => acc + curr.price * curr.quantity, 0);
+  const getOriginalSubtotal = () => cartItems.reduce((acc, curr) => acc + (curr.originalPrice || curr.price) * curr.quantity, 0);
+
+  const subtotal = getOriginalSubtotal();
+  const discount = Math.max(0, getOriginalSubtotal() - getSubtotal());
   const deliveryCharges = selectedDelivery === 'express' ? 99 : 0;
-  const totalAmount = subtotal - discount + deliveryCharges;
+  const totalAmount = getSubtotal() + deliveryCharges;
+
 
   return (
     <SafeAreaView style={styles.container}>
