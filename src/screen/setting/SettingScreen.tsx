@@ -1,4 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
 import {
   Alert,
   SafeAreaView,
@@ -10,8 +12,6 @@ import {
   View,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
 import { useLogout } from '../../api/hook/user/auth';
 
 export default function SettingScreen({ navigation }: any) {
