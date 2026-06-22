@@ -54,32 +54,14 @@ const recommendedItems = [
   },
 ];
 
-// Mock data for brand logos (using reliable Wikimedia Commons PNG URLs with User-Agent header to prevent 403 blocks)
-const brandLogos: { [key: string]: { uri: string, headers: { 'User-Agent': string } } } = {
-  nike: {
-    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/250px-Logo_NIKE.svg.png',
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
-  },
-  adidas: {
-    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Adidas_Logo.svg/250px-Adidas_Logo.svg.png',
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
-  },
-  zara: {
-    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Zara_Logo.svg/250px-Zara_Logo.svg.png',
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
-  },
-  levis: {
-    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Levi%27s_logo.svg/250px-Levi%27s_logo.svg.png',
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
-  },
-  hm: {
-    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/H%26M-Logo.svg/250px-H%26M-Logo.svg.png',
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
-  },
-  puma: {
-    uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Puma_Logo.svg/250px-Puma_Logo.svg.png',
-    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
-  },
+// Mock data for brand logos (using reliable Hunter.io Logo API URLs)
+const brandLogos: { [key: string]: { uri: string } } = {
+  nike: { uri: 'https://logos.hunter.io/nike.com' },
+  adidas: { uri: 'https://logos.hunter.io/adidas.com' },
+  zara: { uri: 'https://logos.hunter.io/zara.com' },
+  levis: { uri: 'https://logos.hunter.io/levis.com' },
+  hm: { uri: 'https://logos.hunter.io/hm.com' },
+  puma: { uri: 'https://logos.hunter.io/puma.com' },
 };
 
 export default function HomeScreen({ navigation }: any) {

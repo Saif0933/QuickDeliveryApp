@@ -57,7 +57,7 @@ const brandData: {
   nike: {
     name: 'NIKE',
     tagline: 'Just Do It.',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/250px-Logo_NIKE.svg.png',
+    logo: 'https://logos.hunter.io/nike.com',
     promoImage: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=80',
     promoTitle: 'UP TO 40% OFF',
     promoSubtitle: 'On selected styles',
@@ -151,7 +151,7 @@ const brandData: {
   adidas: {
     name: 'ADIDAS',
     tagline: 'Impossible Is Nothing.',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Adidas_Logo.svg/250px-Adidas_Logo.svg.png',
+    logo: 'https://logos.hunter.io/adidas.com',
     promoImage: 'https://images.unsplash.com/photo-1518049362265-d5b2a6467637?w=400&auto=format&fit=crop&q=80',
     promoTitle: 'FLAT 35% OFF',
     promoSubtitle: 'On Ultraboost Series',
@@ -198,7 +198,7 @@ const brandData: {
   zara: {
     name: 'ZARA',
     tagline: 'Love your look.',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Zara_Logo.svg/250px-Zara_Logo.svg.png',
+    logo: 'https://logos.hunter.io/zara.com',
     promoImage: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&auto=format&fit=crop&q=80',
     promoTitle: 'UP TO 50% OFF',
     promoSubtitle: 'On summer collection',
@@ -245,7 +245,7 @@ const brandData: {
   levis: {
     name: "LEVI'S",
     tagline: "Live in Levi's.",
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Levi_Strauss_%26_Co._logo.svg/250px-Levi_Strauss_%26_Co._logo.svg.png',
+    logo: 'https://logos.hunter.io/levis.com',
     promoImage: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&auto=format&fit=crop&q=80',
     promoTitle: 'FLAT 25% OFF',
     promoSubtitle: 'On original denim collection',
@@ -292,7 +292,7 @@ const brandData: {
   hm: {
     name: 'H&M',
     tagline: 'Fashion & Quality at the Best Price.',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/H%26M-Logo.svg/250px-H%26M-Logo.svg.png',
+    logo: 'https://logos.hunter.io/hm.com',
     promoImage: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&auto=format&fit=crop&q=80',
     promoTitle: 'UP TO 40% OFF',
     promoSubtitle: 'On winter wear essentials',
@@ -339,7 +339,7 @@ const brandData: {
   puma: {
     name: 'PUMA',
     tagline: 'Forever Faster.',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Puma_Logo.svg/250px-Puma_Logo.svg.png',
+    logo: 'https://logos.hunter.io/puma.com',
     promoImage: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=80',
     promoTitle: 'FLAT 30% OFF',
     promoSubtitle: 'On sport sneakers',
@@ -386,7 +386,7 @@ const brandData: {
   hrx: {
     name: 'HRX',
     tagline: 'Keep Going.',
-    logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80',
+    logo: 'https://logos.hunter.io/hrxbrand.com',
     promoImage: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=400&auto=format&fit=crop&q=80',
     promoTitle: 'FLAT 40% OFF',
     promoSubtitle: 'On activewear range',
@@ -433,7 +433,7 @@ const brandData: {
   uspolo: {
     name: 'U.S. POLO ASSN.',
     tagline: 'Live Authentically.',
-    logo: 'https://images.unsplash.com/photo-1599305445671-ac2c0c1da1b8?w=200&auto=format&fit=crop&q=80',
+    logo: 'https://logos.hunter.io/uspoloassn.com',
     promoImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&auto=format&fit=crop&q=80',
     promoTitle: 'UP TO 30% OFF',
     promoSubtitle: 'On classic polo shirts',
@@ -480,7 +480,7 @@ const brandData: {
   jackjones: {
     name: 'JACK & JONES',
     tagline: 'Keep It Real.',
-    logo: 'https://images.unsplash.com/photo-1599305445671-ac2c0c1da1b8?w=200&auto=format&fit=crop&q=80',
+    logo: 'https://logos.hunter.io/jackjones.com',
     promoImage: 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&auto=format&fit=crop&q=80',
     promoTitle: 'FLAT 35% OFF',
     promoSubtitle: 'On premium denim jackets',
@@ -549,10 +549,7 @@ export default function BrandScreen({ route, navigation }: any) {
         <View style={styles.brandInfoWrapper}>
           <View style={styles.brandTitleRow}>
             <Image 
-              source={{ 
-                uri: data.logo,
-                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36' }
-              }} 
+              source={{ uri: data.logo }} 
               style={styles.headerLogo} 
               resizeMode="contain" 
             />
