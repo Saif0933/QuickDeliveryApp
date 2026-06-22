@@ -165,7 +165,11 @@ export default function HomeScreen({ navigation }: any) {
           contentContainerStyle={styles.categoryBannersContainer}
         >
           {/* Men Banner */}
-          <TouchableOpacity style={[styles.categoryBannerCard, { backgroundColor: '#E3ECE7' }]} activeOpacity={0.9}>
+          <TouchableOpacity 
+            style={[styles.categoryBannerCard, { backgroundColor: '#E3ECE7' }]} 
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('ProductList', { categoryName: 'Men' })}
+          >
             <View style={styles.categoryBannerText}>
               <Text style={styles.categoryBannerTitle}>MEN</Text>
               <Text style={styles.categoryBannerSubtitle}>Explore Now</Text>
@@ -180,7 +184,11 @@ export default function HomeScreen({ navigation }: any) {
           </TouchableOpacity>
 
           {/* Women Banner */}
-          <TouchableOpacity style={[styles.categoryBannerCard, { backgroundColor: '#FCEAE8' }]} activeOpacity={0.9}>
+          <TouchableOpacity 
+            style={[styles.categoryBannerCard, { backgroundColor: '#FCEAE8' }]} 
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('ProductList', { categoryName: 'Women' })}
+          >
             <View style={styles.categoryBannerText}>
               <Text style={styles.categoryBannerTitle}>WOMEN</Text>
               <Text style={styles.categoryBannerSubtitle}>Explore Now</Text>
@@ -195,7 +203,11 @@ export default function HomeScreen({ navigation }: any) {
           </TouchableOpacity>
 
           {/* Kids Banner */}
-          <TouchableOpacity style={[styles.categoryBannerCard, { backgroundColor: '#F8F0DD' }]} activeOpacity={0.9}>
+          <TouchableOpacity 
+            style={[styles.categoryBannerCard, { backgroundColor: '#F8F0DD' }]} 
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('ProductList', { categoryName: 'Kids' })}
+          >
             <View style={styles.categoryBannerText}>
               <Text style={styles.categoryBannerTitle}>KIDS</Text>
               <Text style={styles.categoryBannerSubtitle}>Explore Now</Text>

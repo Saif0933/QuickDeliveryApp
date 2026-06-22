@@ -304,6 +304,16 @@ export default function OrderTrackingScreen({ route, navigation }: any) {
           </View>
         </View>
 
+        {/* Continue Shopping Button */}
+        <TouchableOpacity 
+          style={styles.continueShoppingButton} 
+          onPress={() => navigation.navigate('Home')}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons name="shopping-bag" size={18} color="#ffffff" style={{ marginRight: 8 }} />
+          <Text style={styles.continueShoppingText}>Continue Shopping</Text>
+        </TouchableOpacity>
+
         {/* Footer Badges */}
         <View style={styles.trustRow}>
           <View style={styles.trustItem}>
@@ -799,5 +809,20 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#0f172a',
     marginLeft: 6,
+  },
+  continueShoppingButton: {
+    backgroundColor: '#0f172a',
+    height: 48,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  continueShoppingText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });

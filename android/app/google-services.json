@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "753462381584",
+    "project_id": "modarappid",
+    "storage_bucket": "modarappid.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:753462381584:android:856c480faecb5dde698e95",
+        "android_client_info": {
+          "package_name": "com.restro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHJO2wc7gS4Tw6FDm-6K_K67Ih4Ihrk6E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
