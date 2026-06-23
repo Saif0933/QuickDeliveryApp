@@ -15,6 +15,7 @@ import OrdersScreen from '../screen/orders/OrdersScreen';
 import OrderTrackingScreen from '../screen/orders/OrderTrackingScreen';
 import EditProfileScreen from '../screen/setting/EditProfileScreen';
 import SavedAddressesScreen from '../screen/setting/SavedAddressesScreen';
+import AddAddressScreen from '../screen/setting/AddAddressScreen';
 import BottomTabNavigator from './bottomTab';
 
 export type RootStackParamList = {
@@ -29,6 +30,7 @@ export type RootStackParamList = {
   OrderTracking: undefined;
   EditProfile: undefined;
   SavedAddresses: undefined;
+  AddAddress: undefined;
   Brand: { brandName: string };
   ProductDetail: undefined;
   ProductList: { categoryName?: string };
@@ -59,6 +61,7 @@ export default function MyStack() {
         <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         <Stack.Screen name="SavedAddresses" component={SavedAddressesScreen} />
+        <Stack.Screen name="AddAddress" component={AddAddressScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

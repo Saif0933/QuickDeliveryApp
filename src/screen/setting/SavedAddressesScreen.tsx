@@ -230,7 +230,7 @@ export default function SavedAddressesScreen({ navigation }: any) {
           <MaterialIcons name="keyboard-arrow-left" size={28} color="#1e2022" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Saved Addresses</Text>
-        <TouchableOpacity style={styles.addButton} onPress={openAddModal}>
+        <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddAddress')}>
           <MaterialIcons name="add" size={24} color="#A87C53" />
         </TouchableOpacity>
       </View>
@@ -249,7 +249,7 @@ export default function SavedAddressesScreen({ navigation }: any) {
           <Text style={styles.emptySubtitle}>
             Add a shipping address to place order and get rapid delivery.
           </Text>
-          <TouchableOpacity style={styles.addBtnLarge} onPress={openAddModal} activeOpacity={0.9}>
+          <TouchableOpacity style={styles.addBtnLarge} onPress={() => navigation.navigate('AddAddress')} activeOpacity={0.9}>
             <Text style={styles.addBtnLargeText}>Add New Address</Text>
           </TouchableOpacity>
         </View>
