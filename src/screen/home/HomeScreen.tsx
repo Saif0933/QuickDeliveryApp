@@ -64,7 +64,7 @@ const brandLogos: { [key: string]: { uri: string } } = {
   puma: { uri: 'https://logos.hunter.io/puma.com' },
 };
 
-export default function HomeScreen({ navigation }: any) {
+export default function HomeScreen({ navigation, setActiveTab }: any) {
   const [searchQuery, setSearchQuery] = useState('');
   const { cartItems } = useCartStore();
   const { toggleWishlist, isInWishlist } = useWishlistStore();
@@ -90,7 +90,11 @@ export default function HomeScreen({ navigation }: any) {
           />
         </View>
 
-        <TouchableOpacity style={styles.headerIconButton} activeOpacity={0.8}>
+        <TouchableOpacity 
+          style={styles.headerIconButton} 
+          activeOpacity={0.8}
+          onPress={() => setActiveTab && setActiveTab('Wishlist')}
+        >
           <MaterialIcons name="favorite-border" size={22} color="#0f172a" />
           <View style={styles.badgeCount}>
             <Text style={styles.badgeText}>2</Text>
@@ -256,7 +260,7 @@ export default function HomeScreen({ navigation }: any) {
             <Text style={styles.iconCategoryLabel}>Shoes</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconCategoryCard} onPress={() => navigation.navigate('Categories')}>
+          <TouchableOpacity style={styles.iconCategoryCard} onPress={() => setActiveTab && setActiveTab('Categories')}>
             <View style={[styles.iconCircle, { backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }]}>
               <MaterialIcons name="grid-view" size={20} color="#16a34a" />
             </View>
@@ -271,7 +275,11 @@ export default function HomeScreen({ navigation }: any) {
             <Text style={styles.brandFestSubtitle}>
               Up to <Text style={{ color: '#FFC72C', fontWeight: '900' }}>60%</Text> Off
             </Text>
-            <TouchableOpacity style={styles.brandFestButton} activeOpacity={0.8}>
+            <TouchableOpacity 
+              style={styles.brandFestButton} 
+              activeOpacity={0.8}
+              onPress={() => setActiveTab && setActiveTab('Brands')}
+            >
               <Text style={styles.brandFestButtonText}>SHOP NOW</Text>
             </TouchableOpacity>
           </View>
@@ -295,7 +303,10 @@ export default function HomeScreen({ navigation }: any) {
         {/* Top Brands Section */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Top Brands</Text>
-          <TouchableOpacity style={styles.viewAllButton}>
+          <TouchableOpacity 
+            style={styles.viewAllButton}
+            onPress={() => setActiveTab && setActiveTab('Brands')}
+          >
             <Text style={styles.seeAllText}>View All</Text>
             <MaterialIcons name="arrow-forward" size={14} color="#64748b" style={{ marginLeft: 2 }} />
           </TouchableOpacity>

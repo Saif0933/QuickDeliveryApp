@@ -23,7 +23,7 @@ const sliderBrands = [
     name: 'Nike',
     tagline: 'Just Do It.',
     image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&auto=format&fit=crop&q=80',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/250px-Logo_NIKE.svg.png',
+    logo: 'https://logos.hunter.io/nike.com',
     bgColor: '#1e3a2f',
   },
   {
@@ -31,7 +31,7 @@ const sliderBrands = [
     name: 'Adidas',
     tagline: 'Impossible Is Nothing.',
     image: 'https://images.unsplash.com/photo-1518002171953-a080ee81be25?w=600&auto=format&fit=crop&q=80',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Adidas_Logo.svg/250px-Adidas_Logo.svg.png',
+    logo: 'https://logos.hunter.io/adidas.com',
     bgColor: '#475569',
   },
 ];
@@ -41,31 +41,31 @@ const popularBrandsList = [
     id: 'nike',
     name: 'Nike',
     products: '1250+ Products',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/250px-Logo_NIKE.svg.png',
+    logo: 'https://logos.hunter.io/nike.com',
   },
   {
     id: 'adidas',
     name: 'adidas',
     products: '980+ Products',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Adidas_Logo.svg/250px-Adidas_Logo.svg.png',
+    logo: 'https://logos.hunter.io/adidas.com',
   },
   {
     id: 'puma',
     name: 'PUMA',
     products: '860+ Products',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Puma_Logo.svg/250px-Puma_Logo.svg.png',
+    logo: 'https://logos.hunter.io/puma.com',
   },
   {
     id: 'hrx',
     name: 'HRX',
     products: '620+ Products',
-    logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80',
+    logo: 'https://logos.hunter.io/hrxbrand.com',
   },
   {
     id: 'uspolo',
     name: 'U.S. Polo',
     products: '540+ Products',
-    logo: 'https://images.unsplash.com/photo-1599305445671-ac2c0c1da1b8?w=200&auto=format&fit=crop&q=80',
+    logo: 'https://logos.hunter.io/uspoloassn.com',
   },
 ];
 
@@ -87,7 +87,7 @@ const allBrandsGrid = [
     products: '1250+ Products',
     rating: '4.6',
     image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&auto=format&fit=crop&q=80',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/250px-Logo_NIKE.svg.png',
+    logo: 'https://logos.hunter.io/nike.com',
   },
   {
     id: 'adidas',
@@ -95,7 +95,7 @@ const allBrandsGrid = [
     products: '980+ Products',
     rating: '4.5',
     image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&auto=format&fit=crop&q=80',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Adidas_Logo.svg/250px-Adidas_Logo.svg.png',
+    logo: 'https://logos.hunter.io/adidas.com',
   },
   {
     id: 'puma',
@@ -103,7 +103,7 @@ const allBrandsGrid = [
     products: '860+ Products',
     rating: '4.4',
     image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&auto=format&fit=crop&q=80',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Puma_Logo.svg/250px-Puma_Logo.svg.png',
+    logo: 'https://logos.hunter.io/puma.com',
   },
   {
     id: 'hrx',
@@ -111,7 +111,7 @@ const allBrandsGrid = [
     products: '620+ Products',
     rating: '4.3',
     image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=400&auto=format&fit=crop&q=80',
-    logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80',
+    logo: 'https://logos.hunter.io/hrxbrand.com',
   },
   {
     id: 'levis',
@@ -119,7 +119,7 @@ const allBrandsGrid = [
     products: '740+ Products',
     rating: '4.5',
     image: 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&auto=format&fit=crop&q=80',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Levi%27s_logo.svg/250px-Levi%27s_logo.svg.png',
+    logo: 'https://logos.hunter.io/levis.com',
   },
   {
     id: 'jackjones',
@@ -127,7 +127,7 @@ const allBrandsGrid = [
     products: '510+ Products',
     rating: '4.2',
     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
-    logo: 'https://images.unsplash.com/photo-1599305445671-ac2c0c1da1b8?w=200&auto=format&fit=crop&q=80',
+    logo: 'https://logos.hunter.io/jackjones.com',
   },
 ];
 

@@ -170,7 +170,7 @@ export default function LoginScreen({ navigation }: any) {
             {/* Google Login Button */}
             <TouchableOpacity style={styles.googleButton} activeOpacity={0.8}>
               <Image
-                source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.png' }}
+                source={{ uri: 'https://logos.hunter.io/google.com' }}
                 style={styles.googleIcon}
               />
               <Text style={styles.googleButtonText}>Continue with Google</Text>

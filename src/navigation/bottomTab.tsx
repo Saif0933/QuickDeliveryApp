@@ -13,17 +13,17 @@ export default function BottomTabNavigator({ navigation }: any) {
   const renderActiveScreen = () => {
     switch (activeTab) {
       case 'Home':
-        return <HomeScreen navigation={navigation} />;
+        return <HomeScreen navigation={navigation} setActiveTab={setActiveTab} />;
       case 'Categories':
-        return <CategoriesScreen navigation={navigation} />;
+        return <CategoriesScreen navigation={navigation} setActiveTab={setActiveTab} />;
       case 'Brands':
-        return <BrandsTabScreen navigation={navigation} />;
+        return <BrandsTabScreen navigation={navigation} setActiveTab={setActiveTab} />;
       case 'Wishlist':
-        return <WishlistScreen navigation={navigation} />;
+        return <WishlistScreen navigation={navigation} setActiveTab={setActiveTab} />;
       case 'Account':
-        return <SettingScreen navigation={navigation} />;
+        return <SettingScreen navigation={navigation} setActiveTab={setActiveTab} />;
       default:
-        return <HomeScreen navigation={navigation} />;
+        return <HomeScreen navigation={navigation} setActiveTab={setActiveTab} />;
     }
   };
 
